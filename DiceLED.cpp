@@ -2,9 +2,9 @@
 // 
 // 
 
-#include "Dice_LED.h"
+#include "DiceLED.h"
 #include "DiceWire.h"
-#include "Dice_Debug.h"
+#include "DiceDebug.h"
 
 #define DEV_ADRESS  0x70  // Address of the IO expander!
 

@@ -6,7 +6,7 @@
 #include "LEDController.h"
 #include "LEDAnimation.h"
 #include "LEDAnimations.h"
-#include "Dice_LED.h"
+#include "DiceLED.h"
 
 RotatingSix::RotatingSix(int delay, int onTime, int cycles)
 	: LEDDelay(delay)

@@ -2,8 +2,8 @@
 // 
 // 
 
-#include "Dice_Timer.h"
-#include "Dice_Debug.h"
+#include "DiceTimer.h"
+#include "DiceDebug.h"
 
 DiceTimer diceTimer;
 

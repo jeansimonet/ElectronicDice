@@ -8,8 +8,8 @@
 #include "LEDAnimationController.h"
 #include "RotatingSix.h"
 #include "LEDAnimations.h"
-#include "Dice_Debug.h"
-#include "Dice_Timer.h"
+#include "DiceDebug.h"
+#include "DiceTimer.h"
 #include "LEDController.h"
 #include "LEDAnimation.h"
 #include "LEDAnimations.h"
@@ -118,7 +118,7 @@
 #include "LEDAnimation.h"
 #include <SimbleeBLE.h>
 #include "DiceWire.h"
-#include "Dice_LED.h"
+#include "DiceLED.h"
 #include "LEDAnimation.h"
 
 void setup()

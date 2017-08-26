@@ -2,7 +2,7 @@
 // 
 // 
 
-#include "Dice_Debug.h"
+#include "DiceDebug.h"
 
 DiceDebug diceDebug;
 

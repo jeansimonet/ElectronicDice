@@ -3,9 +3,9 @@
 // 
 
 #include "LEDController.h"
-#include "Dice_LED.h"
-#include "Dice_Timer.h"
-#include "Dice_Debug.h"
+#include "DiceLED.h"
+#include "DiceTimer.h"
+#include "DiceDebug.h"
 
 #define MAX_LEVEL (256)
 
