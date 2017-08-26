@@ -6,6 +6,8 @@
 
 LEDAnimations ledAnimations;
 
+#define MAKE_FROM_FLOAT(x) ((int)(255 * (x)))
+
 Curve constantOn =
 {
 	// Keyframes
@@ -29,6 +31,18 @@ Curve constantOff =
 };
 
 Curve rampUpDown =
+{
+	// Keyframes
+	{
+		{ 0, 0 },
+		{ 127, 255 },
+		{ 255, 0 },
+	},
+	// Number of keyframes
+	3
+};
+
+Curve rampUpDownRepeat3 =
 {
 	// Keyframes
 	{
@@ -64,4 +78,11 @@ LEDAnimations::LEDAnimations()
 	FaceSixSlowPulse.addTrack(5, 3, 0, 3000, &rampUpDown);
 	FaceSixSlowPulse.addTrack(5, 4, 0, 3000, &rampUpDown);
 	FaceSixSlowPulse.addTrack(5, 5, 0, 3000, &rampUpDown);
+
+	FaceSixFastRotatingPulses.addTrack(5, 0,   0, 500, &rampUpDown);
+	FaceSixFastRotatingPulses.addTrack(5, 1, 100, 500, &rampUpDown);
+	FaceSixFastRotatingPulses.addTrack(5, 2, 200, 500, &rampUpDown);
+	FaceSixFastRotatingPulses.addTrack(5, 5, 300, 500, &rampUpDown);
+	FaceSixFastRotatingPulses.addTrack(5, 4, 400, 500, &rampUpDown);
+	FaceSixFastRotatingPulses.addTrack(5, 3, 500, 500, &rampUpDown);
 }

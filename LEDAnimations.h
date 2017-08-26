@@ -11,6 +11,7 @@ class LEDAnimations
 public:
 	Animation FaceOneSlowPulse;
 	Animation FaceSixSlowPulse;
+	Animation FaceSixFastRotatingPulses;
 
 public:
 	LEDAnimations();

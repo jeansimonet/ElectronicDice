@@ -18,7 +18,7 @@ void DiceTimer::hook(int resolutionInMicroSeconds, DiceTimer::ClientMethod clien
 		clientInfo.ticks = resolutionInMicroSeconds / RESOLUTION;
 		NRF_TIMER2->CC[count] = clientInfo.ticks;
 		NRF_TIMER2->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << (TIMER_INTENSET_COMPARE0_Pos + count);
-		NRF_TIMER2->SHORTS |= (TIMER_SHORTS_COMPARE0_STOP_Enabled << (TIMER_SHORTS_COMPARE0_STOP_Pos + count));
+		//NRF_TIMER2->SHORTS |= (TIMER_SHORTS_COMPARE0_STOP_Enabled << (TIMER_SHORTS_COMPARE0_STOP_Pos + count));
 		count++;
 	}
 	else
@@ -94,19 +94,24 @@ void DiceTimer::stop()
 
 void DiceTimer::update()
 {
-	digitalWrite(0, HIGH);
 	for (int i = 0; i < count; ++i)
 	{
 		if (NRF_TIMER2->EVENTS_COMPARE[i] != 0)
 		{
+			if (i == 0)
+				digitalWrite(0, HIGH);
+
+			// Clear interrupt
+			NRF_TIMER2->EVENTS_COMPARE[i] = 0;
+
 			auto& clientInfo = clients[i];
+
+			// Update the compare value for next multiple
+			NRF_TIMER2->CC[i] += clientInfo.ticks;
+
 			if (clientInfo.callback != nullptr)
 			{
-				// Trigger the callback and update the compare value for next multiple
-				NRF_TIMER2->CC[i] = 0xFFFF & (NRF_TIMER2->CC[i] + clientInfo.callback() / RESOLUTION);
-
-				// Clear interrupt
-				NRF_TIMER2->EVENTS_COMPARE[i] = 0;
+				clientInfo.callback();
 			}
 			else
 			{
@@ -114,8 +119,10 @@ void DiceTimer::update()
 				diceDebug.print(i);
 				diceDebug.print(" does not have a registered hook!");
 			}
+
+			if (i == 0)
+				digitalWrite(0, LOW);
 		}
 	}
-	NRF_TIMER2->TASKS_START = 1;
-	digitalWrite(0, LOW);
+//	NRF_TIMER2->TASKS_START = 1;
 }

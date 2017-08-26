@@ -117,14 +117,14 @@ void Animation::addTrack(int face, int index, int startTime, int trackDuration, 
 }
 
 
-void Animation::updateLEDs(int time)
+int Animation::updateLEDs(int time, int retIndices[], int retIntensities[])
 {
 	for (int i = 0; i < count; ++i)
 	{
-		int ledIndex = tracks[i].ledIndex();
-		int ledIntensity = tracks[i].evaluate(time);
-		ledController.setLED(ledIndex, ledIntensity);
+		retIndices[i] = tracks[i].ledIndex();
+		retIntensities[i] = tracks[i].evaluate(time);
 	}
+	return count;
 }
 
 void Animation::clearLEDs()
@@ -148,8 +148,20 @@ AnimationController::AnimInstance::AnimInstance()
 
 int AnimationController::update()
 {
-	//digitalWrite(1, HIGH);
-	int ms = millis();
+	update(millis());
+}
+
+void AnimationController::update(int ms)
+{
+	if (count > 0)
+	{
+		digitalWrite(1, HIGH);
+	}
+	else
+	{
+		digitalWrite(1, LOW);
+	}
+
 	for (int i = 0; i < count; ++i)
 	{
 		auto& anim = animations[i];
@@ -165,18 +177,20 @@ int AnimationController::update()
 		else
 		{
 			// Update the leds
-			anim.animation->updateLEDs(animTime);
+			int ledIndices[MAX_TRACKS];
+			int intensities[MAX_TRACKS];
+			int ledCount = anim.animation->updateLEDs(animTime, ledIndices, intensities);
+			ledController.setLEDs(ledIndices, intensities, ledCount);
 		}
 	}
 
 	//digitalWrite(1, LOW);
-	return RESOLUTION;
 }
 
 // To be passed to the timer
-int AnimationController::animationControllerUpdate()
+void AnimationController::animationControllerUpdate()
 {
-	return animationController.update();
+	animationController.update();
 }
 
 AnimationController::AnimationController()

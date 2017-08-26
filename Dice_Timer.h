@@ -10,7 +10,7 @@
 struct DiceTimer
 {
 public:
-	typedef int(*ClientMethod)();
+	typedef void(*ClientMethod)();
 
 	void hook(int resolutionInMicroSeconds, ClientMethod client);
 	void unHook(ClientMethod client);

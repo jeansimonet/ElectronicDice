@@ -15,25 +15,28 @@ private:
 	public:
 		LEDIndexAndMarker();
 		int ledIndices[LED_COUNT + 1];
-		int ledDurations[LED_COUNT + 1];
+		int ledMarkers[LED_COUNT + 1];
 		int count;
 	};
 
 	byte allLedIntensities[LED_COUNT]; // Represents the current led intensities
 	LEDIndexAndMarker ledsAndMarkers[2];
 
+	int ticks;
 	int currentLedIndex;
 	int bufferIndex;
 	bool swapQueued;
 
 private:
-	LEDIndexAndMarker& getCurrentLEDsAndMarkers();
-	LEDIndexAndMarker& getNextLEDsAndMarkers();
+	LEDIndexAndMarker* getCurrentLEDsAndMarkers();
+	LEDIndexAndMarker* getNextLEDsAndMarkers();
+	void queueSwap();
 	void swapLEDsAndMarkers();
-	int update();
+	void updateDurations();
+	void update();
 
 	// To be passed to the timer
-	static int ledControllerUpdate();
+	static void ledControllerUpdate();
 
 public:
 	LEDController();
@@ -41,7 +44,10 @@ public:
 	void stop();
 
 	void setLED(int index, int intensity); // Index 0 - 20, intensity 0 - 255
+	void setLEDs(int indices[], int intensities[], int count);
 	void clearAll();
+
+	void printAllLeds();
 };
 
 extern LEDController ledController;

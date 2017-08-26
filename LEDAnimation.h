@@ -49,7 +49,7 @@ public:
 	Animation();
 	void addTrack(const AnimationTrack& track);
 	void addTrack(int face, int index, int startTime, int duration, Curve* curve);
-	void updateLEDs(int time);
+	int updateLEDs(int time, int retIndices[], int retIntensities[]);
 	void clearLEDs();
 	int totalDuration();
 };
@@ -70,9 +70,10 @@ private:
 private:
 	void stopAtIndex(int animIndex);
 	int update();
+	void update(int ms);
 
 	// To be passed to the timer
-	static int animationControllerUpdate();
+	static void animationControllerUpdate();
 
 public:
 	AnimationController();

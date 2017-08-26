@@ -131,27 +131,27 @@ void setup()
 	animationController.begin();
 	diceTimer.begin();
 
-	ledController.setLED(0, 1);
-	ledController.setLED(1, 1);
-	ledController.setLED(2, 1);
-	ledController.setLED(3, 1);
-	ledController.setLED(4, 1);
-	ledController.setLED(5, 1);
-	ledController.setLED(6, 1);
-	ledController.setLED(7, 1);
-	ledController.setLED(8, 1);
-	ledController.setLED(9, 1);
-	ledController.setLED(10, 1);
-	ledController.setLED(11, 1);
-	ledController.setLED(12, 1);
-	ledController.setLED(13, 1);
-	ledController.setLED(14, 1);
-	ledController.setLED(15, 1);
-	ledController.setLED(16, 1);
-	ledController.setLED(17, 1);
-	ledController.setLED(18, 1);
-	ledController.setLED(19, 1);
-	ledController.setLED(20, 1);
+	//ledController.setLED(0, 1);
+	//ledController.setLED(1, 1);
+	//ledController.setLED(2, 1);
+	//ledController.setLED(3, 1);
+	//ledController.setLED(4, 1);
+	//ledController.setLED(5, 1);
+	//ledController.setLED(6, 1);
+	//ledController.setLED(7, 1);
+	//ledController.setLED(8, 1);
+	//ledController.setLED(9, 1);
+	//ledController.setLED(10, 1);
+	//ledController.setLED(11, 1);
+	//ledController.setLED(12, 1);
+	//ledController.setLED(13, 1);
+	//ledController.setLED(14, 1);
+	//ledController.setLED(15, 1);
+	//ledController.setLED(16, 1);
+	//ledController.setLED(17, 1);
+	//ledController.setLED(18, 1);
+	//ledController.setLED(19, 1);
+	//ledController.setLED(20, 1);
 
 	// put your setup code here, to run once:
 	// Set buzzer pin as output!
@@ -174,8 +174,15 @@ void setup()
 	}
 
 	//animationController.play(&(ledAnimations.FaceOneSlowPulse));
-	//animationController.play(&(ledAnimations.FaceSixSlowPulse));
+	//animationController.play(&(ledAnimations.FaceSixFastRotatingPulses));
 
+	//int ms = millis();
+	//for (int i = 0; i < 100; +i)
+	//{
+	//	//ledController.printAllLeds();
+	//	animationController.update(ms);
+	//	ms += 33;
+	//}
 }
 
 void SimbleeBLE_onConnect()
@@ -198,18 +205,19 @@ void loop()
 	//delay(1000);
 	//delay(3000);
 	//animationController.play(&(ledAnimations.FaceOneSlowPulse));
+	delay(3000);
+	animationController.play(&(ledAnimations.FaceSixFastRotatingPulses));
+	//for (int i = 0; i < 256; i += 2)
+	//{
+	//	delay(10);
+	//	ledController.setLED(5, i);
+	//}
+	//for (int i = 254; i >= 0; i -= 2)
+	//{
+	//	delay(10);
+	//	ledController.setLED(5, i);
+	//}
 	//delay(3000);
-	//animationController.play(&(ledAnimations.FaceSixSlowPulse));
-	//for (int i = 1; i < 256; i += 2)
-	//{
-	//	delay(10);
-	//	ledController.setLED(5, i);
-	//}
-	//for (int i = 254; i > 0; i -= 2)
-	//{
-	//	delay(10);
-	//	ledController.setLED(5, i);
-	//}
 	//for (int i = 1; i < 20; i += 1)
 	//{
 	//	delay(100);
