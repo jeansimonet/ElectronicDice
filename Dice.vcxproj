@@ -81,11 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DiceWire.h" />
-    <ClInclude Include="Dice_Accel.h" />
-    <ClInclude Include="Dice_Debug.h" />
-    <ClInclude Include="Dice_LED.h" />
-    <ClInclude Include="Dice_Timer.h" />
+    <ClInclude Include="DiceAccel.h" />
+    <ClInclude Include="DiceDebug.h" />
+    <ClInclude Include="DiceLED.h" />
+    <ClInclude Include="DiceTimer.h" />
     <ClInclude Include="LEDAnimation.h" />
+    <ClInclude Include="LEDAnimationController.h" />
     <ClInclude Include="LEDAnimations.h" />
     <ClInclude Include="LEDController.h" />
     <ClInclude Include="RotatingSix.h" />
@@ -93,11 +94,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DiceWire.cpp" />
-    <ClCompile Include="Dice_Accel.cpp" />
-    <ClCompile Include="Dice_Debug.cpp" />
-    <ClCompile Include="Dice_LED.cpp" />
-    <ClCompile Include="Dice_Timer.cpp" />
+    <ClCompile Include="DiceAccel.cpp" />
+    <ClCompile Include="DiceDebug.cpp" />
+    <ClCompile Include="DiceLED.cpp" />
+    <ClCompile Include="DiceTimer.cpp" />
     <ClCompile Include="LEDAnimation.cpp" />
+    <ClCompile Include="LEDAnimationController.cpp" />
     <ClCompile Include="LEDAnimations.cpp" />
     <ClCompile Include="LEDController.cpp" />
     <ClCompile Include="RotatingSix.cpp" />

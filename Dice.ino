@@ -5,6 +5,7 @@
 //
 //#include <SimbleeBLE.h>
 //
+#include "LEDAnimationController.h"
 #include "RotatingSix.h"
 #include "LEDAnimations.h"
 #include "Dice_Debug.h"

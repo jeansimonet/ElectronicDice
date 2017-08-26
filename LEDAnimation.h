@@ -7,7 +7,6 @@
 
 #define MAX_KEYFRAMES (16)
 #define MAX_TRACKS (6)
-#define MAX_ANIMS (5)
 
 struct Keyframe
 {
@@ -41,7 +40,7 @@ public:
 class IAnimation
 {
 public:
-	virtual void start();
+	virtual void start() = 0;
 	virtual int updateLEDs(int time, int retIndices[], int retIntensities[]) = 0;
 	virtual void clearLEDs() = 0;
 	virtual int totalDuration() = 0;
@@ -65,38 +64,6 @@ public:
 	virtual int totalDuration() override;
 };
 
-
-class AnimationController
-{
-private:
-	struct AnimInstance
-	{
-		AnimInstance();
-		IAnimation* animation;
-		int startTime; //ms
-	};
-
-	AnimInstance animations[MAX_ANIMS];
-	int count;
-
-private:
-	void stopAtIndex(int animIndex);
-	int update();
-	void update(int ms);
-
-	// To be passed to the timer
-	static void animationControllerUpdate();
-
-public:
-	AnimationController();
-	void begin();
-	void stop();
-	void play(IAnimation* anim);
-	void stop(IAnimation* anim);
-	void stopAll();
-};
-
-extern AnimationController animationController;
 
 #endif
 
