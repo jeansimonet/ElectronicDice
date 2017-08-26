@@ -88,6 +88,7 @@
     <ClInclude Include="LEDAnimation.h" />
     <ClInclude Include="LEDAnimations.h" />
     <ClInclude Include="LEDController.h" />
+    <ClInclude Include="RotatingSix.h" />
     <ClInclude Include="__vm\.Dice.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +100,7 @@
     <ClCompile Include="LEDAnimation.cpp" />
     <ClCompile Include="LEDAnimations.cpp" />
     <ClCompile Include="LEDController.cpp" />
+    <ClCompile Include="RotatingSix.cpp" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>

@@ -38,7 +38,17 @@ public:
 	int ledIndex();
 };
 
-struct Animation
+class IAnimation
+{
+public:
+	virtual void start();
+	virtual int updateLEDs(int time, int retIndices[], int retIntensities[]) = 0;
+	virtual void clearLEDs() = 0;
+	virtual int totalDuration() = 0;
+};
+
+class Animation
+	: public IAnimation
 {
 private:
 	AnimationTrack tracks[MAX_TRACKS];
@@ -49,10 +59,12 @@ public:
 	Animation();
 	void addTrack(const AnimationTrack& track);
 	void addTrack(int face, int index, int startTime, int duration, Curve* curve);
-	int updateLEDs(int time, int retIndices[], int retIntensities[]);
-	void clearLEDs();
-	int totalDuration();
+	virtual void start() override;
+	virtual int updateLEDs(int time, int retIndices[], int retIntensities[]) override;
+	virtual void clearLEDs() override;
+	virtual int totalDuration() override;
 };
+
 
 class AnimationController
 {
@@ -60,7 +72,7 @@ private:
 	struct AnimInstance
 	{
 		AnimInstance();
-		Animation* animation;
+		IAnimation* animation;
 		int startTime; //ms
 	};
 
@@ -79,8 +91,8 @@ public:
 	AnimationController();
 	void begin();
 	void stop();
-	void play(Animation* anim);
-	void stop(Animation* anim);
+	void play(IAnimation* anim);
+	void stop(IAnimation* anim);
 	void stopAll();
 };
 

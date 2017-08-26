@@ -17,6 +17,11 @@ public:
 	LEDAnimations();
 };
 
+extern Curve constantOn;
+extern Curve constantOff;
+extern Curve rampUpDown;
+extern Curve on128Off128;
+
 extern LEDAnimations ledAnimations;
 
 #endif

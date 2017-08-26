@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Animations">
+      <UniqueIdentifier>{7018fb8d-900e-429a-b9c8-57839b49fc38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Dice.ino" />
@@ -45,6 +48,9 @@
     <ClInclude Include="LEDAnimations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RotatingSix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dice_LED.cpp">
@@ -69,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LEDAnimations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RotatingSix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

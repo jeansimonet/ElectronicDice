@@ -5,6 +5,7 @@
 //
 //#include <SimbleeBLE.h>
 //
+#include "RotatingSix.h"
 #include "LEDAnimations.h"
 #include "Dice_Debug.h"
 #include "Dice_Timer.h"
@@ -183,6 +184,8 @@ void setup()
 	//	animationController.update(ms);
 	//	ms += 33;
 	//}
+	//animationController.play(&rotatingSix);
+
 }
 
 void SimbleeBLE_onConnect()
@@ -206,7 +209,7 @@ void loop()
 	//delay(3000);
 	//animationController.play(&(ledAnimations.FaceOneSlowPulse));
 	delay(3000);
-	animationController.play(&(ledAnimations.FaceSixFastRotatingPulses));
+	animationController.play(&rotatingSix);
 	//for (int i = 0; i < 256; i += 2)
 	//{
 	//	delay(10);

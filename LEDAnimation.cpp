@@ -116,6 +116,10 @@ void Animation::addTrack(int face, int index, int startTime, int trackDuration, 
 	}
 }
 
+void Animation::start()
+{
+	// Nothing to do here!
+}
 
 int Animation::updateLEDs(int time, int retIndices[], int retIntensities[])
 {
@@ -208,7 +212,7 @@ void AnimationController::stop()
 	diceTimer.unHook(animationControllerUpdate);
 }
 
-void AnimationController::play(Animation* anim)
+void AnimationController::play(IAnimation* anim)
 {
 	int prevAnimIndex = 0;
 	for (; prevAnimIndex < count; ++prevAnimIndex)
@@ -224,18 +228,21 @@ void AnimationController::play(Animation* anim)
 	{
 		// Replace a previous animation
 		animations[prevAnimIndex].startTime = ms;
+		animations[prevAnimIndex].animation->clearLEDs();
+		animations[prevAnimIndex].animation->start();
 	}
 	else if (count < MAX_ANIMS)
 	{
 		// Add a new animation
 		animations[count].animation = anim;
 		animations[count].startTime = ms;
+		animations[count].animation->start();
 		count++;
 	}
 	// Else there is no more room
 }
 
-void AnimationController::stop(Animation* anim)
+void AnimationController::stop(IAnimation* anim)
 {
 	int prevAnimIndex = 0;
 	for (; prevAnimIndex < count; ++prevAnimIndex)
