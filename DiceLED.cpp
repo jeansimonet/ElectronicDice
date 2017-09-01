@@ -74,15 +74,16 @@ Face Faces[] =
 
 void DiceLEDs::init()
 {
-	DiceWire.beginTransmission(DEV_ADRESS);   // transmit to IO Expander
-	DiceWire.write(PTR_CONFIG_REG);           // configure register pointer
-	DiceWire.write(0xFF);                     // define all pins as input
-	DiceWire.endTransmission();               // stop transmitting
+	DiceTWI::AutoLock lock();
+	diceWire.beginTransmission(DEV_ADRESS);   // transmit to IO Expander
+	diceWire.write(PTR_CONFIG_REG);           // configure register pointer
+	diceWire.write(0xFF);                     // define all pins as input
+	diceWire.endTransmission();               // stop transmitting
 
-	DiceWire.beginTransmission(DEV_ADRESS);   // transmit to device #39
-	DiceWire.write(PTR_OUTPUT_REG);           // configure register pointer
-	DiceWire.write(0x00);                     // define all pins at 0 output level
-	DiceWire.endTransmission();               // stop transmitting
+	diceWire.beginTransmission(DEV_ADRESS);   // transmit to device #39
+	diceWire.write(PTR_OUTPUT_REG);           // configure register pointer
+	diceWire.write(0x00);                     // define all pins at 0 output level
+	diceWire.endTransmission();               // stop transmitting
 }
 
 void DiceLEDs::set(int face, int led)
@@ -92,34 +93,36 @@ void DiceLEDs::set(int face, int led)
 
 void DiceLEDs::set(int ledIndex)
 {
+	DiceTWI::AutoLock lock();
+
 	LED& rled = Leds[ledIndex];
 	byte dir = ~(rled.HighMask | rled.LowMask); // All inputs except pins i and j
 	byte out = rled.HighMask; // Only i pin is high
 
-	DiceWire.beginTransmission(DEV_ADRESS);
-	DiceWire.write(PTR_CONFIG_REG);
-	DiceWire.write(0xFF);
-	int error = DiceWire.endTransmission();     // stop transmitting
+	diceWire.beginTransmission(DEV_ADRESS);
+	diceWire.write(PTR_CONFIG_REG);
+	diceWire.write(0xFF);
+	int error = diceWire.endTransmission();     // stop transmitting
 	if (error != 0)
 	{
 		diceDebug.print("Error setting config: ");
 		diceDebug.println(error);
 	}
 
-	DiceWire.beginTransmission(DEV_ADRESS);		// transmit to device 0x70
-	DiceWire.write(PTR_OUTPUT_REG);				// send adress of output register
-	DiceWire.write(out);						// sends byte
-	error = DiceWire.endTransmission();         // stop transmitting
+	diceWire.beginTransmission(DEV_ADRESS);		// transmit to device 0x70
+	diceWire.write(PTR_OUTPUT_REG);				// send adress of output register
+	diceWire.write(out);						// sends byte
+	error = diceWire.endTransmission();         // stop transmitting
 	if (error != 0)
 	{
 		diceDebug.print("Error setting output: ");
 		diceDebug.println(error);
 	}
 
-	DiceWire.beginTransmission(DEV_ADRESS);
-	DiceWire.write(PTR_CONFIG_REG);
-	DiceWire.write(dir);
-	error = DiceWire.endTransmission();         // stop transmitting
+	diceWire.beginTransmission(DEV_ADRESS);
+	diceWire.write(PTR_CONFIG_REG);
+	diceWire.write(dir);
+	error = diceWire.endTransmission();         // stop transmitting
 	if (error != 0)
 	{
 		diceDebug.print("Error setting config: ");
@@ -130,10 +133,11 @@ void DiceLEDs::set(int ledIndex)
 
 void DiceLEDs::clear()
 {
-	DiceWire.beginTransmission(DEV_ADRESS);
-	DiceWire.write(PTR_CONFIG_REG);
-	DiceWire.write(0xFF);
-	int error = DiceWire.endTransmission();    // stop transmitting
+	DiceTWI::AutoLock lock();
+	diceWire.beginTransmission(DEV_ADRESS);
+	diceWire.write(PTR_CONFIG_REG);
+	diceWire.write(0xFF);
+	int error = diceWire.endTransmission();    // stop transmitting
 	if (error != 0)
 	{
 		diceDebug.print("Error setting config: ");

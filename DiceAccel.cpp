@@ -34,7 +34,7 @@ Distributed as-is; no warranty is given.
 #define DEV_ADDRESS 0x1C
 
 
-DiceAccelerator DiceAccel;
+DiceAccelerator diceAccel;
 
 // CONSTRUCTOR
 DiceAccelerator::DiceAccelerator()
@@ -235,26 +235,26 @@ void DiceAccelerator::writeRegister(MMA8452Q_Register reg, byte data)
 //	auto-incrmenting to the next.
 void DiceAccelerator::writeRegisters(MMA8452Q_Register reg, byte *buffer, byte len)
 {
-	DiceWire.beginTransmission(address);
-	DiceWire.write(reg);
+	diceWire.beginTransmission(address);
+	diceWire.write(reg);
 	for (int x = 0; x < len; x++)
-		DiceWire.write(buffer[x]);
-	DiceWire.endTransmission(); //Stop transmitting
+		diceWire.write(buffer[x]);
+	diceWire.endTransmission(); //Stop transmitting
 }
 
 // READ A SINGLE REGISTER
 //	Read a byte from the MMA8452Q register "reg".
 byte DiceAccelerator::readRegister(MMA8452Q_Register reg)
 {
-	DiceWire.beginTransmission(address);
-	DiceWire.write(reg);
-	DiceWire.endTransmission(false); //endTransmission but keep the connection active
+	diceWire.beginTransmission(address);
+	diceWire.write(reg);
+	diceWire.endTransmission(false); //endTransmission but keep the connection active
 
-	DiceWire.requestFrom(address, (byte)1); //Ask for 1 byte, once done, bus is released by default
+	diceWire.requestFrom(address, (byte)1); //Ask for 1 byte, once done, bus is released by default
 
-	while (!DiceWire.available()); //Wait for the data to come back
+	while (!diceWire.available()); //Wait for the data to come back
 
-	return DiceWire.read(); //Return this one byte
+	return diceWire.read(); //Return this one byte
 }
 
 // READ MULTIPLE REGISTERS
@@ -262,14 +262,14 @@ byte DiceAccelerator::readRegister(MMA8452Q_Register reg)
 //	in "buffer" on exit.
 void DiceAccelerator::readRegisters(MMA8452Q_Register reg, byte *buffer, byte len)
 {
-	DiceWire.beginTransmission(address);
-	DiceWire.write(reg);
-	DiceWire.endTransmission(false); //endTransmission but keep the connection active
+	diceWire.beginTransmission(address);
+	diceWire.write(reg);
+	diceWire.endTransmission(false); //endTransmission but keep the connection active
 
-	DiceWire.requestFrom(address, len); //Ask for bytes, once done, bus is released by default
+	diceWire.requestFrom(address, len); //Ask for bytes, once done, bus is released by default
 
-	while (DiceWire.available() < len); //Hang out until we get the # of bytes we expect
+	while (diceWire.available() < len); //Hang out until we get the # of bytes we expect
 
 	for (int x = 0; x < len; x++)
-		buffer[x] = DiceWire.read();
+		buffer[x] = diceWire.read();
 }

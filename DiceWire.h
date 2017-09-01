@@ -10,10 +10,23 @@
 class DiceTWI
 {
 public:
+	struct AutoLock
+	{
+		AutoLock();
+		~AutoLock();
+	};
+private:
+	int busyCount;
+
+public:
 	void begin();
 	void beginTransmission(uint8_t);
 	void beginTransmission(int);
 	void end();
+
+	void lock();
+	void unlock();
+
 	uint8_t endTransmission(void);
 	uint8_t endTransmission(uint8_t);
 	uint8_t requestFrom(uint8_t, uint8_t);
@@ -32,7 +45,7 @@ public:
 	void onReceiveService(uint8_t*, int);
 };
 
-extern DiceTWI DiceWire;
+extern DiceTWI diceWire;
 
 #endif
 

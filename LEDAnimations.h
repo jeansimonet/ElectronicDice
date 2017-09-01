@@ -5,22 +5,28 @@
 
 #include "Arduino.h"
 #include "LEDAnimation.h"
+#include "RotatingLEDs.h"
 
 class LEDAnimations
 {
 public:
 	Animation FaceOneSlowPulse;
 	Animation FaceSixSlowPulse;
-	Animation FaceSixFastRotatingPulses;
+	Animation FaceFiveCross;
+
+	RotatingLEDs rotatingSix;
+	RotatingLEDs rotatingFour;
+	RotatingLEDs rotatingThree;
+	RotatingLEDs rotatingTwo;
 
 public:
 	LEDAnimations();
 };
 
-extern Curve constantOn;
-extern Curve constantOff;
-extern Curve rampUpDown;
-extern Curve on128Off128;
+extern const Curve constantOn;
+extern const Curve constantOff;
+extern const Curve rampUpDown;
+extern const Curve on128Off128;
 
 extern LEDAnimations ledAnimations;
 

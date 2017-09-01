@@ -8,7 +8,7 @@
 
 #define MAX_LEVEL (256)
 
-int Curve::evaluate(int time)
+int Curve::evaluate(int time) const
 {
 	if (count == 0)
 		return 0;
@@ -46,13 +46,13 @@ int Curve::evaluate(int time)
 }
 
 
-int AnimationTrack::ledIndex()
+int AnimationTrack::ledIndex() const
 {
 	return LEDs.ledIndex(face, index);
 }
 
 
-int AnimationTrack::evaluate(int time)
+int AnimationTrack::evaluate(int time) const
 {
 	int base = 0;
 	if (time < startTime)
@@ -93,7 +93,7 @@ void Animation::addTrack(const AnimationTrack& track)
 	}
 }
 
-void Animation::addTrack(int face, int index, int startTime, int trackDuration, Curve* curve)
+void Animation::addTrack(int face, int index, int startTime, int trackDuration, const Curve* curve)
 {
 	if (count < MAX_TRACKS)
 	{

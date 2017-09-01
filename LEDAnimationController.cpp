@@ -9,7 +9,7 @@
 #include "DiceTimer.h"
 #include "DiceDebug.h"
 
-#define RESOLUTION (33333) // 33.333 ms = 30 Hz
+#define TIMER2_RESOLUTION (33333) // 33.333 ms = 30 Hz
 
 AnimationController animationController;
 
@@ -27,15 +27,6 @@ int AnimationController::update()
 
 void AnimationController::update(int ms)
 {
-	if (count > 0)
-	{
-		digitalWrite(1, HIGH);
-	}
-	else
-	{
-		digitalWrite(1, LOW);
-	}
-
 	for (int i = 0; i < count; ++i)
 	{
 		auto& anim = animations[i];
@@ -57,7 +48,6 @@ void AnimationController::update(int ms)
 			ledController.setLEDs(ledIndices, intensities, ledCount);
 		}
 	}
-
 	//digitalWrite(1, LOW);
 }
 
@@ -74,7 +64,7 @@ AnimationController::AnimationController()
 
 void AnimationController::begin()
 {
-	diceTimer.hook(RESOLUTION, animationControllerUpdate); // 33.333 ms = 30 Hz
+	diceTimer.hook(TIMER2_RESOLUTION, animationControllerUpdate); // 33.333 ms = 30 Hz
 }
 
 void AnimationController::stop()

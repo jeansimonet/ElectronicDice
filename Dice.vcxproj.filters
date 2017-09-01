@@ -35,9 +35,6 @@
     <ClInclude Include="LEDAnimationController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RotatingSix.h">
-      <Filter>Animations</Filter>
-    </ClInclude>
     <ClInclude Include="DiceAccel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,6 +45,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DiceTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RotatingLEDs.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="AccelController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -64,9 +70,6 @@
     <ClCompile Include="LEDAnimationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RotatingSix.cpp">
-      <Filter>Animations</Filter>
-    </ClCompile>
     <ClCompile Include="DiceAccel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,6 +83,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DiceWire.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RotatingLEDs.cpp">
+      <Filter>Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="AccelController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,6 +6,9 @@
 #include "DiceLED.h"
 #include "DiceTimer.h"
 #include "DiceDebug.h"
+#include "MessageQueue.h"
+
+//#define DEBUG_LEVELS
 
 #define MAX_LEVEL (256)
 
@@ -26,7 +29,7 @@
 // set a default intensity scale such that a full intensity LED, even by itself is 16 times brighter
 // than at its minimum level.
 
-#define RESOLUTION (512)
+#define TIMER2_RESOLUTION (512)
 #define MAX_LEVEL_TICKS (16)
 #define STANDARD_DURATION (48)  // This will give us 40 Hz led refresh rate, and at that refresh rate
 								// allow for 3 leds to be at full brightness
@@ -130,6 +133,7 @@ void LEDController::updateDurations()
 		ledAndMarkers->count = totalLeds;
 
 		// Debug print timings!
+#if DEBUG_LEVELS
 		if (diceDebug.isDebugOn())
 		{
 			for (int i = 0; i < totalLeds; ++i)
@@ -142,6 +146,7 @@ void LEDController::updateDurations()
 			}
 			diceDebug.println(ticks);
 		}
+#endif
 
 		queueSwap();
 	}
@@ -164,7 +169,7 @@ void LEDController::ledControllerUpdate()
 
 void LEDController::begin()
 {
-	diceTimer.hook(RESOLUTION, LEDController::ledControllerUpdate);
+	diceTimer.hook(TIMER2_RESOLUTION, LEDController::ledControllerUpdate);
 }
 
 void LEDController::stop()
@@ -218,18 +223,21 @@ void LEDController::update()
 				if (nextLEDIndex < LED_COUNT)
 				{
 					// Switch to the next led
-					LEDs.set(nextLEDIndex);
+					//LEDs.set(nextLEDIndex);
+					messageQueue.pushSetLED(nextLEDIndex);
 				}
 				else
 				{
 					// Special led index means stay off!
-					LEDs.clear();
+					//LEDs.clear();
+					messageQueue.pushClearLEDs();
 				}
 			}
 			else
 			{
 				// Clear all leds!
-				LEDs.clear();
+				//LEDs.clear();
+				messageQueue.pushClearLEDs();
 			}
 		}
 	}

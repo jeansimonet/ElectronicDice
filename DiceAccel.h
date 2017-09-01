@@ -84,7 +84,8 @@ enum MMA8452Q_Register {
 ////////////////////////////////
 enum MMA8452Q_Scale { SCALE_2G = 2, SCALE_4G = 4, SCALE_8G = 8 }; // Possible full-scale settings
 enum MMA8452Q_ODR { ODR_800, ODR_400, ODR_200, ODR_100, ODR_50, ODR_12, ODR_6, ODR_1 }; // possible data rates
-																						// Possible portrait/landscape settings
+
+// Possible portrait/landscape settings
 #define PORTRAIT_U 0
 #define PORTRAIT_D 1
 #define LANDSCAPE_R 2
@@ -120,7 +121,7 @@ private:
 };
 
 // Begin using the library by creating an instance of the MMA8452Q
-extern DiceAccelerator DiceAccel;
+extern DiceAccelerator diceAccel;
 
 #endif
 

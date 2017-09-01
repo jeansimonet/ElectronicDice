@@ -7,7 +7,9 @@
 
 DiceTimer diceTimer;
 
-#define RESOLUTION (16)
+#define TIMER2_PRESCALER (8)
+#define TIMER2_RESOLUTION ((1<<TIMER2_PRESCALER)/16) // TimerTick = 16M/2^8 = 16 us
+// Note: at 16us per tick, the longest delay that can be requested is roughly 1s
 
 void DiceTimer::hook(int resolutionInMicroSeconds, DiceTimer::ClientMethod client)
 {
@@ -15,7 +17,7 @@ void DiceTimer::hook(int resolutionInMicroSeconds, DiceTimer::ClientMethod clien
 	{
 		auto& clientInfo = clients[count];
 		clientInfo.callback = client;
-		clientInfo.ticks = resolutionInMicroSeconds / RESOLUTION;
+		clientInfo.ticks = resolutionInMicroSeconds / TIMER2_RESOLUTION;
 		NRF_TIMER2->CC[count] = clientInfo.ticks;
 		NRF_TIMER2->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << (TIMER_INTENSET_COMPARE0_Pos + count);
 		//NRF_TIMER2->SHORTS |= (TIMER_SHORTS_COMPARE0_STOP_Enabled << (TIMER_SHORTS_COMPARE0_STOP_Pos + count));
@@ -76,7 +78,7 @@ DiceTimer::DiceTimer()
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 	NRF_TIMER2->MODE = TIMER_MODE_MODE_Timer;  // taken from Nordic dev zone
 	NRF_TIMER2->BITMODE = TIMER_BITMODE_BITMODE_16Bit;
-	NRF_TIMER2->PRESCALER = 8;	// 16MHz / (2^8) = 16 us resolution
+	NRF_TIMER2->PRESCALER = TIMER2_PRESCALER;	// 16MHz / (2^8) = 16 us resolution
 	NRF_TIMER2->TASKS_CLEAR = 1; // Clear timer
 	NVIC_SetPriority(TIMER2_IRQn, 3);
 	dynamic_attachInterrupt(TIMER2_IRQn, DiceTimer::timer2Interrupt);

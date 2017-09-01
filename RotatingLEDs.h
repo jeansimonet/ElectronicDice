@@ -8,7 +8,7 @@
 
 #define MAX_TRACKS (6)
 
-class RotatingSix
+class RotatingLEDs
 	: public IAnimation
 {
 private:
@@ -23,17 +23,17 @@ private:
 	int currentLED;
 	int currentCycle;
 
-	int ledIndices[6];
+	int face;
+	int* ledIndices;
+	int ledCount;
 
 public:
-	RotatingSix(int delay, int onTime, int cycles);
+	RotatingLEDs(int delay, int onTime, int cycles, int face, int leds[], int ledCount);
 	virtual void start() override;
 	virtual int updateLEDs(int time, int retIndices[], int retIntensities[]) override;
 	virtual void clearLEDs() override;
 	virtual int totalDuration() override;
 };
-
-extern RotatingSix rotatingSix;
 
 #endif
 

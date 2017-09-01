@@ -10,12 +10,23 @@
 #define SCLpin 21
 #define SDApin 24
 
-DiceTWI DiceWire;
+DiceTWI diceWire;
+
+DiceTWI::AutoLock::AutoLock()
+{
+	diceWire.lock();
+}
+
+DiceTWI::AutoLock::~AutoLock()
+{
+	diceWire.unlock();
+}
 
 void DiceTWI::begin()
 {
 	Wire.speed = 400;
 	Wire.beginOnPins(SCLpin, SDApin);
+	busyCount = 0;
 }
 
 void DiceTWI::beginTransmission(uint8_t a)
@@ -31,6 +42,22 @@ void DiceTWI::beginTransmission(int a)
 void DiceTWI::end()
 {
 	Wire.end();
+}
+
+void DiceTWI::lock()
+{
+	// lock the counter, check it AFTER we've locked it
+	while (busyCount++ == 0)
+	{
+		// it wasn't 0, decrement it back
+		--busyCount;
+	}
+	// Otherwise we got it
+}
+
+void DiceTWI::unlock()
+{
+	busyCount--;
 }
 
 uint8_t DiceTWI::endTransmission(void)

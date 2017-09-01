@@ -2,13 +2,13 @@
 // 
 // 
 
-#include "RotatingSix.h"
+#include "RotatingLEDs.h"
 #include "LEDController.h"
 #include "LEDAnimation.h"
 #include "LEDAnimations.h"
 #include "DiceLED.h"
 
-RotatingSix::RotatingSix(int delay, int onTime, int cycles)
+RotatingLEDs::RotatingLEDs(int delay, int onTime, int cycles, int face, int leds[], int ledCount)
 	: LEDDelay(delay)
 	, LEDOnTime(onTime)
 	, LEDCycles(cycles)
@@ -16,12 +16,14 @@ RotatingSix::RotatingSix(int delay, int onTime, int cycles)
 	, nextLEDTime(0)
 	, currentLED(-1)
 	, currentCycle(0)
-	, ledIndices{0, 1, 2, 5, 4, 3}
+	, ledIndices( leds )
+	, face(face)
+	, ledCount(ledCount)
 {
 	
 }
 
-void RotatingSix::start()
+void RotatingLEDs::start()
 {
 	count = 0;
 	nextLEDTime = 0;
@@ -29,13 +31,13 @@ void RotatingSix::start()
 	currentCycle = 0;
 }
 
-int RotatingSix::updateLEDs(int time, int retIndices[], int retIntensities[])
+int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
 {
 	if (time >= nextLEDTime)
 	{
 		bool addLED = true;
 		currentLED++;
-		if (currentLED == 6)
+		if (currentLED == ledCount)
 		{
 			currentLED = 0;
 			currentCycle++;
@@ -51,7 +53,7 @@ int RotatingSix::updateLEDs(int time, int retIndices[], int retIntensities[])
 		{
 			// Spawn another led!
 			auto& nextTrack = tracks[count];
-			nextTrack.face = 5;
+			nextTrack.face = face;
 			nextTrack.index = ledIndices[currentLED];
 			nextTrack.startTime = nextLEDTime;	// ms
 			nextTrack.duration = LEDOnTime;	// ms
@@ -94,29 +96,17 @@ int RotatingSix::updateLEDs(int time, int retIndices[], int retIntensities[])
 	return retCount;
 }
 
-void RotatingSix::clearLEDs()
+void RotatingLEDs::clearLEDs()
 {
-	int indices[6] =
-	{
-		LEDs.ledIndex(5,0),
-		LEDs.ledIndex(5,1),
-		LEDs.ledIndex(5,2),
-		LEDs.ledIndex(5,3),
-		LEDs.ledIndex(5,4),
-		LEDs.ledIndex(5,5),
-	};
-
 	int zeros[6] =
 	{
 		0,0,0,0,0,0,
 	};
 	
-	ledController.setLEDs(indices, zeros, 6);
+	ledController.setLEDs(ledIndices, zeros, ledCount);
 }
 
-int RotatingSix::totalDuration()
+int RotatingLEDs::totalDuration()
 {
-	return LEDCycles * LEDDelay * 6 + LEDOnTime;
+	return LEDCycles * LEDDelay * ledCount + LEDOnTime;
 }
-
-RotatingSix rotatingSix(100, 500, 5);

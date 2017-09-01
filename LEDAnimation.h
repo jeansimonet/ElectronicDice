@@ -21,7 +21,7 @@ public:
 	Keyframe keyframes[MAX_KEYFRAMES];
 	int count;
 
-	int evaluate(int time); // 0 - 255 (normalized time)
+	int evaluate(int time) const; // 0 - 255 (normalized time)
 };
 
 struct AnimationTrack
@@ -31,10 +31,10 @@ public:
 	int index;		// 0 - face (depends on the face)
 	int startTime;	// ms
 	int duration;	// ms
-	Curve* curve;	// Typically this comes from an array of pre-defined curves
+	const Curve* curve;	// Typically this comes from an array of pre-defined curves
 
-	int evaluate(int time);
-	int ledIndex();
+	int evaluate(int time) const;
+	int ledIndex() const;
 };
 
 class IAnimation
@@ -57,7 +57,7 @@ private:
 public:
 	Animation();
 	void addTrack(const AnimationTrack& track);
-	void addTrack(int face, int index, int startTime, int duration, Curve* curve);
+	void addTrack(int face, int index, int startTime, int duration, const Curve* curve);
 	virtual void start() override;
 	virtual int updateLEDs(int time, int retIndices[], int retIntensities[]) override;
 	virtual void clearLEDs() override;

@@ -80,6 +80,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AccelController.h" />
     <ClInclude Include="DiceWire.h" />
     <ClInclude Include="DiceAccel.h" />
     <ClInclude Include="DiceDebug.h" />
@@ -89,10 +90,12 @@
     <ClInclude Include="LEDAnimationController.h" />
     <ClInclude Include="LEDAnimations.h" />
     <ClInclude Include="LEDController.h" />
-    <ClInclude Include="RotatingSix.h" />
+    <ClInclude Include="MessageQueue.h" />
+    <ClInclude Include="RotatingLEDs.h" />
     <ClInclude Include="__vm\.Dice.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AccelController.cpp" />
     <ClCompile Include="DiceWire.cpp" />
     <ClCompile Include="DiceAccel.cpp" />
     <ClCompile Include="DiceDebug.cpp" />
@@ -102,7 +105,8 @@
     <ClCompile Include="LEDAnimationController.cpp" />
     <ClCompile Include="LEDAnimations.cpp" />
     <ClCompile Include="LEDController.cpp" />
-    <ClCompile Include="RotatingSix.cpp" />
+    <ClCompile Include="MessageQueue.cpp" />
+    <ClCompile Include="RotatingLEDs.cpp" />
   </ItemGroup>
   <PropertyGroup>
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
@@ -112,7 +116,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties arduino.upload.port="COM5" />
+      <UserProperties arduino.upload.port="COM3" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
