@@ -6,6 +6,7 @@
 #include "Arduino.h"
 #include "LEDAnimation.h"
 #include "RotatingLEDs.h"
+#include "RandomLEDs.h"
 
 class LEDAnimations
 {
@@ -18,6 +19,8 @@ public:
 	RotatingLEDs rotatingFour;
 	RotatingLEDs rotatingThree;
 	RotatingLEDs rotatingTwo;
+
+	RandomLEDs randomLEDs;
 
 public:
 	LEDAnimations();

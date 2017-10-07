@@ -14,7 +14,7 @@ DiceDebug::DiceDebug()
 void DiceDebug::begin()
 {
 	override_uart_limit = true;
-	Serial.begin(19200);
+	Serial.begin(9600);
 	Serial.println("Dice Serial COM on");
 	displayDebug = true;
 }

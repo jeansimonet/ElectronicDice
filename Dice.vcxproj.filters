@@ -56,6 +56,12 @@
     <ClInclude Include="MessageQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DiceCommands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomLEDs.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LEDAnimation.cpp">
@@ -93,6 +99,12 @@
     </ClCompile>
     <ClCompile Include="MessageQueue.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DiceCommands.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomLEDs.cpp">
+      <Filter>Animations</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

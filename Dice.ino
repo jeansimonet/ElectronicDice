@@ -1,3 +1,5 @@
+#include "RandomLEDs.h"
+#include "DiceCommands.h"
 #include <SimbleeBLE.h>
 #include "DiceWire.h"
 #include "DiceLED.h"
@@ -20,15 +22,15 @@ void setup()
 {
 	// start the BLE stack
 	// put your setup code here, to run once:
-	SimbleeBLE.advertisementData = "Dice";
-	SimbleeBLE.deviceName = "Dice";
+	SimbleeBLE.advertisementData = "Alice";
+	SimbleeBLE.deviceName = "Alice";
 
-	SimbleeBLE.txPowerLevel = 0;
+	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
 
 	// put your setup code here, to run once:
 	//setup I2C on the pins of your choice
-	diceDebug.begin();
+	//diceDebug.begin();
 	diceWire.begin();
 	LEDs.init(); // Depends on I2C
 	ledController.begin(); // Uses LEDs
@@ -64,35 +66,50 @@ void SimbleeBLE_onDisconnect()
 	diceDebug.println("Disconnected!");
 }
 
+void SimbleeBLE_onReceive(char *data, int len)
+{
+	// First 4 bytes are a command code
+	if (len >= 4)
+	{
+		ProcessCommand(data, len);
+	}
+}
+
 void updateFaceAnimation()
 {
 	int newFace = accelController.currentFace();
 	if (newFace != currentFace)
 	{
-		currentFace = newFace;
-
-		// Toggle leds
-		animationController.stopAll();
-		switch (currentFace)
+		if (!SimbleeBLE_radioActive)
 		{
-		case 0:
-			animationController.play(&ledAnimations.FaceOneSlowPulse);
-			break;
-		case 1:
-			animationController.play(&ledAnimations.rotatingTwo);
-			break;
-		case 2:
-			animationController.play(&ledAnimations.rotatingThree);
-			break;
-		case 3:
-			animationController.play(&ledAnimations.rotatingFour);
-			break;
-		case 4:
-			animationController.play(&ledAnimations.FaceFiveCross);
-			break;
-		case 5:
-			animationController.play(&ledAnimations.rotatingSix);
-			break;
+			currentFace = newFace;
+
+			// Toggle leds
+			animationController.stopAll();
+			switch (currentFace)
+			{
+			case 0:
+				animationController.play(&ledAnimations.FaceOneSlowPulse);
+				break;
+			case 1:
+				animationController.play(&ledAnimations.rotatingTwo);
+				break;
+			case 2:
+				animationController.play(&ledAnimations.rotatingThree);
+				break;
+			case 3:
+				animationController.play(&ledAnimations.rotatingFour);
+				break;
+			case 4:
+				animationController.play(&ledAnimations.FaceFiveCross);
+				break;
+			case 5:
+				animationController.play(&ledAnimations.rotatingSix);
+				break;
+			}
+			diceDebug.print("sending face number ");
+			diceDebug.println(currentFace);
+			SimbleeBLE.sendByte(currentFace);
 		}
 	}
 }
@@ -100,5 +117,6 @@ void updateFaceAnimation()
 void loop()
 {
 	messageQueue.update();
+	updateFaceAnimation();
 }
 

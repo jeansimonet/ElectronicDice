@@ -42,8 +42,8 @@ void AnimationController::update(int ms)
 		else
 		{
 			// Update the leds
-			int ledIndices[MAX_TRACKS];
-			int intensities[MAX_TRACKS];
+			int ledIndices[LED_COUNT];
+			int intensities[LED_COUNT];
 			int ledCount = anim.animation->updateLEDs(animTime, ledIndices, intensities);
 			ledController.setLEDs(ledIndices, intensities, ledCount);
 		}
