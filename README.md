@@ -2,4 +2,4 @@
 
 Firmware for the electronic dice
 
-### What is this repository for? ###
+This is the source code that runs on the Simblee chip. It uses the arduino environment, with the Simblee board package from RFDigital.
