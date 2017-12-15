@@ -1,3 +1,4 @@
+#include "DiceController.h"
 #include "RandomLEDs.h"
 #include "DiceCommands.h"
 #include <SimbleeBLE.h>
@@ -30,26 +31,15 @@ void setup()
 
 	// put your setup code here, to run once:
 	//setup I2C on the pins of your choice
-	//diceDebug.begin();
+	diceDebug.begin();
 	diceWire.begin();
 	LEDs.init(); // Depends on I2C
 	ledController.begin(); // Uses LEDs
 	animationController.begin(); // Talks to controller
 	diceAccel.init();
 	accelController.begin();
+	diceControl.init();
 	messageQueue.init();
-
-	// Set buzzer pin as output!
-	pinMode(pin, OUTPUT);
-
-	if (!diceDebug.isDebugOn())
-	{
-		pinMode(0, OUTPUT);
-		pinMode(1, OUTPUT);
-		digitalWrite(0, LOW);
-		digitalWrite(1, LOW);
-	}
-
 	diceTimer.begin(); // Kicks off the timers!
 }
 

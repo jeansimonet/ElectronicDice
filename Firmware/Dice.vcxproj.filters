@@ -62,6 +62,12 @@
     <ClInclude Include="RandomLEDs.h">
       <Filter>Animations</Filter>
     </ClInclude>
+    <ClInclude Include="__vm\.Firmware.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DiceController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LEDAnimation.cpp">
@@ -105,6 +111,9 @@
     </ClCompile>
     <ClCompile Include="RandomLEDs.cpp">
       <Filter>Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="DiceController.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

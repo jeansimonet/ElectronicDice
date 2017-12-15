@@ -33,7 +33,6 @@ Distributed as-is; no warranty is given.
 
 #define DEV_ADDRESS 0x1C
 
-
 DiceAccelerator diceAccel;
 
 // CONSTRUCTOR
@@ -207,6 +206,50 @@ byte DiceAccelerator::readPL()
 		return (plStat & 0x6) >> 1;
 }
 
+
+void DiceAccelerator::enableTransientInterrupt()
+{
+	standby();
+
+	// Tell the accelerometer that we want transient interrupts!
+	writeRegister(TRANSIENT_CFG, 0b00011110); // enable latch, xyz and hi-pass filter
+
+	// Setup the threshold
+	writeRegister(TRANSIENT_THS, 16); // Minimum threshold
+
+	// Set detection count
+	writeRegister(TRANSIENT_COUNT, 1); // Shortest detection period
+
+	// Route the transient interrupt to interrupt pin 1
+	writeRegister(CTRL_REG5, 0b00100000);
+
+	// Enable the transient interrupt
+	writeRegister(CTRL_REG4, 0b00100000);
+
+	active();
+}
+
+
+void DiceAccelerator::clearTransientInterrupt()
+{
+	standby();
+	uint8_t dontCare = readRegister(TRANSIENT_SRC);
+	// maybe log to console...
+	active();
+}
+
+
+void DiceAccelerator::disableTransientInterrupt()
+{
+	standby();
+
+	writeRegister(TRANSIENT_CFG, 0b000000000);
+
+	active();
+}
+
+
+
 // SET STANDBY MODE
 //	Sets the MMA8452 to standby mode. It must be in standby to change most register settings
 void DiceAccelerator::standby()
@@ -273,3 +316,4 @@ void DiceAccelerator::readRegisters(MMA8452Q_Register reg, byte *buffer, byte le
 	for (int x = 0; x < len; x++)
 		buffer[x] = diceWire.read();
 }
+

@@ -102,6 +102,10 @@ public:
 	byte readTap();
 	byte readPL();
 
+	void enableTransientInterrupt();
+	void clearTransientInterrupt();
+	void disableTransientInterrupt();
+
 	short x, y, z;
 	float cx, cy, cz;
 private:
