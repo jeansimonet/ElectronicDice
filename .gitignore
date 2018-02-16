@@ -3,3 +3,9 @@
 Debug/
 Release/
 __vm
+obj/
+Temp/
+Central/*.csproj
+Central/*.sln
+Central/*.userprefs
+Build/
