@@ -31,6 +31,13 @@ Distributed as-is; no warranty is given.
 
 #include "Arduino.h"
 
+// Forwards
+namespace Core
+{
+	class MessageQueue;
+}
+
+
 ///////////////////////////////////
 // MMA8452Q Register Definitions //
 ///////////////////////////////////
@@ -92,36 +99,50 @@ enum MMA8452Q_ODR { ODR_800, ODR_400, ODR_200, ODR_100, ODR_50, ODR_12, ODR_6, O
 #define LANDSCAPE_L 3
 #define LOCKOUT 0x40
 
-class DiceAccelerator
+namespace Devices
 {
-public:
-	DiceAccelerator();
-	byte init(MMA8452Q_Scale fsr = SCALE_2G, MMA8452Q_ODR odr = ODR_800);
-	void read();
-	byte available();
-	byte readTap();
-	byte readPL();
+	/// <summary>
+	/// The accelerometer I2C devices
+	/// </summary>
+	class Accelerometer
+	{
+	public:
+		short x, y, z;
+		float cx, cy, cz;
+	private:
+		byte address;
+		MMA8452Q_Scale scale;
 
-	short x, y, z;
-	float cx, cy, cz;
-private:
-	byte address;
-	MMA8452Q_Scale scale;
+	public:
+		Accelerometer();
+		byte init(MMA8452Q_Scale fsr = SCALE_8G, MMA8452Q_ODR odr = ODR_200);
+		void read();
+		byte available();
+		byte readTap();
+		byte readPL();
 
-	void standby();
-	void active();
-	void setupPL();
-	void setupTap(byte xThs, byte yThs, byte zThs);
-	void setScale(MMA8452Q_Scale fsr);
-	void setODR(MMA8452Q_ODR odr);
-	void writeRegister(MMA8452Q_Register reg, byte data);
-	void writeRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
-	byte readRegister(MMA8452Q_Register reg);
-	void readRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
-};
+		void enableTransientInterrupt();
+		void clearTransientInterrupt();
+		void disableTransientInterrupt();
 
-// Begin using the library by creating an instance of the MMA8452Q
-extern DiceAccelerator diceAccel;
+#define MessageType_UpdateAccel 3
+		static bool pushUpdateAccel(Core::MessageQueue& queue);
+
+	private:
+		void standby();
+		void active();
+		void setupPL();
+		void setupTap(byte xThs, byte yThs, byte zThs);
+		void setScale(MMA8452Q_Scale fsr);
+		void setODR(MMA8452Q_ODR odr);
+		void writeRegister(MMA8452Q_Register reg, byte data);
+		void writeRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
+		byte readRegister(MMA8452Q_Register reg);
+		void readRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
+	};
+
+	extern Accelerometer accelerometer;
+}
 
 #endif
 

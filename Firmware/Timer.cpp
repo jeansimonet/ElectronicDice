@@ -1,22 +1,26 @@
-// 
-// 
-// 
+#include "Timer.h"
+#include "Console.h"
 
-#include "DiceTimer.h"
-#include "DiceDebug.h"
+using namespace Systems;
 
-DiceTimer diceTimer;
+Timer Systems::timer;
 
 #define TIMER2_PRESCALER (8)
 #define TIMER2_RESOLUTION ((1<<TIMER2_PRESCALER)/16) // TimerTick = 16M/2^8 = 16 us
 // Note: at 16us per tick, the longest delay that can be requested is roughly 1s
 
-void DiceTimer::hook(int resolutionInMicroSeconds, DiceTimer::ClientMethod client)
+/// <summary>
+/// Method used by clients to request timer callbacks at specific intervals
+/// </summary>
+/// <param name="resolutionInMicroSeconds">The callback period</param>
+/// <param name="client">The callback</param>
+void Timer::hook(int resolutionInMicroSeconds, Timer::ClientMethod client, void* param)
 {
 	if (count < 4)
 	{
 		auto& clientInfo = clients[count];
 		clientInfo.callback = client;
+		clientInfo.param = param;
 		clientInfo.ticks = resolutionInMicroSeconds / TIMER2_RESOLUTION;
 		NRF_TIMER2->CC[count] = clientInfo.ticks;
 		NRF_TIMER2->INTENSET = TIMER_INTENSET_COMPARE0_Enabled << (TIMER_INTENSET_COMPARE0_Pos + count);
@@ -25,11 +29,15 @@ void DiceTimer::hook(int resolutionInMicroSeconds, DiceTimer::ClientMethod clien
 	}
 	else
 	{
-		diceDebug.println("Too many timer hooks registered.");
+		console.println("Too many timer hooks registered.");
 	}
 }
 
-void DiceTimer::unHook(DiceTimer::ClientMethod client)
+/// <summary>
+/// Method used by clients to stop getting timer callbacks
+/// </summary>
+/// <param name="client">the method to unregister</param>
+void Timer::unHook(Timer::ClientMethod client)
 {
 	int clientIndex = 0;
 	for (; clientIndex < 4; ++clientIndex)
@@ -46,6 +54,7 @@ void DiceTimer::unHook(DiceTimer::ClientMethod client)
 		NRF_TIMER2->CC[clientIndex] = 0;
 		auto& clientInfo = clients[clientIndex];
 		clientInfo.callback = nullptr;
+		clientInfo.param = nullptr;
 		clientInfo.ticks = 0;
 
 		// Shift entries down
@@ -63,38 +72,54 @@ void DiceTimer::unHook(DiceTimer::ClientMethod client)
 	}
 	else
 	{
-		diceDebug.println("Timer hook was not found in the list of registered hooks.");
+		console.println("Timer hook was not found in the list of registered hooks.");
 	}
 }
 
-void DiceTimer::timer2Interrupt()
+/// <summary>
+/// The static interrupt method called by the hardware
+/// </summary>
+void Timer::timer2Interrupt()
 {
-	diceTimer.update();
+	timer.update();
 }
 
-DiceTimer::DiceTimer()
+/// <summary>
+/// Constructor
+/// </summary>
+Timer::Timer()
 	: count(0)
 {
+	// Get the timer ready to tick, but without kicking it off
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 	NRF_TIMER2->MODE = TIMER_MODE_MODE_Timer;  // taken from Nordic dev zone
 	NRF_TIMER2->BITMODE = TIMER_BITMODE_BITMODE_16Bit;
 	NRF_TIMER2->PRESCALER = TIMER2_PRESCALER;	// 16MHz / (2^8) = 16 us resolution
 	NRF_TIMER2->TASKS_CLEAR = 1; // Clear timer
 	NVIC_SetPriority(TIMER2_IRQn, 3);
-	dynamic_attachInterrupt(TIMER2_IRQn, DiceTimer::timer2Interrupt);
+	dynamic_attachInterrupt(TIMER2_IRQn, Timer::timer2Interrupt);
 }
 
-void DiceTimer::begin()
+/// <summary>
+/// Kick off the timer
+/// </summary>
+void Timer::begin()
 {
 	NRF_TIMER2->TASKS_START = 1;	// Start TIMER
 }
 
-void DiceTimer::stop()
+/// <summary>
+/// Stop the timer
+/// </summary>
+void Timer::stop()
 {
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 }
 
-void DiceTimer::update()
+/// <summary>
+/// Called when a timer interrupt occurs
+/// </summary>
+void Timer::update()
 {
 	for (int i = 0; i < count; ++i)
 	{
@@ -113,18 +138,17 @@ void DiceTimer::update()
 
 			if (clientInfo.callback != nullptr)
 			{
-				clientInfo.callback();
+				clientInfo.callback(clientInfo.param);
 			}
 			else
 			{
-				diceDebug.print("Timer event ");
-				diceDebug.print(i);
-				diceDebug.print(" does not have a registered hook!");
+				console.print("Timer event ");
+				console.print(i);
+				console.print(" does not have a registered hook!");
 			}
 
 			if (i == 0)
 				digitalWrite(0, LOW);
 		}
 	}
-//	NRF_TIMER2->TASKS_START = 1;
 }

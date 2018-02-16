@@ -4,34 +4,32 @@
 #define _LEDANIMATIONS_h
 
 #include "Arduino.h"
-#include "LEDAnimation.h"
+#include "Animation.h"
 #include "RotatingLEDs.h"
 #include "RandomLEDs.h"
 
-class LEDAnimations
+namespace LEDAnimations
 {
-public:
-	Animation FaceOneSlowPulse;
-	Animation FaceSixSlowPulse;
-	Animation FaceFiveCross;
+	extern Animation FaceOneSlowPulse;
+	extern Animation FaceSixSlowPulse;
+	extern Animation FaceFiveCross;
 
-	RotatingLEDs rotatingSix;
-	RotatingLEDs rotatingFour;
-	RotatingLEDs rotatingThree;
-	RotatingLEDs rotatingTwo;
+	extern RotatingLEDs rotatingSix;
+	extern RotatingLEDs rotatingFour;
+	extern RotatingLEDs rotatingThree;
+	extern RotatingLEDs rotatingTwo;
 
-	RandomLEDs randomLEDs;
+	extern RandomLEDs randomLEDs;
 
-public:
-	LEDAnimations();
-};
-
-extern const Curve constantOn;
-extern const Curve constantOff;
-extern const Curve rampUpDown;
-extern const Curve on128Off128;
-
-extern LEDAnimations ledAnimations;
+	extern const Curve constantOn;
+	extern const Curve constantOff;
+	extern const Curve rampUpDown;
+	extern const Curve rampUpDown128;
+	extern const Curve rampUpDown128x2;
+	extern const Curve rampUpDown128x3;
+	extern const Curve on128Off128;
+	extern const RGBCurve whiteRampUpDown128;
+}
 
 #endif
 

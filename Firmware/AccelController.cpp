@@ -1,56 +1,137 @@
-// 
-// 
-// 
-
 #include "AccelController.h"
-#include "DiceTimer.h"
-#include "DiceAccel.h"
-#include "DiceWire.h"
+#include "Timer.h"
+#include "Accelerometer.h"
 #include "MessageQueue.h"
-#include "DiceDebug.h"
 
-#define TIMER2_RESOLUTION (100000) // 100ms
+using namespace Core;
+using namespace Systems;
+using namespace Devices;
 
+// This defines how frequently we try to read the accelerometer
+#define TIMER2_RESOLUTION (10000) // 10ms
 
-AccelController::AccelController()
-	: face(0)
+/// <summary>
+/// Constructor
+/// </summary>
+AccelFrameQueue::AccelFrameQueue()
+	: _count(0)
 {
 }
 
-void AccelController::update()
+/// <summary>
+/// How many samples do we have stored right now?
+/// </summary>
+int AccelFrameQueue::count() const
 {
-	messageQueue.pushReadAccel(updateCurrentFace);
+	return _count;
 }
 
-void AccelController::updateCurrentFace()
+/// <summary>
+/// Pushes a frame of accelerometer data onto the queue
+/// </summary>
+void AccelFrameQueue::push(short time, short x, short y, short z)
 {
-	accelController.face = accelController.determineFace(diceAccel.cx, diceAccel.cy, diceAccel.cz);
+	if (_count == ACCEL_MAX_SIZE)
+	{
+		// Shift everything left
+		for (int i = 0; i < ACCEL_MAX_SIZE - 1; ++i)
+		{
+			data[i] = data[i + 1];
+		}
+		_count--;
+	}
+	// Else do nothing
+
+	// Add the new frame of data
+	data[_count] = { x, y, z, time };
+	_count++;
+}
+
+/// <summary>
+/// Attempts to pop a frame of accelerometer data from the queue
+/// </summary>
+/// <param name="outFrame">The frame data that will receive the data</param>
+/// <returns>true if a frame of data was pop'ed</returns>
+bool AccelFrameQueue::tryPop(AccelFrame& outFrame)
+{
+	bool ret = _count > 0;
+	if (ret)
+	{
+		outFrame = data[0];
+		// Shift everything left
+		for (int i = 0; i < _count - 1; ++i)
+		{
+			data[i] = data[i + 1];
+		}
+		_count--;
+	}
+	return ret;
+}
+
+/// <summary>
+/// Concstructor
+/// </summary>
+AccelerationController::AccelerationController(MessageQueue& queue)
+	: messageQueue(queue)
+	, face(0)
+{
+}
+
+/// <summary>
+/// update is called from the timer
+/// </summary>
+void AccelerationController::update()
+{
+	Accelerometer::pushUpdateAccel(messageQueue);
+	AccelerationController::pushUpdateFace(messageQueue);
+}
+
+/// <summary>
+/// Perform some conversion and filtering work after reading the accelerometer values
+/// </summary>
+void AccelerationController::updateCurrentFace()
+{
+	face = determineFace(accelerometer.cx, accelerometer.cy, accelerometer.cz);
+	queue.push((short)millis(), accelerometer.x, accelerometer.y, accelerometer.z);
 }
 
 // To be passed to the timer
-void AccelController::accelControllerUpdate()
+void AccelerationController::accelControllerUpdate(void* param)
 {
-	accelController.update();
+	((AccelerationController*)param)->update();
 }
 
-void AccelController::begin()
+/// <summary>
+/// Initialize the acceleration system
+/// </summary>
+void AccelerationController::begin()
 {
-	diceAccel.read();
-	face = determineFace(diceAccel.cx, diceAccel.cy, diceAccel.cz);
-	diceTimer.hook(TIMER2_RESOLUTION, AccelController::accelControllerUpdate);
+	accelerometer.read();
+	face = determineFace(accelerometer.cx, accelerometer.cy, accelerometer.cz);
+	timer.hook(TIMER2_RESOLUTION, AccelerationController::accelControllerUpdate, this);
 }
 
-void AccelController::stop()
+/// <summary>
+/// Stop getting updated from the timer
+/// </summary>
+void AccelerationController::stop()
 {
-	diceTimer.unHook(AccelController::accelControllerUpdate);
+	timer.unHook(AccelerationController::accelControllerUpdate);
 }
 
-int AccelController::currentFace()
+/// <summary>
+/// Returns the currently stored up face!
+/// </summary>
+int AccelerationController::currentFace()
 {
 	return face;
 }
 
-int AccelController::determineFace(float x, float y, float z)
+/// <summary>
+/// Crudely compares accelerometer readings passed in to determine the current face up
+/// </summary>
+/// <returns>The face number, starting at 0</returns>
+int AccelerationController::determineFace(float x, float y, float z)
 {
 	if (abs(x) > abs(y))
 	{
@@ -108,5 +189,30 @@ int AccelController::determineFace(float x, float y, float z)
 	}
 }
 
+/// <summary>
+/// How many frames of data do we have stored?
+/// </summary>
+int AccelerationController::frameCount()
+{
+	return queue.count();
+}
 
-AccelController accelController;
+/// <summary>
+/// Attempts to pop a frame of accelerometer data from the queue
+/// </summary>
+/// <param name="outFrame">The frame data that will receive the data</param>
+/// <returns>true if a frame of data was pop'ed</returns>
+bool AccelerationController::tryPop(AccelFrame& outFrame)
+{
+	return queue.tryPop(outFrame);
+}
+
+/// <summary>
+/// Helper that queues up a message to update the controller's face data
+/// </summary>
+bool AccelerationController::pushUpdateFace(MessageQueue& queue)
+{
+	MessageQueue::Message mes;
+	mes.type = MessageType_UpdateFace;
+	return queue.enqueue(mes);
+}

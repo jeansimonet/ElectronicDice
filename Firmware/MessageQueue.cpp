@@ -1,19 +1,18 @@
-// 
-// 
-// 
-
 #include "MessageQueue.h"
-#include "DiceAccel.h"
-#include "DiceLED.h"
-#include "DiceDebug.h"
 
-MessageQueue messageQueue;
+using namespace Core;
 
+/// <summary>
+/// Constructor
+/// </summary>
 MessageQueue::MessageQueue()
 {
 	init();
 }
 
+/// <summary>
+/// Initialize the message queue
+/// </summary>
 void MessageQueue::init()
 {
 	count = 0;
@@ -21,52 +20,10 @@ void MessageQueue::init()
 	writer = 0;
 }
 
-bool MessageQueue::pushSetLED(int ledIndex)
-{
-	Message mes;
-	mes.type = MessageType_SetLED;
-	mes.intParam = ledIndex;
-	return enqueue(mes);
-}
-
-bool MessageQueue::pushClearLEDs()
-{
-	Message mes;
-	mes.type = MessageType_ClearLEDs;
-	return enqueue(mes);
-}
-
-bool MessageQueue::pushReadAccel(void(*callback)())
-{
-	Message mes;
-	mes.type = MessageType_ReadAccel;
-	mes.callback = callback;
-	return enqueue(mes);
-}
-
-void MessageQueue::update()
-{
-	Message mes;
-	while (tryDequeue(mes))
-	{
-		switch (mes.type)
-		{
-		case MessageType_SetLED:
-			LEDs.set(mes.intParam);
-			break;
-		case MessageType_ClearLEDs:
-			LEDs.clear();
-			break;
-		case MessageType_ReadAccel:
-			diceAccel.read();
-			mes.callback();
-			break;
-		default:
-			break;
-		}
-	}
-}
-
+/// <summary>
+/// Internal queueing method
+/// </summary>
+/// <returns>true if the message was queued, false if the queue was full</returns>
 bool MessageQueue::enqueue(const Message& message)
 {
 	noInterrupts();
@@ -80,6 +37,10 @@ bool MessageQueue::enqueue(const Message& message)
 	interrupts();
 }
 
+/// <summary>
+/// Internal dequeueing method
+/// </summary>
+/// <returns>true if a message was dequeued</returns>
 bool MessageQueue::tryDequeue(Message& outMessage)
 {
 	noInterrupts();

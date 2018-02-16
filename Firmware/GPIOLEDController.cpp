@@ -1,12 +1,13 @@
-// 
-// 
-// 
-
-#include "LEDController.h"
-#include "DiceLED.h"
-#include "DiceTimer.h"
-#include "DiceDebug.h"
+#include "GPIOLEDController.h"
+#include "GPIOLEDs.h"
+#include "LEDs.h"
+#include "Timer.h"
+#include "Console.h"
 #include "MessageQueue.h"
+
+using namespace Core;
+using namespace Systems;
+using namespace Devices;
 
 //#define DEBUG_LEVELS
 
@@ -36,15 +37,20 @@
 
 #define DIVISOR (MAX_LEVEL / MAX_LEVEL_TICKS)
 
-LEDController ledController;
-
-LEDController::LEDIndexAndMarker::LEDIndexAndMarker()
+/// <summary>
+/// Constructor
+/// </summary>
+GPIOLEDController::LEDIndexAndMarker::LEDIndexAndMarker()
 	: count(0)
 {
 }
 
-LEDController::LEDController()
-	: currentLedIndex(0)
+/// <summary>
+/// Constructor
+/// </summary>
+GPIOLEDController::GPIOLEDController(MessageQueue& queue)
+	: messageQueue(queue)
+	, currentLedIndex(0)
 	, bufferIndex(0)
 	, swapQueued(false)
 	, ticks(0)
@@ -56,40 +62,68 @@ LEDController::LEDController()
 	}
 }
 
-LEDController::LEDIndexAndMarker* LEDController::getCurrentLEDsAndMarkers()
+/// <summary>
+/// Gets the array of LED indices currently being read by the interrupt routine
+/// </summary>
+GPIOLEDController::LEDIndexAndMarker* GPIOLEDController::getCurrentLEDsAndMarkers()
 {
 	return &(ledsAndMarkers[bufferIndex]);
 }
 
-LEDController::LEDIndexAndMarker* LEDController::getNextLEDsAndMarkers()
+/// <summary>
+/// Gets the array of LED indices that we can write to (not being read by the interrupt routine)
+/// </summary>
+GPIOLEDController::LEDIndexAndMarker* GPIOLEDController::getNextLEDsAndMarkers()
 {
 	return &(ledsAndMarkers[1 - bufferIndex]);
 }
 
-void LEDController::queueSwap()
+/// <summary>
+/// Indicate to the interrupt routine that it should swap the queues when it
+/// is finished with the current one.
+/// </summary>
+void GPIOLEDController::queueSwap()
 {
 	swapQueued = true;
 }
 
-void LEDController::swapLEDsAndMarkers()
+/// <summary>
+/// Swap the lists of leds and time markers
+/// </summary>
+void GPIOLEDController::swapLEDsAndMarkers()
 {
 	bufferIndex = 1 - bufferIndex;
 	swapQueued = false;
 }
 
-void LEDController::setLED(int index, int intensity)
+/// <summary>
+/// Updates the led and time markers to accomodate the new
+/// led and intensity being passed in.
+/// </summary>
+void GPIOLEDController::setLED(int index, int intensity)
 {
+	// First we look through the global list of led intensities
+	// to see if the led was even on, and what intensity it was set to.
 	int prevIntensity = allLedIntensities[index];
 	if (intensity != prevIntensity)
 	{
 		// First update the intensity array
 		allLedIntensities[index] = intensity;
+
+		// Then recompute all current duration markers
 		updateDurations();
 	}
 	// Else nothing to change!
 }
 
-void LEDController::setLEDs(int indices[], int intensities[], int count)
+/// <summary>
+/// Sets an array of LEDs at once, similar to SetLED, but delays the
+/// recomputation of the duration markers to the end.
+/// </summary>
+/// <param name="indices">The led indices to modify</param>
+/// <param name="intensities">The matching intensities</param>
+/// <param name="count">The number of leds passed in</param>
+void GPIOLEDController::setLEDs(int indices[], int intensities[], int count)
 {
 	for (int i = 0; i < count; ++i)
 	{
@@ -98,7 +132,10 @@ void LEDController::setLEDs(int indices[], int intensities[], int count)
 	updateDurations();
 }
 
-void LEDController::updateDurations()
+/// <summary>
+/// Recompute the duration markers for the interrupt routine!
+/// </summary>
+void GPIOLEDController::updateDurations()
 {
 	int totalTimeOn = 0;
 	int totalLeds = 0;
@@ -134,17 +171,17 @@ void LEDController::updateDurations()
 
 		// Debug print timings!
 #if DEBUG_LEVELS
-		if (diceDebug.isDebugOn())
+		if (console->isDebugOn())
 		{
 			for (int i = 0; i < totalLeds; ++i)
 			{
-				diceDebug.print("[");
-				diceDebug.print(ledAndMarkers->ledIndices[i]);
-				diceDebug.print(":");
-				diceDebug.print(ledAndMarkers->ledMarkers[i]);
-				diceDebug.print("] ");
+				console->print("[");
+				console->print(ledAndMarkers->ledIndices[i]);
+				console->print(":");
+				console->print(ledAndMarkers->ledMarkers[i]);
+				console->print("] ");
 			}
-			diceDebug.println(ticks);
+			console->println(ticks);
 		}
 #endif
 
@@ -162,22 +199,34 @@ void LEDController::updateDurations()
 	}
 }
 
-void LEDController::ledControllerUpdate()
+/// <summary>
+/// Imterrupt routine
+/// </summary>
+void GPIOLEDController::ledControllerUpdate(void* param)
 {
-	ledController.update();
+	((GPIOLEDController*)param)->update();
 }
 
-void LEDController::begin()
+/// <summary>
+/// Kick off the led controller, hooking it up to the timer system
+/// </summary>
+void GPIOLEDController::begin()
 {
-	diceTimer.hook(TIMER2_RESOLUTION, LEDController::ledControllerUpdate);
+	timer.hook(TIMER2_RESOLUTION, GPIOLEDController::ledControllerUpdate, this);
 }
 
-void LEDController::stop()
+/// <summary>
+/// Stops the led controller
+/// </summary>
+void GPIOLEDController::stop()
 {
-	diceTimer.unHook(LEDController::ledControllerUpdate);
+	timer.unHook(GPIOLEDController::ledControllerUpdate);
 }
 
-void LEDController::update()
+/// <summary>
+/// Interrupt routine, typically turns one LED on and another one off!
+/// </summary>
+void GPIOLEDController::update()
 {
 	auto currentLEDsAndMarkers = getCurrentLEDsAndMarkers();
 	if (currentLEDsAndMarkers->count == 0 && swapQueued)
@@ -223,28 +272,35 @@ void LEDController::update()
 				if (nextLEDIndex < LED_COUNT)
 				{
 					// Switch to the next led
-					//LEDs.set(nextLEDIndex);
-					messageQueue.pushSetLED(nextLEDIndex);
+					MessageQueue::Message msg;
+					msg.type = GPIO_MsgType_LEDOn;
+					msg.intParam = nextLEDIndex;
+					messageQueue.enqueue(msg);
 				}
 				else
 				{
 					// Special led index means stay off!
-					//LEDs.clear();
-					messageQueue.pushClearLEDs();
+					MessageQueue::Message msg;
+					msg.type = GPIO_MsgType_LEDsOff;
+					messageQueue.enqueue(msg);
 				}
 			}
 			else
 			{
 				// Clear all leds!
-				//LEDs.clear();
-				messageQueue.pushClearLEDs();
+				MessageQueue::Message msg;
+				msg.type = GPIO_MsgType_LEDsOff;
+				messageQueue.enqueue(msg);
 			}
 		}
 	}
 	// Else there isn't much to do, we'll just wait until a swap is requested
 }
 
-void LEDController::clearAll()
+/// <summary>
+/// Clear all the LEDs
+/// </summary>
+void GPIOLEDController::clearAll()
 {
 	for (int i = 0; i < LED_COUNT; ++i)
 	{
@@ -259,12 +315,15 @@ void LEDController::clearAll()
 	ledsAndMarkers->count = 0;
 }
 
-void LEDController::printAllLeds()
+/// <summary>
+/// Dumps the LED state to the console
+/// </summary>
+void GPIOLEDController::dumpToConsole()
 {
 	for (int i = 0; i < LED_COUNT; ++i)
 	{
-		diceDebug.print(allLedIntensities[i]);
-		diceDebug.print(", ");
+		console.print(allLedIntensities[i]);
+		console.print(", ");
 	}
-	diceDebug.println();
+	console.println();
 }

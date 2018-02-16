@@ -1,14 +1,37 @@
-// 
-// 
-// 
-
 #include "RotatingLEDs.h"
-#include "LEDController.h"
-#include "LEDAnimation.h"
+#include "AnimController.h"
 #include "LEDAnimations.h"
-#include "DiceLED.h"
+#include "LEDs.h"
 
-RotatingLEDs::RotatingLEDs(int delay, int onTime, int cycles, int face, int leds[], int ledCount)
+/// <summary>
+/// Default Constructor
+/// </summary>
+RotatingLEDs::RotatingLEDs()
+	: LEDDelay(0)
+	, LEDOnTime(0)
+	, LEDCycles(0)
+	, count(0)
+	, nextLEDTime(0)
+	, currentLED(-1)
+	, currentCycle(0)
+	, ledIndices(0)
+	, face(0)
+	, ledCount(0)
+{
+	rampUpDownCurve = RGBCurve::fromColorAndCurve(0, LEDAnimations::rampUpDown);
+}
+
+/// <summary>
+/// Initializing constructor
+/// </summary>
+/// <param name="color">The color of the leds</param>
+/// <param name="delay">Time between when each consecutive LED turns on (ms)</param>
+/// <param name="onTime">How long each LED should stay on</param>
+/// <param name="cycles">How many times each LED will end up lighting up</param>
+/// <param name="face">Which face we're working with</param>
+/// <param name="leds">Which leds on that face we're working with</param>
+/// <param name="ledCount">size of the passed in array of leds to work with</param>
+RotatingLEDs::RotatingLEDs(uint32_t color, int delay, int onTime, int cycles, int face, int leds[], int ledCount)
 	: LEDDelay(delay)
 	, LEDOnTime(onTime)
 	, LEDCycles(cycles)
@@ -20,9 +43,12 @@ RotatingLEDs::RotatingLEDs(int delay, int onTime, int cycles, int face, int leds
 	, face(face)
 	, ledCount(ledCount)
 {
-	
+	rampUpDownCurve = RGBCurve::fromColorAndCurve(color, LEDAnimations::rampUpDown);
 }
 
+/// <summary>
+/// Kick off the animation
+/// </summary>
 void RotatingLEDs::start()
 {
 	count = 0;
@@ -31,7 +57,15 @@ void RotatingLEDs::start()
 	currentCycle = 0;
 }
 
-int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
+/// <summary>
+/// Computes the list of LEDs that need to be on, and what their intensities should be
+/// based on the different tracks of this animation.
+/// </summary>
+/// <param name="time">The animation time (in milliseconds)</param>
+/// <param name="retIndices">the return list of LED indices to fill, max size should be at least 21, the total number of leds</param>
+/// <param name="retIntensities">the return list of LED intensities to fill, max size should be at least 21, the total number of leds</param>
+/// <returns>The number of leds/intensities added to the return array</returns>
+int RotatingLEDs::updateLEDs(int time, int retIndices[], uint32_t retColors[])
 {
 	if (time >= nextLEDTime)
 	{
@@ -57,7 +91,7 @@ int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
 			nextTrack.index = ledIndices[currentLED];
 			nextTrack.startTime = nextLEDTime;	// ms
 			nextTrack.duration = LEDOnTime;	// ms
-			nextTrack.curve = &rampUpDown;
+			nextTrack.curve = &rampUpDownCurve;
 			count++;
 
 			// Set the next LED time
@@ -73,8 +107,8 @@ int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
 		if (time >= tracks[i].startTime + tracks[i].duration)
 		{
 			// Tell ledcontroller to turn off the led
-			retIndices[retCount] = LEDs.ledIndex(tracks[i].face, tracks[i].index);
-			retIntensities[retCount] = 0;
+			retIndices[retCount] = LEDs::ledIndex(tracks[i].face, tracks[i].index);
+			retColors[retCount] = 0;
 			retCount++;
 
 			// And remove the track
@@ -87,8 +121,8 @@ int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
 		}
 		else
 		{
-			retIndices[retCount] = LEDs.ledIndex(tracks[i].face, tracks[i].index);
-			retIntensities[retCount] = tracks[i].evaluate(time);
+			retIndices[retCount] = LEDs::ledIndex(tracks[i].face, tracks[i].index);
+			retColors[retCount] = tracks[i].evaluate(time);
 			retCount++;
 		}
 	}
@@ -96,16 +130,18 @@ int RotatingLEDs::updateLEDs(int time, int retIndices[], int retIntensities[])
 	return retCount;
 }
 
-void RotatingLEDs::clearLEDs()
+/// <summary>
+/// Stop this animation
+/// </summary>
+int RotatingLEDs::stop(int retIndices[])
 {
-	int zeros[6] =
-	{
-		0,0,0,0,0,0,
-	};
-	
-	ledController.setLEDs(ledIndices, zeros, ledCount);
+	memcpy(retIndices, ledIndices, ledCount * sizeof(int));
+	return ledCount;
 }
 
+/// <summary>
+/// How long is this animation?
+/// </summary>
 int RotatingLEDs::totalDuration()
 {
 	return LEDCycles * LEDDelay * ledCount + LEDOnTime;

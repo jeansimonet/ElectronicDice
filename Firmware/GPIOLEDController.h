@@ -7,7 +7,19 @@
 
 #define LED_COUNT (21)
 
-class LEDController
+// Forwards
+namespace Core
+{
+	class MessageQueue;
+}
+
+/// <summary>
+/// Turns LEDs on and off really fast to take advantage of persistence of vision
+/// to simulate multiple LEDs on at once and varying levels of intensity.
+/// The controller uses a double buffer to modify the timing values when adjusting
+/// on/off time of each led, in order to try and minimize unwanted flickering.
+/// </summary>
+class GPIOLEDController
 {
 private:
 	struct LEDIndexAndMarker
@@ -28,7 +40,8 @@ private:
 	bool swapQueued;
 
 private:
-	LEDIndexAndMarker* getCurrentLEDsAndMarkers();
+	Core::MessageQueue& messageQueue;
+	LEDIndexAndMarker * getCurrentLEDsAndMarkers();
 	LEDIndexAndMarker* getNextLEDsAndMarkers();
 	void queueSwap();
 	void swapLEDsAndMarkers();
@@ -36,10 +49,10 @@ private:
 	void update();
 
 	// To be passed to the timer
-	static void ledControllerUpdate();
+	static void ledControllerUpdate(void* param);
 
 public:
-	LEDController();
+	GPIOLEDController(Core::MessageQueue& queue);
 	void begin();
 	void stop();
 
@@ -47,10 +60,8 @@ public:
 	void setLEDs(int indices[], int intensities[], int count);
 	void clearAll();
 
-	void printAllLeds();
+	void dumpToConsole();
 };
-
-extern LEDController ledController;
 
 #endif
 

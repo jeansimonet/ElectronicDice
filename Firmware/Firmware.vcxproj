@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C5F80730-F44F-4478-BDAE-6634EFC2CA88}</ProjectGuid>
+    <RootNamespace>
+    </RootNamespace>
+    <ProjectName>Firmware</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>
+    </PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>
+    </PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Firmware;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SimbleeBLE;$(ProjectDir)..\..\Arduino\libraries\Adafruit_DotStar;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SPI;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\Wire;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries;$(ProjectDir)..\..\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino\avr;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\variants\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee\include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\CMSIS\CMSIS\Include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Firmware.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>F_CPU=16000000;ARDUINO=10805;__Simblee__;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Firmware;$(ProjectDir)..\..\Arduino\libraries\Adafruit_DotStar;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SimbleeBLE;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SPI;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\Wire;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries;$(ProjectDir)..\..\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino\avr;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\variants\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee\include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\CMSIS\CMSIS\Include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Firmware.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>RGB_LEDS;F_CPU=16000000;ARDUINO=10805;__Simblee__;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="VisualMicro" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Firmware.ino">
+      <FileType>CppCode</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AccelController.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Accelerometer.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="AnimController.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="APA102LEDs.h" />
+    <ClInclude Include="BluetoothMessage.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="CommandMessage.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Die.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="EEPROM.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="GPIOLEDs.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="I2C.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="IAnimation.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Lazarus.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="LEDAnimations.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="GPIOLEDController.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="LEDs.h" />
+    <ClInclude Include="MessageQueue.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="RandomLEDs.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="RotatingLEDs.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="__vm\.Firmware.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AccelController.cpp" />
+    <ClCompile Include="Accelerometer.cpp" />
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimController.cpp" />
+    <ClCompile Include="APA102LEDs.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Die.cpp" />
+    <ClCompile Include="EEPROM.cpp" />
+    <ClCompile Include="GPIOLEDs.cpp" />
+    <ClCompile Include="I2C.cpp" />
+    <ClCompile Include="Lazarus.cpp" />
+    <ClCompile Include="LEDAnimations.cpp" />
+    <ClCompile Include="GPIOLEDController.cpp" />
+    <ClCompile Include="LEDs.cpp" />
+    <ClCompile Include="MessageQueue.cpp" />
+    <ClCompile Include="RandomLEDs.cpp" />
+    <ClCompile Include="RotatingLEDs.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Utils.cpp" />
+  </ItemGroup>
+  <PropertyGroup>
+    <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties arduino.upload.maximum_size="131072" arduino.upload.speed="" visualmicro.package.name="Simblee" arduino.board.property_bag="name=Simblee&#xD;&#xA;build.board=SIMBLEE&#xD;&#xA;build.mcu=cortex-m0&#xD;&#xA;build.f_cpu=16000000&#xD;&#xA;build.core=arduino&#xD;&#xA;build.extra_flags=-mthumb -D__Simblee__&#xD;&#xA;build.ldscript=linker_scripts/gcc/Simblee.ld&#xD;&#xA;build.variant=Simblee&#xD;&#xA;build.variant_system_include=&quot;-I{build.system.path}/Simblee&quot; &quot;-I{build.system.path}/Simblee/include&quot; &quot;-I{build.system.path}/CMSIS/CMSIS/Include&quot;&#xD;&#xA;build.variant_system_lib=libSimbleeSystem.a&#xD;&#xA;upload.tool=RFDLoader&#xD;&#xA;upload.protocol=&#xD;&#xA;upload.maximum_size=131072&#xD;&#xA;runtime.ide.path=C:\Program Files (x86)\Arduino&#xD;&#xA;runtime.os=windows&#xD;&#xA;build.system.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system&#xD;&#xA;runtime.ide.version=10805&#xD;&#xA;target_package=Simblee&#xD;&#xA;target_platform=Simblee&#xD;&#xA;runtime.hardware.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee&#xD;&#xA;originalid=simblee_Simblee_Simblee&#xD;&#xA;compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/&#xD;&#xA;compiler.c.cmd=arm-none-eabi-gcc&#xD;&#xA;compiler.c.flags=-c -g -Os -w -std=gnu11 -ffunction-sections -fdata-sections -fno-builtin -MMD&#xD;&#xA;compiler.c.elf.cmd=arm-none-eabi-g++&#xD;&#xA;compiler.c.elf.flags=-Wl,--gc-sections --specs=nano.specs&#xD;&#xA;compiler.S.flags=-c -g -assembler-with-cpp&#xD;&#xA;compiler.cpp.cmd=arm-none-eabi-g++&#xD;&#xA;compiler.cpp.flags=-c -g -Os -w -std=gnu++11 -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions -fno-builtin -MMD&#xD;&#xA;compiler.ar.cmd=arm-none-eabi-ar&#xD;&#xA;compiler.ar.flags=rcs&#xD;&#xA;compiler.objcopy.cmd=arm-none-eabi-objcopy&#xD;&#xA;compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0&#xD;&#xA;compiler.elf2hex.flags=-O ihex&#xD;&#xA;compiler.elf2hex.cmd=arm-none-eabi-objcopy&#xD;&#xA;compiler.ldflags=&#xD;&#xA;compiler.size.cmd=arm-none-eabi-size&#xD;&#xA;compiler.define=-DARDUINO=&#xD;&#xA;recipe.c.o.pattern=&quot;{compiler.path}{compiler.c.cmd}&quot; {compiler.c.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -D{software}={runtime.ide.version} {build.extra_flags} {includes} {build.variant_system_include} &quot;{source_file}&quot; -o &quot;{object_file}&quot;&#xD;&#xA;recipe.cpp.o.pattern=&quot;{compiler.path}{compiler.cpp.cmd}&quot; {compiler.cpp.flags} -mcpu={build.mcu} -DF_CPU={build.f_cpu} -D{software}={runtime.ide.version} -D__PROJECT__=&quot;{build.project_name}&quot; {build.extra_flags} {includes} {build.variant_system_include} &quot;{source_file}&quot; -o &quot;{object_file}&quot;&#xD;&#xA;recipe.ar.pattern=&quot;{compiler.path}{compiler.ar.cmd}&quot; {compiler.ar.flags} &quot;{archive_file_path}&quot; &quot;{object_file}&quot;&#xD;&#xA;recipe.c.combine.pattern=&quot;{compiler.path}{compiler.c.elf.cmd}&quot; {compiler.c.elf.flags} -mcpu={build.mcu} {build.extra_flags} &quot;-T{build.variant.path}/{build.ldscript}&quot; &quot;-Wl,-Map,{build.path}/{build.project_name}.map&quot; -Wl,--cref -o &quot;{build.path}/{build.project_name}.elf&quot; &quot;-L{build.path}&quot; -Wl,--warn-common -Wl,--warn-section-align -Wl,--start-group &quot;{build.path}/core/syscalls.c.o&quot; {object_files} &quot;{build.variant.path}/{build.variant_system_lib}&quot; &quot;{build.variant.path}/libSimblee.a&quot; &quot;{build.variant.path}/libSimbleeBLE.a&quot; &quot;{build.variant.path}/libSimbleeGZLL.a&quot; &quot;{build.variant.path}/libSimbleeForMobile.a&quot; &quot;{build.variant.path}/libSimbleeCOM.a&quot; &quot;{build.variant.path}/libSimbleeSensor.a&quot; &quot;{build.path}/{archive_file}&quot; -Wl,--end-group&#xD;&#xA;recipe.objcopy.eep.pattern=&#xD;&#xA;recipe.objcopy.hex.pattern=&quot;{compiler.path}{compiler.elf2hex.cmd}&quot; {compiler.elf2hex.flags} &quot;{build.path}/{build.project_name}.elf&quot; &quot;{build.path}/{build.project_name}.hex&quot;&#xD;&#xA;recipe.output.tmp_file={build.project_name}.hex&#xD;&#xA;recipe.output.save_file={build.project_name}.{build.variant}.hex&#xD;&#xA;recipe.size.pattern=&quot;{compiler.path}{compiler.size.cmd}&quot; -A &quot;{build.path}/{build.project_name}.elf&quot;&#xD;&#xA;recipe.size.regex=^(?:\.text|\.ARM.exidx|\.relocate)\s+([0-9]+).*&#xD;&#xA;recipe.size.regex.data=^(?:\.relocate|\.bss)\s+([0-9]+).*&#xD;&#xA;recipe.hooks.prebuild.0.pattern=&#xD;&#xA;recipe.hooks.postbuild.0.pattern=&#xD;&#xA;tools.RFDLoader.path={runtime.platform.path}/&#xD;&#xA;tools.RFDLoader.compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/&#xD;&#xA;tools.RFDLoader.script=loader.bat&#xD;&#xA;tools.RFDLoader.script.windows=loader.bat&#xD;&#xA;tools.RFDLoader.cmd.windows=RFDLoader.exe&#xD;&#xA;tools.RFDLoader.cmd.macosx=RFDLoader_osx&#xD;&#xA;tools.RFDLoader.cmd.linux=RFDLoader_linux&#xD;&#xA;tools.RFDLoader.upload.params.verbose=&#xD;&#xA;tools.RFDLoader.upload.params.quiet=&#xD;&#xA;tools.RFDLoader.upload.pattern=&quot;{path}{script}&quot; {cmd} {serial.port} &quot;{build.path}&quot; &quot;{build.project_name}&quot; &quot;{path}&quot; &quot;{compiler.path}&quot;&#xD;&#xA;tools.RFDLoader.cmd=RFDLoader.exe&#xD;&#xA;vm.platform.root.path=C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\IDE\Extensions\pbd1usl1.2ll\Micro Platforms\arduino16x&#xD;&#xA;runtime.tools.arm-none-eabi-gcc.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\tools\arm-none-eabi-gcc\4.8.3-2014q1&#xD;&#xA;runtime.tools.arm-none-eabi-gcc-4.8.3-2014q1.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\tools\arm-none-eabi-gcc\4.8.3-2014q1&#xD;&#xA;runtime.tools.arduinoOTA.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.arduinoOTA-1.1.1.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avrdude.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avrdude-6.3.0-arduino9.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avr-gcc.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.avr-gcc-4.9.2-atmel3.5.4-arduino2.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.tools.tools-avr.path=C:\Program Files (x86)\Arduino\hardware\tools\avr&#xD;&#xA;runtime.vm.boardinfo.id=Simblee_simblee_Simblee_Simblee&#xD;&#xA;runtime.vm.boardinfo.name=Simblee_simblee_Simblee_Simblee&#xD;&#xA;runtime.vm.boardinfo.desc=Simblee&#xD;&#xA;runtime.vm.boardinfo.src_location=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4&#xD;&#xA;ide.hint=Use installed IDE. Provides built-in hardware, reference/help and libraries.&#xD;&#xA;ide.location.key=Arduino16x&#xD;&#xA;ide.location.ide.winreg=Arduino 1.6.x Application&#xD;&#xA;ide.location.sketchbook.winreg=Arduino 1.6.x Sketchbook&#xD;&#xA;ide.location.sketchbook.preferences=sketchbook.path&#xD;&#xA;ide.default.revision_name=1.9.0&#xD;&#xA;ide.default.version=10800&#xD;&#xA;ide.default.package=arduino&#xD;&#xA;ide.default.platform=avr&#xD;&#xA;ide.multiplatform=true&#xD;&#xA;ide.includes=Arduino.h&#xD;&#xA;ide.exe_name=arduino&#xD;&#xA;ide.platformswithoutpackage=false&#xD;&#xA;ide.includes.fallback=wprogram.h&#xD;&#xA;ide.extension=ino&#xD;&#xA;ide.extension.fallback=pde&#xD;&#xA;ide.versionGTEQ=160&#xD;&#xA;ide.exe=arduino.exe&#xD;&#xA;ide.builder.exe=arduinobuilder.exe&#xD;&#xA;ide.builder.name=Arduino Builder&#xD;&#xA;ide.hosts=atmel&#xD;&#xA;ide.url=http://arduino.cc/en/Main/Software&#xD;&#xA;ide.help.reference.path=reference&#xD;&#xA;ide.help.reference.path2=reference\www.arduino.cc\en\Reference&#xD;&#xA;ide.help.reference.serial=reference\www.arduino.cc\en\Serial&#xD;&#xA;ide.location.preferences.portable={runtime.ide.path}\portable&#xD;&#xA;ide.location.preferences.arduinoData={runtime.sketchbook.path}\ArduinoData&#xD;&#xA;ide.location.preferences=%VM_APPDATA_LOCAL%\arduino15\preferences.txt&#xD;&#xA;ide.location.preferences_fallback=%VM_APPDATA_ROAMING%\arduino15\preferences.txt&#xD;&#xA;ide.location.contributions=%VM_APPDATA_LOCAL%\arduino15&#xD;&#xA;ide.location.contributions_fallback=%VM_APPDATA_ROAMING%\arduino15&#xD;&#xA;ide.contributions.boards.allow=true&#xD;&#xA;ide.contributions.boards.ignore_unless_rewrite_found=true&#xD;&#xA;ide.contributions.libraries.allow=true&#xD;&#xA;ide.contributions.boards.support.urls.wiki=https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls&#xD;&#xA;ide.create_platforms_from_boardsTXT.teensy=build.core&#xD;&#xA;vm.debug=true&#xD;&#xA;software=ARDUINO&#xD;&#xA;ssh.user.name=root&#xD;&#xA;ssh.user.default.password=arduino&#xD;&#xA;ssh.host.wwwfiles.path=/www/sd&#xD;&#xA;build.working_directory={runtime.ide.path}\java\bin&#xD;&#xA;ide.appid=arduino16x&#xD;&#xA;location.sketchbook=C:\Projects\Arduino&#xD;&#xA;build.core.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino&#xD;&#xA;vm.core.include=Arduino.h&#xD;&#xA;vm.boardsource.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4&#xD;&#xA;runtime.platform.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4&#xD;&#xA;vm.platformname.name=Simblee&#xD;&#xA;build.arch=SIMBLEE&#xD;&#xA;builder.noino=false&#xD;&#xA;intellisense.include.paths={runtime.hardware.path}&#xD;&#xA;build.architecture=4.8.3-2014q1&#xD;&#xA;vmresolved.compiler.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\tools\arm-none-eabi-gcc\4.8.3-2014q1\bin\&#xD;&#xA;vmresolved.tools.path=C:\Users\frogi\AppData\Local\arduino15\packages\Simblee\tools\arm-none-eabi-gcc\4.8.3-2014q1&#xD;&#xA;build.path=C:\Users\frogi\AppData\Local\Temp\VMBuilds\Firmware\Simblee_simblee_Simblee_Simblee\Debug&#xD;&#xA;build.project_name=Firmware.ino&#xD;&#xA;build.project_path=C:\Projects\ElectronicDice\Firmware&#xD;&#xA;ProjectDir=C:\Projects\ElectronicDice\Firmware\&#xD;&#xA;" debug.remote.portname="" debug.view.FreeMemory="" debug.local.portname="" visualmicro.application.name="arduino16x" arduino.build.mcu="cortex-m0" debug.view.AnalogPins="" debug.remote.portspeed="" arduino.upload.protocol="" arduino.build.f_cpu="16000000" arduino.board.desc="Simblee" arduino.board.name="Simblee_simblee_Simblee_Simblee" arduino.upload.port="COM3" debug.view.DigitalPins="" visualmicro.platform.name="Simblee" arduino.build.core="arduino" debug.local.portspeed="" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
