@@ -9,3 +9,4 @@ Central/*.csproj
 Central/*.sln
 Central/*.userprefs
 Build/
+Library/
