@@ -10,3 +10,5 @@ Central/*.sln
 Central/*.userprefs
 Build/
 Library/
+Build.app/
+*.xcappdata

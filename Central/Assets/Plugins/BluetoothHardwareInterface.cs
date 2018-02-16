@@ -27,6 +27,8 @@ public class BluetoothLEHardwareInterface
 		CBAttributePermissionsWriteEncryptionRequired = 0x08,
 	};
 
+	private static bool logAllMessages = false;
+
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 	public delegate void DebugDelegate([MarshalAs(UnmanagedType.LPStr)]string message);
 	public delegate void SendBluetoothMessageDelegate([MarshalAs(UnmanagedType.LPStr)]string gameObjectName, [MarshalAs(UnmanagedType.LPStr)]string methodName, [MarshalAs(UnmanagedType.LPStr)]string message);
@@ -38,7 +40,7 @@ public class BluetoothLEHardwareInterface
 
 	private static readonly Queue<Action> _executionQueue = new Queue<Action>();
 
-    private static bool logAllMessages = false;
+
 
 
     private static void Enqueue(System.Action action)
