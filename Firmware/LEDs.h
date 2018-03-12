@@ -6,8 +6,6 @@
 #include "Arduino.h"
 #include "MessageQueue.h"
 
-//#define RGB_LED
-
 #if defined(RGB_LED)
 #include "APA102LEDs.h"
 #else

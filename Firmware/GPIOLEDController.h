@@ -3,6 +3,7 @@
 #ifndef _LEDCONTROLLER_h
 #define _LEDCONTROLLER_h
 
+#if !defined(RGB_LED)
 #include "Arduino.h"
 
 #define LED_COUNT (21)
@@ -62,6 +63,8 @@ public:
 
 	void dumpToConsole();
 };
+
+#endif
 
 #endif
 

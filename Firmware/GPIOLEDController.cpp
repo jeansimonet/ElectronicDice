@@ -1,4 +1,6 @@
 #include "GPIOLEDController.h"
+
+#if !defined(RGB_LED)
 #include "GPIOLEDs.h"
 #include "LEDs.h"
 #include "Timer.h"
@@ -327,3 +329,5 @@ void GPIOLEDController::dumpToConsole()
 	}
 	console.println();
 }
+
+#endif

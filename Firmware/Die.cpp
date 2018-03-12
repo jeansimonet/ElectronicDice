@@ -47,8 +47,9 @@ void Die::init()
 	// put your setup code here, to run once:
 	//setup I2C on the pins of your choice
 	console.begin();
-	console.println("LED init");
+	console.print("LED init...");
 	leds.init();
+	console.println("ok");
 
 	// Flash all the LEDs once, to make sure they work!
 	leds.setAllNow(0x000F04);
@@ -57,26 +58,26 @@ void Die::init()
 
 	// Then turn an led on the 6th face after major init code
 	leds.setLEDNow(5, 0, 0xFFFF00);
-	console.println("Wire init");
+	console.print("Wire init...");
 	wire.begin();
+	console.println("ok");
 	//leds.init(); // Depends on I2C
 	leds.setLEDNow(5, 0, 0x00FF00);
 
-	console.println("EEPROM init");
+	console.print("Accelerometer init...");
 	leds.setLEDNow(5, 1, 0xFFFF00);
-	eeprom.init();
-	leds.setLEDNow(5, 1, 0x0FFF00);
-	console.println("Accelerometer init");
 	accelerometer.init();
+	console.println("ok");
 	leds.setLEDNow(5, 1, 0x00FF00);
 
-	leds.setLEDNow(5, 2, 0xFFFF00);
-	console.println("Settings init");
-	settings.init();
-	leds.setLEDNow(5, 2, 0x00FF00);
+	//leds.setLEDNow(5, 2, 0xFFFF00);
+	//console.print("Settings init...");
+	//settings.init();
+	//console.println("ok");
+	//leds.setLEDNow(5, 2, 0x00FF00);
 
 	leds.setLED(5, 3, 0xFFFF00);
-	console.println("BLE init");
+	console.print("BLE init...");
 
 	// start the BLE stack
 	// put your setup code here, to run once:
@@ -85,13 +86,15 @@ void Die::init()
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
 
+	console.println("ok");
 	leds.setLEDNow(5, 3, 0x00FF00);
 
 	leds.setLEDNow(5, 4, 0xFFFF00);
-	console.println("Modules init");
+	console.print("Modules init...");
 	animController.begin(); // Talks to controller
 	accelController.begin();
 	messageQueue.init();
+	console.println("ok");
 	leds.setLEDNow(5, 4, 0x00FF00);
 
 	leds.setLEDNow(5, 5, 0xFFFF00);

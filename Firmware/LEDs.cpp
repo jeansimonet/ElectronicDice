@@ -75,7 +75,7 @@ void LEDs::setLEDNow(int face, int led, uint32_t color)
 void LEDs::setLEDNow(int index, uint32_t color)
 {
 #if defined(RGB_LED)
-	RGBLeds.Set(index, color);
+	RGBLeds.set(index, color, true);
 #else
 	controller.setLED(index, getGreyscale(color));
 #endif
@@ -86,7 +86,7 @@ void LEDs::setLEDsNow(int indices[], uint32_t colors[], int count)
 #if defined(RGB_LED)
 	for (int i = 0; i < count; ++i)
 	{
-		RGBLeds.Set(indices[i], colors[i], false);
+		RGBLeds.set(indices[i], colors[i], false);
 	}
 	RGBLeds.show();
 #else
@@ -102,9 +102,9 @@ void LEDs::setLEDsNow(int indices[], uint32_t colors[], int count)
 void LEDs::setAllNow(uint32_t color)
 {
 #if defined(RGB_LED)
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i < LED_COUNT; ++i)
 	{
-		RGBLeds.Set(i, color, false);
+		RGBLeds.set(i, color, false);
 	}
 	RGBLeds.show();
 #else
@@ -179,7 +179,7 @@ void LEDs::clearAll()
 int LEDs::ledIndex(int face, int led)
 {
 #if defined(RGB_LED)
-	return APA102LEDs::ledIndex(face, led);
+	return Devices::APA102LEDs::ledIndex(face, led);
 #else
 	return Devices::GPIOLEDs::ledIndex(face, led);
 #endif

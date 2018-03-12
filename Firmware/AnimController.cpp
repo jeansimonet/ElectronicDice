@@ -162,13 +162,8 @@ void AnimController::stopAtIndex(int animIndex)
 {
 	// Found the animation, start by killing the leds it controls
 	int ledIndices[LED_COUNT];
-#if defined(RGB_LEDS)
 	uint32_t zeros[LED_COUNT] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#else
-	int zeros[LED_COUNT] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#endif
 	int ledCount = animations[animIndex].animation->stop(ledIndices);
-
 	leds.setLEDs(ledIndices, zeros, ledCount);
 }
 
