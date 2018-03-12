@@ -15,7 +15,7 @@ public class CaptureVideo
         {
             Debug.Log(dev.name);
         }
-        var cam = WebCamTexture.devices[3];
+        var cam = WebCamTexture.devices[0];
         WebCamTexture tex = new WebCamTexture(cam.name);
         tex.Play();
 
