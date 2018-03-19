@@ -4,14 +4,11 @@
 #define _ACCELCONTROLLER_h
 
 #include "Arduino.h"
+#include "RingBuffer.h"
 
-#define ACCEL_MAX_SIZE 32
-
-// Forwards
-namespace Core
-{
-	class MessageQueue;
-}
+#define ACCEL_BUFFER_SIZE 100 // 10ms * 100 = 1 seconds of buffer
+							  // 16 bytes * 128 = 2k of RAM
+#define MAX_CLIENTS 4
 
 /// <summary>
 /// Small struct holding a single frame of accelerometer data
@@ -22,25 +19,10 @@ struct AccelFrame
 	short X;
 	short Y;
 	short Z;
+	short jerkX;
+	short jerkY;
+	short jerkZ;
 	unsigned long Time;
-};
-
-
-/// <summary>
-/// A small buffer of acceleraion readings, FIFO
-/// </summary>
-class AccelFrameQueue
-{
-public:
-	AccelFrameQueue();
-
-	int count() const;
-	void push(short time, short x, short y, short z);
-	bool tryPop(AccelFrame& outFrame);
-
-private:
-	AccelFrame data[ACCEL_MAX_SIZE];
-	int _count;
 };
 
 /// <summary>
@@ -50,13 +32,16 @@ private:
 class AccelerationController
 {
 private:
-	Core::MessageQueue& messageQueue;
+	typedef void(*ClientMethod)(const AccelFrame& accelFrame);
+
 	int face;
 
-	// This is a small FIFO to buffer accelerometer readings
-	// between the timed accel controller update, and variable-timed
-	// main loop bluetooth message queue thingamajig! :)
-	AccelFrameQueue queue;
+	// This small buffer stores about 1 second of Acceleration data
+	Core::RingBuffer<AccelFrame, ACCEL_BUFFER_SIZE> buffer;
+
+	// Clients needing to be notified when accelerometer readings come in
+	ClientMethod clients[MAX_CLIENTS];
+	int clientCount;
 
 private:
 	// To be passed to the timer
@@ -64,19 +49,19 @@ private:
 	int determineFace(float x, float y, float z);
 
 public:
-	AccelerationController(Core::MessageQueue& queue);
+	AccelerationController();
 	void begin();
 	void stop();
 
-	void update();
-	void updateCurrentFace();
+	void timerUpdate();
 	int currentFace();
 
-	int frameCount();
-	bool tryPop(AccelFrame& outFrame);
-
-#define MessageType_UpdateFace 4
-	static bool pushUpdateFace(Core::MessageQueue& queue);
+	// Notification management
+	void hook(ClientMethod method);
+	void unHook(ClientMethod client);
 };
+
+extern AccelerationController accelController;
+
 #endif
 

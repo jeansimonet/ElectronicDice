@@ -22,8 +22,10 @@ public:
 
 	// Test
 	int someOtherData;
-	float someFloatData;
+	//float someFloatData;
 };
+
+extern Settings settings;
 
 #endif
 

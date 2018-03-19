@@ -3,6 +3,7 @@
 #ifndef _DICECONSOLE_h
 #define _DICECONSOLE_h
 
+#if defined(_CONSOLE)
 #include "Arduino.h"
 
 namespace Systems
@@ -16,8 +17,6 @@ namespace Systems
 	{
 	public:
 		void begin();
-		void stop();
-
 		void print(const char string[]);
 		void print(char);
 		void print(unsigned char, int = DEC);
@@ -47,5 +46,6 @@ namespace Systems
 
 	extern Console console;
 }
-#endif
 
+#endif
+#endif

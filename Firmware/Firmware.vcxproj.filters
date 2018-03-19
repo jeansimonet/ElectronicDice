@@ -9,36 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\Systems">
-      <UniqueIdentifier>{85ede6b1-14b6-47cf-96cd-2dd8b13de046}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Systems">
-      <UniqueIdentifier>{a211459e-1613-4249-8472-79ce74e9c744}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Devices">
-      <UniqueIdentifier>{b6cd96b3-e976-4756-8157-f7e5a9cfe5c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Devices">
-      <UniqueIdentifier>{f63cd870-a7ca-4b34-90c7-8dfd59704e74}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\App">
-      <UniqueIdentifier>{4546280c-7734-41c0-abdf-c7e26dd70276}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\App">
-      <UniqueIdentifier>{3b017f55-fb33-417a-82b8-3dd870c0abbb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Animations">
-      <UniqueIdentifier>{3110c90c-d16a-477e-9ce4-b17445b5d21f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Animations">
-      <UniqueIdentifier>{4ad7fbd8-d4d3-4a73-be8a-18b0621492f9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Core">
-      <UniqueIdentifier>{1ddbf488-1d5c-45c4-a732-e41f9730cbf9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Core">
-      <UniqueIdentifier>{cd8af905-266e-4422-a72e-56d38b2c2daa}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Firmware.ino" />
@@ -47,135 +17,144 @@
     <ClInclude Include="__vm\.Firmware.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lazarus.h">
-      <Filter>Header Files\Systems</Filter>
+    <ClInclude Include="LEDs.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BluetoothMessage.h">
-      <Filter>Header Files\App</Filter>
-    </ClInclude>
-    <ClInclude Include="RotatingLEDs.h">
-      <Filter>Header Files\Animations</Filter>
-    </ClInclude>
-    <ClInclude Include="RandomLEDs.h">
-      <Filter>Header Files\Animations</Filter>
-    </ClInclude>
-    <ClInclude Include="AccelController.h">
-      <Filter>Header Files\App</Filter>
-    </ClInclude>
-    <ClInclude Include="Die.h">
-      <Filter>Header Files\App</Filter>
+    <ClInclude Include="Adafruit_DotStar.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Animation.h">
-      <Filter>Header Files\Animations</Filter>
-    </ClInclude>
-    <ClInclude Include="Settings.h">
-      <Filter>Header Files\App</Filter>
-    </ClInclude>
-    <ClInclude Include="LEDAnimations.h">
-      <Filter>Header Files\Animations</Filter>
-    </ClInclude>
-    <ClInclude Include="Accelerometer.h">
-      <Filter>Header Files\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="EEPROM.h">
-      <Filter>Header Files\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="GPIOLEDs.h">
-      <Filter>Header Files\Devices</Filter>
-    </ClInclude>
-    <ClInclude Include="Console.h">
-      <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Header Files\Systems</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IAnimation.h">
-      <Filter>Header Files\Animations</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LEDAnimations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomLEDs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RotatingLEDs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AccelController.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AnimController.h">
-      <Filter>Header Files\App</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="I2C.h">
-      <Filter>Header Files\Systems</Filter>
+    <ClInclude Include="BluetoothMessage.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommandMessage.h">
-      <Filter>Header Files\App</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageQueue.h">
-      <Filter>Header Files\Core</Filter>
+    <ClInclude Include="Die.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h">
-      <Filter>Header Files\Core</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Accelerometer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="APA102LEDs.h">
-      <Filter>Header Files\Devices</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GPIOLEDController.h">
-      <Filter>Header Files\Systems</Filter>
+    <ClInclude Include="Console.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LEDs.h">
+    <ClInclude Include="I2C.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lazarus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HWTesting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Telemetry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JerkMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Lazarus.cpp">
-      <Filter>Source Files\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="RandomLEDs.cpp">
-      <Filter>Source Files\Animations</Filter>
-    </ClCompile>
-    <ClCompile Include="RotatingLEDs.cpp">
-      <Filter>Source Files\Animations</Filter>
+    <ClCompile Include="Adafruit_DotStar.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AccelController.cpp">
-      <Filter>Source Files\App</Filter>
-    </ClCompile>
-    <ClCompile Include="Die.cpp">
-      <Filter>Source Files\App</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation.cpp">
-      <Filter>Source Files\Animations</Filter>
-    </ClCompile>
-    <ClCompile Include="LEDAnimations.cpp">
-      <Filter>Source Files\Animations</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimController.cpp">
-      <Filter>Source Files\App</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings.cpp">
-      <Filter>Source Files\App</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Accelerometer.cpp">
-      <Filter>Source Files\Devices</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EEPROM.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GPIOLEDs.cpp">
-      <Filter>Source Files\Devices</Filter>
+    <ClCompile Include="AnimController.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Console.cpp">
-      <Filter>Source Files\Systems</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files\Systems</Filter>
+    <ClCompile Include="Die.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="I2C.cpp">
-      <Filter>Source Files\Systems</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MessageQueue.cpp">
-      <Filter>Source Files\Core</Filter>
+    <ClCompile Include="Lazarus.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="APA102LEDs.cpp">
-      <Filter>Source Files\Devices</Filter>
-    </ClCompile>
-    <ClCompile Include="GPIOLEDController.cpp">
-      <Filter>Source Files\Systems</Filter>
+    <ClCompile Include="LEDAnimations.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LEDs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomLEDs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RotatingLEDs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="APA102LEDs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HWTesting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Telemetry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JerkMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

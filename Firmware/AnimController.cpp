@@ -10,6 +10,8 @@ using namespace Devices;
 //#define TIMER2_RESOLUTION (33333) // 33.333 ms = 30 Hz
 #define TIMER2_RESOLUTION (100000) // 33.333 ms = 30 Hz
 
+AnimController animController;
+
 /// <summary>
 /// Constructor
 /// </summary>

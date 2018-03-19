@@ -12,11 +12,18 @@ namespace Systems
 {
 	class Lazarus
 	{
+	private:
+		int lastMillis;
+
+	private:
+		void sleepUntilInterrupt();
+
 	public:
 		Lazarus();
 		void init();
 		void onRadio();
-		void sleepUntilInterrupt();
+		void poke();
+		void update();
 	};
 
 	extern Lazarus lazarus;

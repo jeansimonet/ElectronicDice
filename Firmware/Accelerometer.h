@@ -31,12 +31,6 @@ Distributed as-is; no warranty is given.
 
 #include "Arduino.h"
 
-// Forwards
-namespace Core
-{
-	class MessageQueue;
-}
-
 
 ///////////////////////////////////
 // MMA8452Q Register Definitions //
@@ -121,12 +115,11 @@ namespace Devices
 		byte readTap();
 		byte readPL();
 
+		float convert(short value);
+
 		void enableTransientInterrupt();
 		void clearTransientInterrupt();
 		void disableTransientInterrupt();
-
-#define MessageType_UpdateAccel 3
-		static bool pushUpdateAccel(Core::MessageQueue& queue);
 
 	private:
 		void standby();

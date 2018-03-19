@@ -1,5 +1,5 @@
 #include "Timer.h"
-#include "Console.h"
+#include "Debug.h"
 
 using namespace Systems;
 
@@ -29,7 +29,7 @@ void Timer::hook(int resolutionInMicroSeconds, Timer::ClientMethod client, void*
 	}
 	else
 	{
-		console.println("Too many timer hooks registered.");
+		debugPrintln("Too many timer hooks registered.");
 	}
 }
 
@@ -72,7 +72,7 @@ void Timer::unHook(Timer::ClientMethod client)
 	}
 	else
 	{
-		console.println("Timer hook was not found in the list of registered hooks.");
+		debugPrintln("Timer hook was not found in the list of registered hooks.");
 	}
 }
 
@@ -81,7 +81,7 @@ void Timer::unHook(Timer::ClientMethod client)
 /// </summary>
 void Timer::timer2Interrupt()
 {
-	timer.update();
+	timer.interrupt();
 }
 
 /// <summary>
@@ -119,15 +119,12 @@ void Timer::stop()
 /// <summary>
 /// Called when a timer interrupt occurs
 /// </summary>
-void Timer::update()
+void Timer::interrupt()
 {
 	for (int i = 0; i < count; ++i)
 	{
 		if (NRF_TIMER2->EVENTS_COMPARE[i] != 0)
 		{
-			if (i == 0)
-				digitalWrite(0, HIGH);
-
 			// Clear interrupt
 			NRF_TIMER2->EVENTS_COMPARE[i] = 0;
 
@@ -138,17 +135,31 @@ void Timer::update()
 
 			if (clientInfo.callback != nullptr)
 			{
-				clientInfo.callback(clientInfo.param);
+				// Queue the call
+				if (!calls.enqueue(i))
+				{
+					debugPrint("Could not queue Timer callback");
+				}
 			}
 			else
 			{
-				console.print("Timer event ");
-				console.print(i);
-				console.print(" does not have a registered hook!");
+				debugPrint("Timer event ");
+				debugPrint(i);
+				debugPrint(" does not have a registered hook!");
 			}
-
-			if (i == 0)
-				digitalWrite(0, LOW);
 		}
+	}
+}
+
+/// <summary>
+/// Called from the "main" loop() method
+/// </summary>
+void Timer::update()
+{
+	byte clientIndex = -1;
+	while (calls.tryDequeue(clientIndex))
+	{
+		auto& clientInfo = clients[clientIndex];
+		clientInfo.callback(clientInfo.param);
 	}
 }

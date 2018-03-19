@@ -7,11 +7,6 @@ LEDs leds;
 
 #define LED_COUNT (21)
 
-#define MsgType_SetLED 1
-#define MsgType_SetLEDs 2
-#define MsgType_SetAll 3
-#define MsgType_ClearAll 4
-
 LEDs::LEDs()
 #if !defined(RGB_LED)
 	: controller(messageQueue)
@@ -31,33 +26,6 @@ void LEDs::init()
 
 void LEDs::update()
 {
-	MessageQueue::Message msg;
-	while (messageQueue.tryDequeue(msg))
-	{
-		switch (msg.type)
-		{
-		case MsgType_SetLED:
-			setLEDNow(msg.intParam, msg.colorParam);
-			break;
-		case MsgType_SetLEDs:
-			setLEDsNow(msg.indices, msg.colors, msg.count);
-			break;
-		case MsgType_SetAll:
-			setAllNow(msg.colorParam);
-			break;
-		case MsgType_ClearAll:
-			clearAllNow();
-			break;
-#if !defined(RGB_LED)
-		case GPIO_MsgType_LEDOn:
-			GPIOLeds.set(msg.intParam);
-			break;
-		case GPIO_MsgType_LEDsOff:
-			GPIOLeds.clear();
-			break;
-#endif
-		}
-	}
 }
 
 void LEDs::stop()
@@ -67,12 +35,12 @@ void LEDs::stop()
 #endif
 }
 
-void LEDs::setLEDNow(int face, int led, uint32_t color)
+void LEDs::setLED(int face, int led, uint32_t color)
 {
-	setLEDNow(ledIndex(face, led), color);
+	setLED(ledIndex(face, led), color);
 }
 
-void LEDs::setLEDNow(int index, uint32_t color)
+void LEDs::setLED(int index, uint32_t color)
 {
 #if defined(RGB_LED)
 	RGBLeds.set(index, color, true);
@@ -81,7 +49,7 @@ void LEDs::setLEDNow(int index, uint32_t color)
 #endif
 }
 
-void LEDs::setLEDsNow(int indices[], uint32_t colors[], int count)
+void LEDs::setLEDs(int indices[], uint32_t colors[], int count)
 {
 #if defined(RGB_LED)
 	for (int i = 0; i < count; ++i)
@@ -99,7 +67,7 @@ void LEDs::setLEDsNow(int indices[], uint32_t colors[], int count)
 #endif
 }
 
-void LEDs::setAllNow(uint32_t color)
+void LEDs::setAll(uint32_t color)
 {
 #if defined(RGB_LED)
 	for (int i = 0; i < LED_COUNT; ++i)
@@ -120,60 +88,13 @@ void LEDs::setAllNow(uint32_t color)
 #endif
 }
 
-void LEDs::clearAllNow()
+void LEDs::clearAll()
 {
 #if defined(RGB_LED)
 	RGBLeds.clear();
 #else
 	controller.clearAll();
 #endif
-}
-
-void LEDs::setLED(int face, int led, uint32_t color)
-{
-	MessageQueue::Message msg;
-	msg.type = MsgType_SetLED;
-	msg.intParam = ledIndex(face, led);
-	msg.colorParam = color;
-	messageQueue.enqueue(msg);
-}
-
-void LEDs::setLED(int index, uint32_t color)
-{
-	MessageQueue::Message msg;
-	msg.type = MsgType_SetLED;
-	msg.intParam = index;
-	msg.colorParam = color;
-	messageQueue.enqueue(msg);
-}
-
-void LEDs::setLEDs(int indices[], uint32_t colors[], int count)
-{
-	// If a previous queued message was already using the buffers, Oh well... 
-	memcpy(queuedIndices, indices, count * sizeof(int));
-	memcpy(queuedColors, colors, count * sizeof(uint32_t));
-
-	MessageQueue::Message msg;
-	msg.type = MsgType_SetLEDs;
-	msg.indices = queuedIndices;
-	msg.colors = queuedColors;
-	msg.count = count;
-	messageQueue.enqueue(msg);
-}
-
-void LEDs::setAll(uint32_t color)
-{
-	MessageQueue::Message msg;
-	msg.type = MsgType_SetAll;
-	msg.colorParam = color;
-	messageQueue.enqueue(msg);
-}
-
-void LEDs::clearAll()
-{
-	MessageQueue::Message msg;
-	msg.type = MsgType_ClearAll;
-	messageQueue.enqueue(msg);
 }
 
 int LEDs::ledIndex(int face, int led)

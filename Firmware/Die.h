@@ -5,7 +5,6 @@
 
 #include "Arduino.h"
 #include "BluetoothMessage.h"
-#include "MessageQueue.h"
 #include "AccelController.h"
 #include "AnimController.h"
 #include "Settings.h"
@@ -15,22 +14,11 @@ class CommandMessage;
 
 /// <summary>
 /// This defines our global die object!
-/// It includes all the systems and devices we need to work with
+/// It coordinates all the systems and devices we need to work with
 /// </summary>
 class Die
 {
-public:
-
 private:
-	Core::MessageQueue messageQueue;
-
-	// Modules
-	AccelerationController accelController;
-	AnimController animController;
-	Settings settings;
-
-	DieMessageAcc teleMessage;
-	AccelFrame lastAccelFrame;
 	int currentFace;
 
 public:
@@ -43,10 +31,12 @@ public:
 
 private:
 	void processCommand(CommandMessage* msg);
-	void processMessageQueue();
 	void updateFaceAnimation();
+
+#if defined(_CONSOLE)
 	void processConsole();
 	void processConsoleCommand(char* data, int len);
+#endif
 	void playAnimation(int animIndex);
 };
 

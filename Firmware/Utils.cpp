@@ -1,7 +1,4 @@
 #include "Utils.h"
-#include "Console.h"
-
-using namespace Systems;
 
 /// <summary>
 /// Parses the first word out of a string (typically a command or parameter)
@@ -35,8 +32,6 @@ int Core::parseWord(char*& text, int& len, char* outWord, int outWordLen)
 		*outWord = 0;
 		wordLen++;
 	}
-
-	console.println(outWordRet);
 
 	return wordLen;
 }

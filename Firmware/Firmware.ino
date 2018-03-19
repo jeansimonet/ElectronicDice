@@ -1,64 +1,75 @@
-#include "LEDs.h"
-#include "Die.h"
+//----------------
+// !!!IMPORTANT!!!
+//----------------
+// Make sure to include ota_bootloader.h so it makes sure to
+// include the bootloader hex in the image.
+#include <ota_bootloader.h>
 #include <SimbleeBLE.h>
+//----------------
+// !!!IMPORTANT!!!
+//----------------
+
+#include "HWTesting.h"
+#include "Die.h"
 
 Die die;
 
-#include "Console.h"
-#include "I2C.h"
-#include "Accelerometer.h"
+//#define TEST_I2C
+//#define TEST_ACC
+//#define TEST_LED
+//#define TEST_BLE
 
 
-// Here's how to control the LEDs from any two pins:
-#define DATAPIN		7
-#define CLOCKPIN	0
-#define NUMPIXELS	21
+void setup()
+{
+	//----------------
+	// !!!IMPORTANT!!!
+	//----------------
+	// Always start BLE Stack first, so that we get a chance to perform DFU
+	SimbleeBLE.advertisementData = "Dice_Boot";
+	SimbleeBLE.deviceName = "Dice_Boot";
+	SimbleeBLE.txPowerLevel = 4;
+	SimbleeBLE.begin();
+	//----------------
+	// !!!IMPORTANT!!!
+	//----------------
 
-
-using namespace Systems;
-using namespace Devices;
-
-
-void setup() {
-	//wire.begin();
+#if defined(TEST_I2C)
+	Tests::TestI2C();
+#elif defined(TEST_ACC)
+	Tests::TestAcc();
+#elif defined(TEST_LED)
+	Tests::TestLED();
+#elif defined(TEST_BLE)
+#else
 	die.init();
-	//strip.begin(); // Initialize pins for output
-	//for (int i = 0; i < NUMPIXELS; ++i)
-	//{
-	//	strip.setPixelColor(i, 0x0F0000);
-	//}
-	//strip.show();  // Turn all LEDs off ASAP
+#endif
 }
 
 void SimbleeBLE_onConnect()
 {
-	//die.onConnect();
+#if !defined(TEST_I2C) && !defined(TEST_ACC) && !defined(TEST_LED) && !defined(TEST_BLE)
+	die.onConnect();
+#endif
 }
 
 void SimbleeBLE_onDisconnect()
 {
-	//die.onDisconnect();
+#if !defined(TEST_I2C) && !defined(TEST_ACC) && !defined(TEST_LED) && !defined(TEST_BLE)
+	die.onDisconnect();
+#endif
 }
 
 void SimbleeBLE_onReceive(char *data, int len)
 {
-	//die.onReceive(data, len);
+#if !defined(TEST_I2C) && !defined(TEST_ACC) && !defined(TEST_LED) && !defined(TEST_BLE)
+	die.onReceive(data, len);
+#endif
 }
 
 void loop()
 {
-	//for (int i = 0; i < NUMPIXELS; ++i)
-	//{
-	//	strip.setPixelColor(i, 0x0F0F00);
-	//}
-	//strip.show();  // Turn all LEDs off ASAP
-				   
+#if !defined(TEST_I2C) && !defined(TEST_ACC) && !defined(TEST_LED) && !defined(TEST_BLE)
 	die.update();
-
-	//wire.beginTransmission(0x50);
-	//wire.write(0x00);
-	//wire.endTransmission();
-
+#endif
 }
-
-

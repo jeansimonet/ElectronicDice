@@ -1,11 +1,7 @@
 #include "APA102LEDs.h"
 #include "I2C.h"
-#include "Console.h"
-#include "MessageQueue.h"
-#include <Adafruit_DotStar.h>
-#include <SPI.h>
+#include "Adafruit_DotStar.h"
 
-using namespace Core;
 using namespace Devices;
 using namespace Systems;
 
@@ -96,14 +92,7 @@ void APA102LEDs::set(int face, int led, uint32_t color, bool flush)
 void APA102LEDs::set(int ledIndex, uint32_t color, bool flush)
 {
 	int theled = theLeds[ledIndex];
-	//console.print("setting led ");
-	//console.print(theled);
-
 	strip.setPixelColor(theled, color);
-
-	//console.print(" to ");
-	//console.println(color, HEX);
-
 	if (flush)
 	{
 		show();
