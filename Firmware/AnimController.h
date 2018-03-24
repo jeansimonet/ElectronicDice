@@ -47,5 +47,8 @@ public:
 	void stop(IAnimation* anim);
 	void stopAll();
 };
+
+extern AnimController animController;
+
 #endif
 

@@ -30,9 +30,7 @@ Distributed as-is; no warranty is given.
 #include <Arduino.h>
 #include "Accelerometer.h"
 #include "I2C.h"
-#include "MessageQueue.h"
 
-using namespace Core;
 using namespace Devices;
 using namespace Systems;
 
@@ -100,6 +98,16 @@ void Accelerometer::read()
 	cx = (float)x / (float)(1 << 11) * (float)(scale);
 	cy = (float)y / (float)(1 << 11) * (float)(scale);
 	cz = (float)z / (float)(1 << 11) * (float)(scale);
+}
+
+/// <summary>
+/// Helper that converts a raw reading value to a float
+/// </summary>
+/// <param name="value"></param>
+/// <returns></returns>
+float Accelerometer::convert(short value)
+{
+	return (float)value / (float)(1 << 11) * (float)(scale);
 }
 
 /// <summary>
@@ -365,14 +373,4 @@ void Accelerometer::readRegisters(MMA8452Q_Register reg, byte *buffer, byte len)
 
 	for (int x = 0; x < len; x++)
 		buffer[x] = wire.read();
-}
-
-/// <summary>
-/// Helper that queues up a call to update the accelerometer readings
-/// </summary>
-bool Accelerometer::pushUpdateAccel(MessageQueue& queue)
-{
-	MessageQueue::Message mes;
-	mes.type = MessageType_UpdateAccel;
-	return queue.enqueue(mes);
 }

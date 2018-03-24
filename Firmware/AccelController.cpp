@@ -1,104 +1,70 @@
 #include "AccelController.h"
 #include "Timer.h"
 #include "Accelerometer.h"
-#include "MessageQueue.h"
+#include "Debug.h"
 
-using namespace Core;
 using namespace Systems;
 using namespace Devices;
 
 // This defines how frequently we try to read the accelerometer
-#define TIMER2_RESOLUTION (10000) // 10ms
+#define TIMER2_RESOLUTION (10000)	// 10ms
+#define JERK_SCALE (1000)		// To make the jerk in the same range as the acceleration
 
-/// <summary>
-/// Constructor
-/// </summary>
-AccelFrameQueue::AccelFrameQueue()
-	: _count(0)
-{
-}
+AccelerationController accelController;
 
-/// <summary>
-/// How many samples do we have stored right now?
-/// </summary>
-int AccelFrameQueue::count() const
-{
-	return _count;
-}
-
-/// <summary>
-/// Pushes a frame of accelerometer data onto the queue
-/// </summary>
-void AccelFrameQueue::push(short time, short x, short y, short z)
-{
-	if (_count == ACCEL_MAX_SIZE)
-	{
-		// Shift everything left
-		for (int i = 0; i < ACCEL_MAX_SIZE - 1; ++i)
-		{
-			data[i] = data[i + 1];
-		}
-		_count--;
-	}
-	// Else do nothing
-
-	// Add the new frame of data
-	data[_count] = { x, y, z, time };
-	_count++;
-}
-
-/// <summary>
-/// Attempts to pop a frame of accelerometer data from the queue
-/// </summary>
-/// <param name="outFrame">The frame data that will receive the data</param>
-/// <returns>true if a frame of data was pop'ed</returns>
-bool AccelFrameQueue::tryPop(AccelFrame& outFrame)
-{
-	bool ret = _count > 0;
-	if (ret)
-	{
-		outFrame = data[0];
-		// Shift everything left
-		for (int i = 0; i < _count - 1; ++i)
-		{
-			data[i] = data[i + 1];
-		}
-		_count--;
-	}
-	return ret;
-}
 
 /// <summary>
 /// Concstructor
 /// </summary>
-AccelerationController::AccelerationController(MessageQueue& queue)
-	: messageQueue(queue)
-	, face(0)
+AccelerationController::AccelerationController()
+	: face(0)
 {
 }
 
 /// <summary>
 /// update is called from the timer
 /// </summary>
-void AccelerationController::update()
+void AccelerationController::timerUpdate()
 {
-	Accelerometer::pushUpdateAccel(messageQueue);
-	AccelerationController::pushUpdateFace(messageQueue);
-}
-
-/// <summary>
-/// Perform some conversion and filtering work after reading the accelerometer values
-/// </summary>
-void AccelerationController::updateCurrentFace()
-{
+	accelerometer.read();
 	face = determineFace(accelerometer.cx, accelerometer.cy, accelerometer.cz);
-	queue.push((short)millis(), accelerometer.x, accelerometer.y, accelerometer.z);
+
+	AccelFrame newFrame;
+	newFrame.X = accelerometer.x;
+	newFrame.Y = accelerometer.y;
+	newFrame.Z = accelerometer.z;
+	newFrame.Time = millis();
+
+	// Compute delta!
+	auto& lastFrame = buffer.last();
+	short deltaX = newFrame.X - lastFrame.X;
+	short deltaY = newFrame.Y - lastFrame.Y;
+	short deltaZ = newFrame.Z - lastFrame.Z;
+
+	// deltaTime should be roughly 10ms because that's how frequently we asked to be updated!
+	short deltaTime = (short)(newFrame.Time - lastFrame.Time); 
+
+	// Compute jerk
+	// deltas are stored in the same unit (over time) as accelerometer readings
+	// i.e. if readings are 8g scaled to a signed 12 bit integer (which they are)
+	// then jerk is 8g/s scaled to a signed 12 bit integer
+	newFrame.jerkX = deltaX * JERK_SCALE / deltaTime;
+	newFrame.jerkY = deltaY * JERK_SCALE / deltaTime;
+	newFrame.jerkZ = deltaZ * JERK_SCALE / deltaTime;
+
+	buffer.push(newFrame);
+
+	// Notify clients
+	for (int i = 0; i < clientCount; ++i)
+	{
+		clients[i](newFrame);
+	}
 }
 
 // To be passed to the timer
 void AccelerationController::accelControllerUpdate(void* param)
 {
-	((AccelerationController*)param)->update();
+	((AccelerationController*)param)->timerUpdate();
 }
 
 /// <summary>
@@ -190,29 +156,52 @@ int AccelerationController::determineFace(float x, float y, float z)
 }
 
 /// <summary>
-/// How many frames of data do we have stored?
+/// Method used by clients to request timer callbacks when accelerometer readings are in
 /// </summary>
-int AccelerationController::frameCount()
+void AccelerationController::hook(AccelerationController::ClientMethod callback)
 {
-	return queue.count();
+	if (clientCount < MAX_CLIENTS)
+	{
+		clients[clientCount] = callback;
+		clientCount++;
+	}
+	else
+	{
+		debugPrintln("Too many accelerometer hooks registered.");
+	}
 }
 
 /// <summary>
-/// Attempts to pop a frame of accelerometer data from the queue
+/// Method used by clients to stop getting accelerometer reading callbacks
 /// </summary>
-/// <param name="outFrame">The frame data that will receive the data</param>
-/// <returns>true if a frame of data was pop'ed</returns>
-bool AccelerationController::tryPop(AccelFrame& outFrame)
+void AccelerationController::unHook(AccelerationController::ClientMethod callback)
 {
-	return queue.tryPop(outFrame);
+	int clientIndex = 0;
+	for (; clientIndex < 4; ++clientIndex)
+	{
+		if (clients[clientIndex] == callback)
+		{
+			break;
+		}
+	}
+
+	if (clientIndex != 4)
+	{
+		// Clear the entry
+		clients[clientIndex] = nullptr;
+
+		// Shift entries down
+		for (; clientIndex < clientCount - 1; ++clientIndex)
+		{
+			clients[clientIndex] = clients[clientIndex + 1];
+		}
+
+		// Decrement total count
+		clientCount--;
+	}
+	else
+	{
+		debugPrintln("Accelerometer hook was not found in the list of registered hooks.");
+	}
 }
 
-/// <summary>
-/// Helper that queues up a message to update the controller's face data
-/// </summary>
-bool AccelerationController::pushUpdateFace(MessageQueue& queue)
-{
-	MessageQueue::Message mes;
-	mes.type = MessageType_UpdateFace;
-	return queue.enqueue(mes);
-}

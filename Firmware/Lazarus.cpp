@@ -1,8 +1,5 @@
-/* Lazarus.h - Library for onBLE functions to break INFINITE waits in loop()
-   written by Thomas Olson Consulting
-   20140806.01
-   20140808.01 modified for lower power by using pulldown instead of pullup.
-*/
+// Lazarus.h - Library for onBLE functions to break INFINITE waits in loop()
+// original written by Thomas Olson Consulting
 
 #include "Arduino.h"
 #include "SimbleeBLE.h"
@@ -16,6 +13,8 @@ Lazarus Systems::lazarus;
 
 #define radioPin 31
 #define accelPin 23
+
+#define AUTO_SLEEP_AFTER 10000 // 10s
 
 /// <summary>
 /// Constructor
@@ -36,6 +35,8 @@ void Lazarus::init()
 
 	// Set accelerometer interrupt pin as an input!
 	pinMode(accelPin, INPUT_PULLUP);
+
+	lastMillis = millis();
 }
 
 /// <summary>
@@ -52,6 +53,32 @@ void Lazarus::onRadio()
 	// Need to bring internal pin low again.. so..
 	NRF_GPIO->PIN_CNF[radioPin] =
 		(GPIO_PIN_CNF_PULL_Pulldown << GPIO_PIN_CNF_PULL_Pos);
+
+	lastMillis = millis();
+}
+
+/// <summary>
+/// Manually poke Lazarus so it doesn't go to sleep
+/// </summary>
+void Lazarus::poke()
+{
+	lastMillis = millis();
+}
+
+/// <summary>
+/// Main update, called from die update()
+/// </summary>
+void Lazarus::update()
+{
+	// Very simple: if we haven't been poked by anyone in the last X many seconds we go to sleep!
+	if (millis() - lastMillis > AUTO_SLEEP_AFTER)
+	{
+		// Go to sleep!
+		sleepUntilInterrupt();
+
+		// Refresh millis after wake up
+		lastMillis = millis();
+	}
 }
 
 /// <summary>

@@ -1,21 +1,36 @@
 #include "APA102LEDs.h"
 #include "I2C.h"
-#include "Console.h"
-#include "MessageQueue.h"
-#include <Adafruit_DotStar.h>
-#include <SPI.h>
+#include "Adafruit_DotStar.h"
 
-using namespace Core;
 using namespace Devices;
 using namespace Systems;
 
 // Here's how to control the LEDs from any two pins:
-#define DATAPIN		7
-#define CLOCKPIN	6
+#define DATAPIN		30
+#define CLOCKPIN	29
 #define NUMPIXELS	21
 
 // The actual led strip!
 Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
+
+/// <summary>
+/// Define led index in strip as per the routing of the pcb
+/// </summary>
+int theLeds[] =
+{
+	// Face 1
+	17,
+	// Face 2
+	15, 16,
+	// Face 3
+	18, 19, 20,
+	// Face 4
+	2, 3, 4, 5,
+	// Face 5
+	0, 1, 6, 7, 8,
+	// Face 6
+	9, 10, 11, 12, 13, 14
+};
 
 ///// <summary>
 ///// Define led index in strip as per the routing of the pcb
@@ -29,31 +44,12 @@ Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
 //	// Face 3
 //	18, 19, 20,
 //	// Face 4
-//	2, 3, 4, 5,
+//	2, 3, 0, 1,
 //	// Face 5
-//	0, 1, 6, 7, 8,
+//	4, 5, 7, 6, 8,
 //	// Face 6
-//	9, 10, 11, 12, 13, 14
+//	9, 12, 10, 11, 13, 14
 //};
-//
-/// <summary>
-/// Define led index in strip as per the routing of the pcb
-/// </summary>
-int theLeds[] =
-{
-	// Face 1
-	17,
-	// Face 2
-	15, 16,
-	// Face 3
-	18, 19, 20,
-	// Face 4
-	2, 3, 0, 1,
-	// Face 5
-	4, 5, 7, 6, 8,
-	// Face 6
-	9, 12, 10, 11, 13, 14
-};
 
 /// <summary>
 /// Defines how to look up the LEDs of a face in the led array above!
@@ -96,14 +92,7 @@ void APA102LEDs::set(int face, int led, uint32_t color, bool flush)
 void APA102LEDs::set(int ledIndex, uint32_t color, bool flush)
 {
 	int theled = theLeds[ledIndex];
-	//console.print("setting led ");
-	//console.print(theled);
-
 	strip.setPixelColor(theled, color);
-
-	//console.print(" to ");
-	//console.println(color, HEX);
-
 	if (flush)
 	{
 		show();

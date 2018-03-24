@@ -1,5 +1,7 @@
 #include "Console.h"
 
+#if defined(_CONSOLE)
+
 using namespace Systems;
 
 Console Systems::console;
@@ -12,15 +14,6 @@ void Console::begin()
 	override_uart_limit = true;
 	Serial.begin(57600);
 	Serial.println("Console on");
-}
-
-/// <summary>
-/// Turns the console off
-/// </summary>
-void Console::stop()
-{
-	Serial.println("Console off");
-	Serial.end();
 }
 
 int Console::available()
@@ -117,3 +110,5 @@ void Console::println()
 {
 	Serial.println();
 }
+
+#endif

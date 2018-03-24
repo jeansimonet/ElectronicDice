@@ -4,7 +4,7 @@
 #define _APA102LEDS_h
 
 #include "Arduino.h"
-#include <Adafruit_DotStar.h>
+#include "Adafruit_DotStar.h"
 
 extern Adafruit_DotStar strip;
 

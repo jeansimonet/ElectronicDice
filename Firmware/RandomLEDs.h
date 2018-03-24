@@ -22,8 +22,8 @@ private:
 
 	struct LEDAndTime
 	{
-		int led;
-		int startTime;
+		short led;
+		short startTime;
 	};
 
 	LEDAndTime leds[MAX_CONCURRENT_LEDS];
