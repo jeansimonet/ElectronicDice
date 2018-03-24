@@ -12,7 +12,7 @@ Console Systems::console;
 void Console::begin()
 {
 	override_uart_limit = true;
-	Serial.begin(57600);
+	Serial.begin(115200);
 	Serial.println("Console on");
 }
 

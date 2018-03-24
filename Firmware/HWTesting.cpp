@@ -8,6 +8,8 @@
 /// </summary>
 void Tests::TestI2C()
 {
+	Serial.begin(9600);
+	Serial.print("Trying to Write to arbitrary I2C addresses...");
 	Systems::wire.begin();
 	pinMode(0, OUTPUT);
 	while (true)
@@ -79,6 +81,33 @@ void Tests::TestAcc()
 					else
 					{
 						Serial.println("Ok");
+						//Serial.println("Reading acceleration");
+
+						//// Read registers!
+						//for (int i = 0; i < 1000; ++i)
+						//{
+						//	byte rawData[6];  // x/y/z accel register data stored here
+						//	Systems::wire.beginTransmission(0x1C);
+						//	Systems::wire.write(OUT_X_MSB);
+						//	Systems::wire.endTransmission(false); //endTransmission but keep the connection active
+
+						//	Systems::wire.requestFrom(0x1C, 6); //Ask for bytes, once done, bus is released by default
+
+						//	while (Systems::wire.available() < 6); //Hang out until we get the # of bytes we expect
+
+						//	for (int x = 0; x < 6; x++)
+						//		rawData[x] = Systems::wire.read();
+
+						//	short x = ((short)(rawData[0] << 8 | rawData[1])) >> 4;
+						//	short y = ((short)(rawData[2] << 8 | rawData[3])) >> 4;
+						//	short z = ((short)(rawData[4] << 8 | rawData[5])) >> 4;
+						//	Serial.print("x: ");
+						//	Serial.print(x);
+						//	Serial.print(", y: ");
+						//	Serial.print(y);
+						//	Serial.print(", z: ");
+						//	Serial.println(z);
+						//}
 					}
 				}
 			}

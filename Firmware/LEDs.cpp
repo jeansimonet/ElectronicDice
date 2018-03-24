@@ -24,10 +24,6 @@ void LEDs::init()
 #endif
 }
 
-void LEDs::update()
-{
-}
-
 void LEDs::stop()
 {
 #if !defined(RGB_LED)

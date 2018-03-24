@@ -116,6 +116,8 @@ void Timer::stop()
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 }
 
+int total = 0;
+
 /// <summary>
 /// Called when a timer interrupt occurs
 /// </summary>
@@ -135,17 +137,24 @@ void Timer::interrupt()
 
 			if (clientInfo.callback != nullptr)
 			{
+				total++;
 				// Queue the call
+				//calls.enqueue(i);
 				if (!calls.enqueue(i))
 				{
-					debugPrint("Could not queue Timer callback");
+					NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
+					debugPrint("Could not queue Timer callback for client ");
+					debugPrint(i);
+					debugPrint(", ");
+					debugPrintln(total);
 				}
 			}
 			else
 			{
+				NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 				debugPrint("Timer event ");
 				debugPrint(i);
-				debugPrint(" does not have a registered hook!");
+				debugPrintln(" does not have a registered hook!");
 			}
 		}
 	}

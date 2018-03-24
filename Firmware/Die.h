@@ -8,6 +8,7 @@
 #include "AccelController.h"
 #include "AnimController.h"
 #include "Settings.h"
+#include "IStateEstimator.h"
 
 // Forwards
 class CommandMessage;
@@ -20,6 +21,8 @@ class Die
 {
 private:
 	int currentFace;
+	StateEstimate currentState;
+	IStateEstimator* stateEstimators[DieState_Count];
 
 public:
 	Die();

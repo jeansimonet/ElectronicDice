@@ -67,7 +67,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\Firmware;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SimbleeBLE;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\Wire;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries;$(ProjectDir)..\..\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino\avr;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\variants\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee\include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\CMSIS\CMSIS\Include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(ProjectDir)__vm\.Firmware.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>RGB_LED;F_CPU=16000000;ARDUINO=10805;__Simblee__;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RGB_LED;_CONSOLE;F_CPU=16000000;ARDUINO=10805;__Simblee__;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -111,6 +111,8 @@
     <ClInclude Include="Die.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="EstimatorOnFace.h" />
+    <ClInclude Include="float3.h" />
     <ClInclude Include="HWTesting.h" />
     <ClInclude Include="I2C.h">
       <FileType>CppCode</FileType>
@@ -118,6 +120,7 @@
     <ClInclude Include="IAnimation.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="IStateEstimator.h" />
     <ClInclude Include="Lazarus.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -155,6 +158,7 @@
     <ClCompile Include="APA102LEDs.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Die.cpp" />
+    <ClCompile Include="EstimatorOnFace.cpp" />
     <ClCompile Include="HWTesting.cpp" />
     <ClCompile Include="I2C.cpp" />
     <ClCompile Include="Lazarus.cpp" />

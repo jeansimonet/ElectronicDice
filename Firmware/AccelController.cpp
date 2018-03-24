@@ -5,6 +5,7 @@
 
 using namespace Systems;
 using namespace Devices;
+using namespace Core;
 
 // This defines how frequently we try to read the accelerometer
 #define TIMER2_RESOLUTION (10000)	// 10ms
@@ -12,6 +13,21 @@ using namespace Devices;
 
 AccelerationController accelController;
 
+/// <summary>
+/// Retrieves the acceleration value stored in the frame of data
+/// </summary>
+float3 AccelFrame::getAcc() const
+{
+	return float3(accelerometer.convert(X), accelerometer.convert(Y), accelerometer.convert(Z));
+}
+
+/// <summary>
+/// Retrieves the jerk
+/// </summary>
+float3 AccelFrame::getJerk() const
+{
+	return float3(accelerometer.convert(jerkX), accelerometer.convert(jerkY), accelerometer.convert(jerkZ));
+}
 
 /// <summary>
 /// Concstructor
@@ -57,7 +73,7 @@ void AccelerationController::timerUpdate()
 	// Notify clients
 	for (int i = 0; i < clientCount; ++i)
 	{
-		clients[i](newFrame);
+		clients[i].callback(clients[i].param, newFrame);
 	}
 }
 
@@ -158,11 +174,12 @@ int AccelerationController::determineFace(float x, float y, float z)
 /// <summary>
 /// Method used by clients to request timer callbacks when accelerometer readings are in
 /// </summary>
-void AccelerationController::hook(AccelerationController::ClientMethod callback)
+void AccelerationController::hook(AccelerationController::ClientMethod callback, void* parameter)
 {
 	if (clientCount < MAX_CLIENTS)
 	{
-		clients[clientCount] = callback;
+		clients[clientCount].callback = callback;
+		clients[clientCount].param = parameter;
 		clientCount++;
 	}
 	else
@@ -179,7 +196,7 @@ void AccelerationController::unHook(AccelerationController::ClientMethod callbac
 	int clientIndex = 0;
 	for (; clientIndex < 4; ++clientIndex)
 	{
-		if (clients[clientIndex] == callback)
+		if (clients[clientIndex].callback == callback)
 		{
 			break;
 		}
@@ -188,7 +205,8 @@ void AccelerationController::unHook(AccelerationController::ClientMethod callbac
 	if (clientIndex != 4)
 	{
 		// Clear the entry
-		clients[clientIndex] = nullptr;
+		clients[clientIndex].callback = nullptr;
+		clients[clientIndex].param = nullptr;
 
 		// Shift entries down
 		for (; clientIndex < clientCount - 1; ++clientIndex)

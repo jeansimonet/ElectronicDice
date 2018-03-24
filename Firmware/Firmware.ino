@@ -1,8 +1,8 @@
 //----------------
 // !!!IMPORTANT!!!
 //----------------
-// Make sure to include ota_bootloader.h so it makes sure to
-// include the bootloader hex in the image.
+// Make sure to include ota_bootloader.h so it 
+// includes the bootloader hex in the image.
 #include <ota_bootloader.h>
 #include <SimbleeBLE.h>
 //----------------
@@ -16,7 +16,7 @@ Die die;
 
 //#define TEST_I2C
 //#define TEST_ACC
-//#define TEST_LED
+//#define TEST_LED 
 //#define TEST_BLE
 
 

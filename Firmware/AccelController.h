@@ -5,6 +5,7 @@
 
 #include "Arduino.h"
 #include "RingBuffer.h"
+#include "float3.h"
 
 #define ACCEL_BUFFER_SIZE 100 // 10ms * 100 = 1 seconds of buffer
 							  // 16 bytes * 128 = 2k of RAM
@@ -23,6 +24,9 @@ struct AccelFrame
 	short jerkY;
 	short jerkZ;
 	unsigned long Time;
+
+	Core::float3 getAcc() const;
+	Core::float3 getJerk() const;
 };
 
 /// <summary>
@@ -32,15 +36,21 @@ struct AccelFrame
 class AccelerationController
 {
 private:
-	typedef void(*ClientMethod)(const AccelFrame& accelFrame);
+	typedef void(*ClientMethod)(void* param, const AccelFrame& accelFrame);
 
 	int face;
 
 	// This small buffer stores about 1 second of Acceleration data
 	Core::RingBuffer<AccelFrame, ACCEL_BUFFER_SIZE> buffer;
 
+	struct Client
+	{
+		ClientMethod callback;
+		void* param;
+	};
+
 	// Clients needing to be notified when accelerometer readings come in
-	ClientMethod clients[MAX_CLIENTS];
+	Client clients[MAX_CLIENTS];
 	int clientCount;
 
 private:
@@ -56,8 +66,10 @@ public:
 	void timerUpdate();
 	int currentFace();
 
+	const Core::RingBuffer<AccelFrame, ACCEL_BUFFER_SIZE>& getBuffer() const { return buffer; }
+
 	// Notification management
-	void hook(ClientMethod method);
+	void hook(ClientMethod method, void* param);
 	void unHook(ClientMethod client);
 };
 

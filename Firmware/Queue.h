@@ -41,6 +41,7 @@ namespace Core
 				count++;
 			}
 			interrupts();
+			return ret;
 		}
 
 		/// <summary>

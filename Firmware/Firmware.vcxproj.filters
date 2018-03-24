@@ -95,6 +95,15 @@
     <ClInclude Include="JerkMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EstimatorOnFace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IStateEstimator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="float3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_DotStar.cpp">
@@ -155,6 +164,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="JerkMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EstimatorOnFace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

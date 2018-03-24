@@ -20,7 +20,7 @@ namespace Systems
 		bool lastAccelWasSent;
 
 	private:
-		static void accelControllerCallback(const AccelFrame& frame);
+		static void accelControllerCallback(void* ignore, const AccelFrame& frame);
 
 	public:
 		void begin();

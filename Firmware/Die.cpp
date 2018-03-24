@@ -20,6 +20,8 @@
 #include "Telemetry.h"
 #include "JerkMonitor.h"
 
+#include "EstimatorOnFace.h"
+
 using namespace Core;
 using namespace Systems;
 using namespace Devices;
@@ -28,6 +30,8 @@ Die::Die()
 {
 	currentFace = 0;
 }
+
+EstimatorOnFace estimatorOnFace;
 
 void Die::init()
 {
@@ -87,12 +91,15 @@ void Die::init()
 	leds.setLED(5, 4, 0x00FF00);
 
 	leds.setLED(5, 5, 0xFFFF00);
+	//estimatorOnFace.begin();
 
-	timer.begin(); // Kicks off the timers!
+	//stateEstimators[DieState_OnFace] = &estimatorOnFace;
 
 	leds.setLED(5, 5, 0x00FF00);
 	delay(300);
 	leds.clearAll();
+
+	timer.begin(); // Kicks off the timers!
 }
 
 void Die::onConnect()
@@ -131,8 +138,13 @@ void Die::update()
 
 	timer.update();
 	updateFaceAnimation();
-	leds.update();
-	lazarus.update();
+	//lazarus.update();
+
+	//// Ask the estimators which state we should be in...
+	//for (int i = 0; i < DieState_Count; ++i)
+	//{
+	//	currentState.estimates[i] = stateEstimators[i]->GetEstimate();
+	//}
 }
 
 void Die::processCommand(CommandMessage* msg)

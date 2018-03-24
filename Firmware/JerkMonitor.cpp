@@ -13,11 +13,10 @@ JerkMonitor Systems::jerkMonitor;
 void JerkMonitor::begin()
 {
 	sigma = 0.0f;
-	memset(&lastFrame, 0, sizeof(AccelFrame));
-	accelController.hook(accelControllerCallback);
+	accelController.hook(accelControllerCallback, nullptr);
 }
 
-void JerkMonitor::accelControllerCallback(const AccelFrame& frame)
+void JerkMonitor::accelControllerCallback(void* ignore, const AccelFrame& frame)
 {
 	jerkMonitor.onAccelFrame(frame);
 }

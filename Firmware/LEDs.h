@@ -23,7 +23,6 @@ class LEDs
 public:
 	LEDs();
 	void init();
-	void update();
 	void stop();
 
 	void setLED(int face, int led, uint32_t color); // Index 0 - 20

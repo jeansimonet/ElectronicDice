@@ -58,6 +58,15 @@ namespace Core
 		}
 
 		/// <summary>
+		/// Returns the number of items in the buffer
+		/// </summary>
+		/// <returns></returns>
+		constexpr int count() const
+		{
+			return MaxCount;
+		}
+
+		/// <summary>
 		/// Allows you to iterate the items from oldest to newest
 		/// </summary>
 		const T& operator[](int index) const

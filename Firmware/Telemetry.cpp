@@ -19,10 +19,10 @@ void Telemetry::begin()
 
 	// Ask the acceleration controller to be notified when
 	// new acceleration data comes in!
-	accelController.hook(accelControllerCallback);
+	accelController.hook(accelControllerCallback, nullptr);
 }
 
-void Telemetry::accelControllerCallback(const AccelFrame& frame)
+void Telemetry::accelControllerCallback(void* ignore, const AccelFrame& frame)
 {
 	telemetry.onAccelFrame(frame);
 }
