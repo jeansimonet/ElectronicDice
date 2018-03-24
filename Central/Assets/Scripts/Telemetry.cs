@@ -198,6 +198,13 @@ public class Telemetry : MonoBehaviour
 		{
 			Debug.Log("Could not find any die");
 		}
+
+		var vr = GetComponent<iVidCapPro>();
+		vr.BeginRecordingSession ("DiceCapture",
+			512, 512,
+			30,
+			iVidCapPro.CaptureAudio.Audio_Plus_Mic,
+			iVidCapPro.CaptureFramerateLock.Unlocked);
 	}
 
     public void SaveToFile()
@@ -241,6 +248,10 @@ public class Telemetry : MonoBehaviour
             clip.SetData(samples, 0);
             SavWav.Save(graph.name, clip);
         }
+
+		var vr = GetComponent<iVidCapPro>();
+		int ignore;
+		vr.EndRecordingSession (iVidCapPro.VideoDisposition.Save_Video_To_Album, out ignore);
     }
 
     // Update is called once per frame
