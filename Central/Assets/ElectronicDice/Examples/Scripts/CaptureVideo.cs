@@ -19,7 +19,7 @@ public class CaptureVideo
         WebCamTexture tex = new WebCamTexture(cam.name, 1920, 1080, 30);
         tex.Play();
 
-        GetComponent<RawImage>().texture = tex;
+		GetComponent<MeshRenderer> ().material.mainTexture = tex;
 	}
 	
 	// Update is called once per frame

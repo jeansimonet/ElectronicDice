@@ -124,6 +124,13 @@ public class Telemetry : MonoBehaviour
         {
             central.ConnectToDie(newDie, OnDieConnected, OnDieDisconnected);
         });
+
+		var vr = GetComponent<iVidCapPro>();
+		vr.BeginRecordingSession ("DiceCapture",
+			512, 512,
+			30,
+			iVidCapPro.CaptureAudio.Audio_Plus_Mic,
+			iVidCapPro.CaptureFramerateLock.Unlocked);
     }
 
     void Update()
@@ -194,5 +201,9 @@ public class Telemetry : MonoBehaviour
             clip.SetData(samples, 0);
             SavWav.Save(graph.name, clip);
         }
+
+		var vr = GetComponent<iVidCapPro>();
+		int ignore;
+		vr.EndRecordingSession (iVidCapPro.VideoDisposition.Save_Video_To_Album, out ignore);
     }
 }
