@@ -9,7 +9,7 @@ public class OrientImage : MonoBehaviour {
         Screen.autorotateToPortrait = false;
         Screen.autorotateToLandscapeLeft = true;
         Screen.autorotateToLandscapeRight = true;
-        Screen.orientation = ScreenOrientation.Landscape;
+        Screen.orientation = ScreenOrientation.AutoRotation;
     }
 
     // Update is called once per frame
