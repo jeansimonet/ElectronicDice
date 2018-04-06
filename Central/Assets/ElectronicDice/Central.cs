@@ -39,9 +39,16 @@ public class Central
 
     CentralState _state = CentralState.Uninitialized;
 
+    VirtualBluetoothInterface virtualBluetooth;
+
     public CentralState state
     {
         get { return _state; }
+    }
+
+    void Awake()
+    {
+        virtualBluetooth = GetComponent<VirtualBluetoothInterface>();
     }
 
     void Start()
@@ -74,9 +81,16 @@ public class Central
             }
 
             _state = CentralState.Scanning;
-            BluetoothLEHardwareInterface.ScanForPeripheralsWithServices(
-                new string[] { serviceGUID },
+            var services = new string[] { serviceGUID };
+            BluetoothLEHardwareInterface.ScanForPeripheralsWithServices(services,
                 (name, address) => foundDieCallback(CreateDie(name, address)), null, false, false);
+
+            // Also notify virtual dice that we're trying to connect
+            if (virtualBluetooth != null)
+            {
+                virtualBluetooth.ScanForPeripheralsWithServices(services,
+                    (name, address) => foundDieCallback(CreateDie(name, address)), null, false, false);
+            }
         }
         else
         {
@@ -101,6 +115,10 @@ public class Central
         if (_state == CentralState.Scanning)
         {
             BluetoothLEHardwareInterface.StopScan();
+            if (virtualBluetooth != null)
+            {
+                virtualBluetooth.StopScan();
+            }
             _state = CentralState.Idle;
         }
         else
@@ -118,9 +136,8 @@ public class Central
             _state = CentralState.Connecting;
             bool readCharacDiscovered = false;
             bool writeCharacDiscovered = false;
-            BluetoothLEHardwareInterface.ConnectToPeripheral(die.address,
-                null,
-                null,
+
+            System.Action<string, string, string> onCharacteristicDiscovered =
                 (ad, serv, charac) =>
                 {
                     // Check for the service guid to match that for our dice (it's the Simblee one)
@@ -130,17 +147,31 @@ public class Central
                         if (charac == subscribeCharacteristic)
                         {
                             // It's the read characteristic, subscribe to it!
-                            BluetoothLEHardwareInterface.SubscribeCharacteristic(die.address,
-                                serviceGUID,
-                                subscribeCharacteristic,
-                                null,
+                            System.Action<string, byte[]> onDataReceived =
                                 (dev, data) =>
                                 {
                                     if (dev == die.address)
                                     {
                                         die.DataReceived(data);
                                     }
-                                });
+                                };
+
+                            if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
+                            {
+                                BluetoothLEHardwareInterface.SubscribeCharacteristic(die.address,
+                                serviceGUID,
+                                subscribeCharacteristic,
+                                null,
+                                onDataReceived);
+                            }
+                            else
+                            {
+                                virtualBluetooth.SubscribeCharacteristic(die.address,
+                                serviceGUID,
+                                subscribeCharacteristic,
+                                null,
+                                onDataReceived);
+                            }
                             readCharacDiscovered = true;
                         }
                         else if (charac == writeCharacteristic)
@@ -158,14 +189,33 @@ public class Central
                             dieConnectedCallback(die);
                         }
                     }
-                },
+                };
+
+            System.Action<string> onDieDisconnected =
                 (ad) =>
                 {
                     if (ad == die.address)
                     {
                         dieDisconnectedCallback(die);
                     }
-                });
+                };
+
+            if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
+            {
+                BluetoothLEHardwareInterface.ConnectToPeripheral(die.address,
+                    null,
+                    null,
+                    onCharacteristicDiscovered,
+                    onDieDisconnected);
+            }
+            else
+            {
+                virtualBluetooth.ConnectToPeripheral(die.address,
+                    null,
+                    null,
+                    onCharacteristicDiscovered,
+                    onDieDisconnected);
+            }
         }
         else
         {
@@ -176,7 +226,14 @@ public class Central
     public void DisconnectDie(Die die)
     {
         die.Disconnect();
-        BluetoothLEHardwareInterface.DisconnectPeripheral(die.address, null);
+        if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
+        {
+            BluetoothLEHardwareInterface.DisconnectPeripheral(die.address, null);
+        }
+        else
+        {
+            virtualBluetooth.DisconnectPeripheral(die.address, null);
+        }
     }
 
     public void DisconnectAllDice()
@@ -186,6 +243,10 @@ public class Central
             die.Disconnect();
         }
         BluetoothLEHardwareInterface.DisconnectAll();
+        if (virtualBluetooth != null)
+        {
+            virtualBluetooth.DisconnectAll();
+        }
     }
 
     void DestroyDie(Die die)
@@ -195,7 +256,26 @@ public class Central
 
     public void SendBytes(Die die, byte[] bytes, int length, System.Action bytesWrittenCallback)
 	{
-		BluetoothLEHardwareInterface.WriteCharacteristic(die.address, serviceGUID, writeCharacteristic, bytes, length, false, (ignore) => bytesWrittenCallback());
+        if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
+        {
+            BluetoothLEHardwareInterface.WriteCharacteristic(die.address, serviceGUID, writeCharacteristic, bytes, length, false, (ignore) =>
+                {
+                    if (bytesWrittenCallback != null)
+                    {
+                        bytesWrittenCallback();
+                    }
+                });
+        }
+        else
+        {
+            virtualBluetooth.WriteCharacteristic(die.address, serviceGUID, writeCharacteristic, bytes, length, false, (ignore) =>
+                {
+                    if (bytesWrittenCallback != null)
+                    {
+                        bytesWrittenCallback();
+                    }
+                });
+        }
 	}
 
     public void OnApplicationQuit()

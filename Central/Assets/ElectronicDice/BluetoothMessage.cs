@@ -48,6 +48,19 @@ public static class DieMessages
         Marshal.FreeHGlobal(ptr);
         return retMessage;
     }
+
+    // For virtual dice!
+    public static byte[] ToByteArray<T>(T message)
+        where T : DieMessage
+    {
+        int size = Marshal.SizeOf(typeof(T));
+        System.IntPtr ptr = Marshal.AllocHGlobal(size);
+        Marshal.StructureToPtr(message, ptr, false);
+        byte[] ret = new byte[size];
+        Marshal.Copy(ptr, ret, 0, size);
+        Marshal.FreeHGlobal(ptr);
+        return ret;
+    }
 }
 
 public struct DieMessageFace
@@ -89,6 +102,18 @@ public static class CommandMessages
         Marshal.Copy(ptr, ret, 0, size);
         Marshal.FreeHGlobal(ptr);
         return ret;
+    }
+
+    // For virtual dice!
+    public static CommandMessage FromByteArray<T>(byte[] data)
+        where T : CommandMessage
+    {
+        int size = Marshal.SizeOf(typeof(T));
+        System.IntPtr ptr = Marshal.AllocHGlobal(size);
+        Marshal.Copy(data, 0, ptr, size);
+        var retMessage = (T)Marshal.PtrToStructure(ptr, typeof(T));
+        Marshal.FreeHGlobal(ptr);
+        return retMessage;
     }
 }
 

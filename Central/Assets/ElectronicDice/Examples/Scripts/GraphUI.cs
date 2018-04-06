@@ -7,16 +7,9 @@ using System.Linq;
 
 public class GraphUI : MonoBehaviour
 {
-    [SerializeField]
     UILineRenderer lineRenderer;
 
-    [SerializeField]
-    UILineRenderer axesRenderer;
-
-    [SerializeField]
-    Text text;
-
-    public Telemetry.Samples samples
+    public Samples samples
     {
         get;
         set;
@@ -71,6 +64,7 @@ public class GraphUI : MonoBehaviour
 
     private void Awake()
     {
+        lineRenderer = GetComponent<UILineRenderer>();
     }
 
     Vector2 ScaleSample(float s, int t)
@@ -118,20 +112,5 @@ public class GraphUI : MonoBehaviour
 
         lineRenderer.Points = points;
         lineRenderer.SetVerticesDirty();
-
-        // Update text box as well!
-        text.text = lastSample.value.ToString("F2");
-
-        if (axesRenderer != null)
-        {
-            axesRenderer.Points = new Vector2[6];
-            axesRenderer.Points[0] = ScaleSample(0, lastSample.millis);
-            axesRenderer.Points[1] = ScaleSample(0, oldestSample.millis);
-            axesRenderer.Points[2] = ScaleSample(-1, lastSample.millis);
-            axesRenderer.Points[3] = ScaleSample(-1, oldestSample.millis);
-            axesRenderer.Points[4] = ScaleSample(1, lastSample.millis);
-            axesRenderer.Points[5] = ScaleSample(1, oldestSample.millis);
-            axesRenderer.SetVerticesDirty();
-        }
     }
 }
