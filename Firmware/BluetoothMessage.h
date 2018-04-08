@@ -22,10 +22,13 @@ struct DieMessage
 		MessageType_TransferAnimSet,
 		MessageType_TransferAnimSetAck,
 		MessageType_TransferAnimReadyForNextAnim,
+		MessageType_TransferSettings,
+		MessageType_TransferSettingsAck,
 
 		MessageType_PlayAnim,
 		MessageType_PrintName,
 		MessageType_RequestAnimSet,
+		MessageType_RequestSettings,
 		MessageType_Count
 	};
 

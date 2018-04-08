@@ -374,4 +374,45 @@ public class Die
 
         // We've read all the anims!
     }
+
+    public IEnumerator UploadSettings(DieSettings settings)
+    {
+        // Prepare the die
+        var prepareDie = new DieMessageTransferSettings();
+        yield return StartCoroutine(SendMessageWithAck(prepareDie, DieMessageType.TransferSettingsAck));
+
+        // Die is ready, perform bulk transfer of the settings
+        byte[] settingsBytes = DieSettings.ToByteArray(settings);
+        yield return StartCoroutine(UploadBulkData(settingsBytes));
+
+        // We're done!
+    }
+
+    public IEnumerator DownloadSettings(System.Action<DieSettings> settingsReadCallback)
+    {
+        // Request the settings from the die
+        SendMessage(new DieMessageRequestSettings());
+
+        // Now wait for the setup message back
+        bool setupReady = false;
+        MessageReceivedDelegate setupHandler = (msg) =>
+        {
+            var setupMsg = (DieMessageTransferSettings)msg;
+            setupReady = true;
+        };
+
+        AddMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
+        yield return new WaitUntil(() => setupReady);
+        RemoveMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
+
+        // Got the message, acknowledge it
+        StartCoroutine(SendMessage(new DieMessageTransferSettingsAck()));
+
+        byte[] settingsBytes = null;
+        yield return StartCoroutine(DownloadBulkData((buf) => settingsBytes = buf));
+        var newSettings = DieSettings.FromByteArray(settingsBytes);
+
+        // We've read the settings
+        settingsReadCallback.Invoke(newSettings);
+    }
 }

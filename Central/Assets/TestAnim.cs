@@ -9,14 +9,12 @@ public class TestAnim : MonoBehaviour {
 
         Animations.AnimationSet set = new Animations.AnimationSet();
         set.animations = new Animations.RGBAnimation[5];
-        set.count = 5;
-        for (int a = 0; a < 5; ++a)
+        for (int a = 0; a < set.animations.Length; ++a)
         {
             Animations.RGBAnimation anim = new Animations.RGBAnimation();
-            anim.tracks = new Animations.RGBAnimationTrack[4];
-            anim.count = (short)(a + 1);
+            anim.tracks = new Animations.RGBAnimationTrack[a + 1];
             anim.duration = 2500;
-            for (int i = 0; i < anim.count; ++i)
+            for (int i = 0; i < anim.tracks.Length; ++i)
             {
                 var keyframes = new Animations.RGBKeyframe[Animations.Constants.MAX_KEYFRAMES];
                 for (int j = 0; j < 3; ++j)

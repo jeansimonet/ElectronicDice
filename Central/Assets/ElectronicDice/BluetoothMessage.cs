@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
+/// <summary>
+/// These message identifiers have to match up with the ones on the firmware of course!
+/// </summary>
 public enum DieMessageType : byte
 {
     None = 0,
@@ -15,10 +18,13 @@ public enum DieMessageType : byte
     TransferAnimSet,
     TransferAnimSetAck,
     TransferAnimReadyForNextAnim,
+    TransferSettings,
+    TransferSettingsAck,
 
     PlayAnim,
     PrintName,
     RequestAnimSet,
+    RequestSettings,
 }
 
 public interface DieMessage
@@ -174,5 +180,28 @@ public class DieMessageRequestAnimSet
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.RequestAnimSet;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessageTransferSettings
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.TransferSettings;
+    public byte count;
+    public short totalAnimationByteSize;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessageTransferSettingsAck
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.TransferSettingsAck;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessageRequestSettings
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.RequestSettings;
 }
 
