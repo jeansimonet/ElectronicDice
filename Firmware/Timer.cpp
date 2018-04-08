@@ -16,7 +16,7 @@ Timer Systems::timer;
 /// <param name="client">The callback</param>
 void Timer::hook(int resolutionInMicroSeconds, Timer::ClientMethod client, void* param)
 {
-	if (count < 4)
+	if (count < MAX_CLIENTS)
 	{
 		auto& clientInfo = clients[count];
 		clientInfo.callback = client;
@@ -40,7 +40,7 @@ void Timer::hook(int resolutionInMicroSeconds, Timer::ClientMethod client, void*
 void Timer::unHook(Timer::ClientMethod client)
 {
 	int clientIndex = 0;
-	for (; clientIndex < 4; ++clientIndex)
+	for (; clientIndex < MAX_CLIENTS; ++clientIndex)
 	{
 		if (clients[clientIndex].callback == client)
 		{
@@ -48,7 +48,7 @@ void Timer::unHook(Timer::ClientMethod client)
 		}
 	}
 
-	if (clientIndex != 4)
+	if (clientIndex != MAX_CLIENTS)
 	{
 		// Clear the entry and timer entry
 		NRF_TIMER2->CC[clientIndex] = 0;

@@ -64,7 +64,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Firmware;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SimbleeBLE;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\Wire;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries;$(ProjectDir)..\..\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino\avr;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\variants\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee\include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\CMSIS\CMSIS\Include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Firmware;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\SimbleeBLE;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries\Wire;$(ProjectDir)..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\Arduino\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\libraries;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\cores\arduino\avr;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\variants\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\Simblee\include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee\1.1.4\system\CMSIS\CMSIS\Include;$(ProjectDir)..\..\..\Users\frogi\AppData\Local\arduino15\packages\Simblee\hardware\Simblee;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(ProjectDir)__vm\.Firmware.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>RGB_LED;_CONSOLE;F_CPU=16000000;ARDUINO=10805;__Simblee__;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -94,6 +94,7 @@
     <ClInclude Include="Animation.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="AnimationSet.h" />
     <ClInclude Include="AnimController.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -101,9 +102,7 @@
     <ClInclude Include="BluetoothMessage.h">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="CommandMessage.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
+    <ClInclude Include="BulkDataTransfer.h" />
     <ClInclude Include="Console.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -117,25 +116,13 @@
     <ClInclude Include="I2C.h">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="IAnimation.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="IStateEstimator.h" />
     <ClInclude Include="Lazarus.h">
       <FileType>CppCode</FileType>
     </ClInclude>
-    <ClInclude Include="LEDAnimations.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="LEDs.h" />
     <ClInclude Include="Queue.h" />
-    <ClInclude Include="RandomLEDs.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="RingBuffer.h" />
-    <ClInclude Include="RotatingLEDs.h">
-      <FileType>CppCode</FileType>
-    </ClInclude>
     <ClInclude Include="Settings.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -154,18 +141,18 @@
     <ClCompile Include="Accelerometer.cpp" />
     <ClCompile Include="Adafruit_DotStar.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationSet.cpp" />
     <ClCompile Include="AnimController.cpp" />
     <ClCompile Include="APA102LEDs.cpp" />
+    <ClCompile Include="BluetoothMessage.cpp" />
+    <ClCompile Include="BulkDataTransfer.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Die.cpp" />
     <ClCompile Include="EstimatorOnFace.cpp" />
     <ClCompile Include="HWTesting.cpp" />
     <ClCompile Include="I2C.cpp" />
     <ClCompile Include="Lazarus.cpp" />
-    <ClCompile Include="LEDAnimations.cpp" />
     <ClCompile Include="LEDs.cpp" />
-    <ClCompile Include="RandomLEDs.cpp" />
-    <ClCompile Include="RotatingLEDs.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="JerkMonitor.cpp" />
     <ClCompile Include="Telemetry.cpp" />

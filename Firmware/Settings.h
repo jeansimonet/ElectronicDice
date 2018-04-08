@@ -5,27 +5,22 @@
 
 #include "Arduino.h"
 
-/// <summary>
-/// Describes unique settings for this die
-/// </summary>
+#define SETTINGS_PAGE (251)
+#define SETTINGS_VALID_KEY (0x05E77165) // 0SETTINGS in leet speak ;)
+#define SETTINGS_ADDRESS (SETTINGS_PAGE * 1024)
+
 class Settings
 {
 public:
-	Settings();
-
-	void init();
-
-	void readSettings();
-	void writeSettings();
-
+	// Indicates whether there is valid data
+	uint32_t headMarker;
 	char name[16];
+	uint32_t tailMarker;
 
-	// Test
-	int someOtherData;
-	//float someFloatData;
+	bool CheckValid() const;
 };
 
-extern Settings settings;
+extern const Settings* settings;
 
 #endif
 

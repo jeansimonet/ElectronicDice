@@ -1,5 +1,5 @@
 #include "AnimController.h"
-#include "IAnimation.h"
+#include "Animation.h"
 #include "LEDs.h"
 #include "Timer.h"
 #include "Console.h"
@@ -91,7 +91,7 @@ void AnimController::stop()
 /// <summary>
 /// Add an animation to the list of running animations
 /// </summary>
-void AnimController::play(IAnimation* anim)
+void AnimController::play(const Animation* anim)
 {
 	int prevAnimIndex = 0;
 	for (; prevAnimIndex < count; ++prevAnimIndex)
@@ -125,7 +125,7 @@ void AnimController::play(IAnimation* anim)
 /// <summary>
 /// Forcibly stop a currently running animation
 /// </summary>
-void AnimController::stop(IAnimation* anim)
+void AnimController::stop(const Animation* anim)
 {
 	int prevAnimIndex = 0;
 	for (; prevAnimIndex < count; ++prevAnimIndex)

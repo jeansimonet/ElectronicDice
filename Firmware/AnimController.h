@@ -4,7 +4,8 @@
 #define _LEDANIMATIONCONTROLLER_h
 
 #include "Arduino.h"
-#include "IAnimation.h"
+
+class Animation;
 
 #define MAX_ANIMS (5)
 
@@ -20,7 +21,7 @@ private:
 	/// </summary>
 	struct AnimInstance
 	{
-		IAnimation* animation;
+		const Animation* animation;
 		int startTime; //ms
 
 		AnimInstance();
@@ -43,8 +44,8 @@ public:
 	AnimController();
 	void begin();
 	void stop();
-	void play(IAnimation* anim);
-	void stop(IAnimation* anim);
+	void play(const Animation* anim);
+	void stop(const Animation* anim);
 	void stopAll();
 };
 

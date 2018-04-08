@@ -10,12 +10,12 @@
 #include "LEDs.h"
 
 #include "BluetoothMessage.h"
-#include "CommandMessage.h"
 #include "AccelController.h"
 #include "Settings.h"
 #include "AnimController.h"
+#include "Animation.h"
+#include "AnimationSet.h"
 
-#include "LEDAnimations.h"
 #include "Utils.h"
 #include "Telemetry.h"
 #include "JerkMonitor.h"
@@ -29,6 +29,8 @@ using namespace Devices;
 Die::Die()
 {
 	currentFace = 0;
+	memset(messageHandlers, 0, sizeof(Die::HandlerAndToken) * DieMessage::MessageType_Count);
+	updateHandlerCount = 0;
 }
 
 EstimatorOnFace estimatorOnFace;
@@ -64,17 +66,37 @@ void Die::init()
 	leds.setLED(5, 1, 0x00FF00);
 
 	leds.setLED(5, 2, 0xFFFF00);
-	debugPrint("Settings init...");
-	settings.init();
-	debugPrintln("ok");
+	debugPrint("Checking Settings...");
+	if (settings->CheckValid())
+	{
+		debugPrintln("ok");
+	}
+	else
+	{
+		debugPrintln("invalid");
+	}
 	leds.setLED(5, 2, 0x00FF00);
 
 	leds.setLED(5, 3, 0xFFFF00);
 	debugPrint("BLE init...");
+
+	// Hook default message handlers
+	RegisterMessageHandler(DieMessage::MessageType_PlayAnim, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnPlayAnim(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_RequestAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestAnimSet(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_TransferAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateAnimSet(msg); });
+
 	// start the BLE stack
 	SimbleeBLE.end();
-	SimbleeBLE.advertisementData = settings.name;
-	SimbleeBLE.deviceName = settings.name;
+	if (settings->CheckValid())
+	{
+		SimbleeBLE.advertisementData = settings->name;
+		SimbleeBLE.deviceName = settings->name;
+	}
+	else
+	{
+		SimbleeBLE.advertisementData = "ElectronicDie";
+		SimbleeBLE.deviceName = "ElectronicDie";
+	}
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
 	debugPrintln("ok");
@@ -122,12 +144,28 @@ void Die::onReceive(char *data, int len)
 	// Wake up if necessary
 	lazarus.onRadio();
 
-	if (len >= sizeof(CommandMessage))
+	if (len >= sizeof(DieMessage))
 	{
-		auto msg = reinterpret_cast<CommandMessage*>(data);
-		processCommand(msg);
+		auto msg = reinterpret_cast<DieMessage*>(data);
+		auto handler = messageHandlers[(int)msg->type];
+		if (handler.handler != nullptr)
+		{
+			handler.handler(handler.token, msg);
+		}
 	}
 }
+
+bool Die::SendMessage(DieMessage::MessageType msgType)
+{
+	DieMessage msg(msgType);
+	return SimbleeBLE.send(reinterpret_cast<const char*>(&msg), sizeof(msg));
+}
+
+bool Die::SendMessage(const DieMessage* msg, int msgSize)
+{
+	return SimbleeBLE.send(reinterpret_cast<const char*>(msg), msgSize);
+}
+
 
 void Die::update()
 {
@@ -138,28 +176,19 @@ void Die::update()
 
 	timer.update();
 	updateFaceAnimation();
-	//lazarus.update();
+	lazarus.update();
+
+	// Update handlers
+	for (int i = 0; i < updateHandlerCount; ++i)
+	{
+		updateHandlers[i].handler(updateHandlers[i].token);
+	}
 
 	//// Ask the estimators which state we should be in...
 	//for (int i = 0; i < DieState_Count; ++i)
 	//{
 	//	currentState.estimates[i] = stateEstimators[i]->GetEstimate();
 	//}
-}
-
-void Die::processCommand(CommandMessage* msg)
-{
-	switch (msg->type)
-	{
-	case CommandMessage::CommandType_PlayAnim:
-		{
-			auto animMsg = static_cast<CommandMessagePlayAnim*>(msg);
-			playAnimation(animMsg->animation);
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 void Die::updateFaceAnimation()
@@ -179,10 +208,9 @@ void Die::updateFaceAnimation()
 			debugPrintln(currentFace);
 
 			// Send face message
-			DieMessageFace faceMessage;
-			faceMessage.type = DieMessage::MessageType_Face;
-			faceMessage.face = currentFace;
-			SimbleeBLE.send(reinterpret_cast<const char*>(&faceMessage), sizeof(DieMessageFace));
+			DieMessageState faceMessage;
+			faceMessage.state = currentFace;
+			SimbleeBLE.send(reinterpret_cast<const char*>(&faceMessage), sizeof(DieMessageState));
 		}
 	}
 }
@@ -233,21 +261,6 @@ void Die::processConsoleCommand(char* data, int len)
 				playAnimation(animNumber);
 			}
 		}
-		else if (strcmp(commandWord, Keyword_SetName) == 0)
-		{
-			// Parse name, or display it!
-			char newName[17] = "";
-			int nameLength = parseWord(data, len, newName, 17);
-			if (nameLength > 0)
-			{
-				// Set the new name
-				strcpy(settings.name, newName);
-				settings.writeSettings();
-			}
-			// In either case, print out the name
-			debugPrint("Name is: ");
-			debugPrintln(settings.name);
-		}
 		else if (strcmp(commandWord, Keyword_ClearLEDs) == 0)
 		{
 			leds.clearAll();
@@ -279,7 +292,6 @@ void Die::processConsoleCommand(char* data, int len)
 		{
 			debugPrintln("Possible commands:");
 			debugPrintln("  playanim <number> - Plays one of the face animations");
-			debugPrintln("  name <name, optional> - display (or sets) the bluetooth name of the die");
 			debugPrintln("  clearleds - Turns all LEDs off");
 			debugPrintln("  setled <face> <index> <color> - Sets the given LED to the passed in color");
 		}
@@ -293,29 +305,103 @@ void Die::processConsoleCommand(char* data, int len)
 }
 #endif
 
-void Die::playAnimation(int animIndex)
+void Die::RegisterMessageHandler(DieMessage::MessageType msgType, void* token, DieMessageHandler handler)
 {
-	switch (animIndex)
+	if (messageHandlers[msgType].handler != nullptr)
 	{
-	case 0:
-		animController.play(&LEDAnimations::FaceOneSlowPulse);
-		break;
-	case 1:
-		animController.play(&LEDAnimations::rotatingTwo);
-		break;
-	case 2:
-		animController.play(&LEDAnimations::rotatingThree);
-		break;
-	case 3:
-		animController.play(&LEDAnimations::rotatingFour);
-		break;
-	case 4:
-		animController.play(&LEDAnimations::FaceFiveCross);
-		break;
-	case 5:
-		animController.play(&LEDAnimations::rotatingSix);
-		break;
-	case 6:
-		animController.play(&LEDAnimations::randomLEDs);
+		debugPrint("Handler for message ");
+		debugPrint(msgType);
+		debugPrintln(" already set");
+	}
+	else
+	{
+		messageHandlers[msgType].handler = handler;
+		messageHandlers[msgType].token = token;
 	}
 }
+
+void Die::UnregisterMessageHandler(DieMessage::MessageType msgType)
+{
+	messageHandlers[msgType].handler = nullptr;
+	messageHandlers[msgType].token = nullptr;
+}
+
+void Die::RegisterUpdate(void* token, DieUpdateHandler handler)
+{
+	if (updateHandlerCount < UPDATE_MAX_COUNT)
+	{
+		updateHandlers[updateHandlerCount].handler = handler;
+		updateHandlers[updateHandlerCount].token = token;
+		updateHandlerCount++;
+	}
+	else
+	{
+		debugPrint("Too many update handlers");
+	}
+}
+
+void Die::UnregisterUpdateHandler(DieUpdateHandler handler)
+{
+	int clientIndex = 0;
+	for (; clientIndex < 4; ++clientIndex)
+	{
+		if (updateHandlers[clientIndex].handler == handler)
+			break;
+	}
+
+	if (clientIndex != UPDATE_MAX_COUNT)
+	{
+		// Shift entries down
+		updateHandlerCount--;
+		for (; clientIndex < updateHandlerCount; ++clientIndex)
+			updateHandlers[clientIndex] = updateHandlers[clientIndex + 1];
+	}
+}
+
+void Die::UnregisterUpdateToken(void* token)
+{
+	int clientIndex = 0;
+	for (; clientIndex < 4; ++clientIndex)
+	{
+		if (updateHandlers[clientIndex].token == token)
+			break;
+	}
+
+	if (clientIndex != UPDATE_MAX_COUNT)
+	{
+		// Shift entries down
+		updateHandlerCount--;
+		for (; clientIndex < updateHandlerCount; ++clientIndex)
+			updateHandlers[clientIndex] = updateHandlers[clientIndex + 1];
+	}
+}
+
+
+void Die::OnPlayAnim(DieMessage* msg)
+{
+	auto playAnimMsg = static_cast<DieMessagePlayAnim*>(msg);
+	playAnimation(playAnimMsg->animation);
+}
+
+void Die::OnRequestAnimSet(DieMessage* msg)
+{
+	// This will setup the data transfers and unregister itself when done
+	sendAnimSetSM.Setup();
+}
+
+void Die::OnUpdateAnimSet(DieMessage* msg)
+{
+	auto updateAnimSetMsg = (DieMessageTransferAnimSet*)msg;
+	// This will setup the data transfers and unregister itself when done
+	receiveAnimSetSM.Setup(updateAnimSetMsg->count, updateAnimSetMsg->totalAnimationByteSize);
+}
+
+
+void Die::playAnimation(int animIndex)
+{
+	if (animationSet->CheckValid())
+	{
+		animController.play(animationSet->GetAnimation(animIndex));
+	}
+}
+

@@ -26,18 +26,6 @@
     <ClInclude Include="Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IAnimation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LEDAnimations.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RandomLEDs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RotatingLEDs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AccelController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,9 +33,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BluetoothMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommandMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Die.h">
@@ -104,6 +89,12 @@
     <ClInclude Include="float3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AnimationSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BulkDataTransfer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_DotStar.cpp">
@@ -133,16 +124,7 @@
     <ClCompile Include="Lazarus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LEDAnimations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LEDs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RandomLEDs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RotatingLEDs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Settings.cpp">
@@ -167,6 +149,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EstimatorOnFace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BulkDataTransfer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BluetoothMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
