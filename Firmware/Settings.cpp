@@ -12,10 +12,12 @@ bool Settings::CheckValid() const
 
 ReceiveSettingsSM::ReceiveSettingsSM()
 	: currentState(State_Done)
+	, FinishedCallbackHandler(nullptr)
+	, FinishedCallbackToken(nullptr)
 {
 }
 
-void ReceiveSettingsSM::Setup()
+void ReceiveSettingsSM::Setup(void* token, FinishedCallback handler)
 {
 	currentState = State_ErasingFlash;
 	if (flashPageErase(SETTINGS_PAGE) != 0)
@@ -24,6 +26,9 @@ void ReceiveSettingsSM::Setup()
 		currentState = State_Done;
 		return;
 	}
+
+	FinishedCallbackHandler = handler;
+	FinishedCallbackToken = token;
 
 	// Register for update so we can try to send ack messages
 	die.RegisterUpdate(this, [](void* token)
@@ -70,6 +75,13 @@ void ReceiveSettingsSM::Update()
 void ReceiveSettingsSM::Finish()
 {
 	currentState = State_Done;
+
+	if (FinishedCallbackHandler != nullptr)
+	{
+		FinishedCallbackHandler(FinishedCallbackToken);
+		FinishedCallbackHandler = nullptr;
+		FinishedCallbackToken = nullptr;
+	}
 }
 
 
@@ -78,14 +90,19 @@ void ReceiveSettingsSM::Finish()
 
 SendSettingsSM::SendSettingsSM()
 	: currentState(State_Done)
+	, FinishedCallbackHandler(nullptr)
+	, FinishedCallbackToken(nullptr)
 {
 }
 
-void SendSettingsSM::Setup()
+void SendSettingsSM::Setup(void* token, FinishedCallback handler)
 {
 	if (settings->CheckValid())
 	{
 		currentState = State_SendingSetup;
+
+		FinishedCallbackHandler = handler;
+		FinishedCallbackToken = token;
 
 		die.RegisterUpdate(this, [](void* token)
 		{
@@ -135,5 +152,12 @@ void SendSettingsSM::Update()
 void SendSettingsSM::Finish()
 {
 	currentState = State_Done;
+
+	if (FinishedCallbackHandler != nullptr)
+	{
+		FinishedCallbackHandler(FinishedCallbackToken);
+		FinishedCallbackHandler = nullptr;
+		FinishedCallbackToken = nullptr;
+	}
 }
 

@@ -61,12 +61,16 @@ private:
 	Animation** animationPtrInFlash;
 	ReceiveBulkDataSM receiveBulkDataSM;
 
+	typedef void(*FinishedCallback)(void* token);
+	FinishedCallback FinishedCallbackHandler;
+	void* FinishedCallbackToken;
+
 private:
 	void Finish();
 
 public:
 	ReceiveAnimSetSM();
-	void Setup(short animCount, short totalAnimByteSize);
+	void Setup(short animCount, short totalAnimByteSize, void* token, FinishedCallback handler);
 	void Update();
 };
 
@@ -94,12 +98,16 @@ private:
 	// Temporarily stores animation pointers as we program them in flash
 	SendBulkDataSM sendBulkDataSM;
 
+	typedef void(*FinishedCallback)(void* token);
+	FinishedCallback FinishedCallbackHandler;
+	void* FinishedCallbackToken;
+
 private:
 	void Finish();
 
 public:
 	SendAnimSetSM();
-	void Setup();
+	void Setup(void* token, FinishedCallback handler);
 	void Update();
 };
 

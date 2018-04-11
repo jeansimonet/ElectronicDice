@@ -19,12 +19,7 @@ void Telemetry::begin()
 
 	// Ask the acceleration controller to be notified when
 	// new acceleration data comes in!
-	accelController.hook(accelControllerCallback, nullptr);
-}
-
-void Telemetry::accelControllerCallback(void* ignore, const AccelFrame& frame)
-{
-	telemetry.onAccelFrame(frame);
+	accelController.hook([](void* token, const AccelFrame& frame) {((Telemetry*)token)->onAccelFrame(frame); }, this);
 }
 
 void Telemetry::onAccelFrame(const AccelFrame& frame)
@@ -53,6 +48,12 @@ void Telemetry::onAccelFrame(const AccelFrame& frame)
 
 	// Always remember the last frame, so we can extract delta time!
 	lastAccelFrame = frame;
+}
+
+void Telemetry::stop()
+{
+	// Stop being notified!
+	accelController.unHookWithParam(this);
 }
 
 

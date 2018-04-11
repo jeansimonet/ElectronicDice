@@ -1,5 +1,6 @@
 #include "Timer.h"
 #include "Debug.h"
+#include "Die.h"
 
 using namespace Systems;
 
@@ -105,6 +106,7 @@ Timer::Timer()
 /// </summary>
 void Timer::begin()
 {
+	die.RegisterUpdate(this, [](void* token) {((Timer*)token)->update(); });
 	NRF_TIMER2->TASKS_START = 1;	// Start TIMER
 }
 
@@ -114,6 +116,7 @@ void Timer::begin()
 void Timer::stop()
 {
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
+	die.UnregisterUpdateToken(this);
 }
 
 int total = 0;

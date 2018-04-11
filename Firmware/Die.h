@@ -10,8 +10,9 @@
 #include "Settings.h"
 #include "IStateEstimator.h"
 #include "AnimationSet.h"
+#include "DelegateArray.h"
 
-#define UPDATE_MAX_COUNT 4
+#define UPDATE_MAX_COUNT 8
 
 class Animation;
 
@@ -36,20 +37,14 @@ private:
 	};
 	HandlerAndToken messageHandlers[DieMessage::MessageType_Count];
 
-
 	// Update message handlers
 	typedef void(*DieUpdateHandler)(void* token);
-
-	struct UpdateAndToken
-	{
-		DieUpdateHandler handler;
-		void* token;
-	};
-	UpdateAndToken updateHandlers[UPDATE_MAX_COUNT];
-	int updateHandlerCount;
+	DelegateArray<DieUpdateHandler, UPDATE_MAX_COUNT> updateHandlers;
 
 	SendAnimSetSM sendAnimSetSM;
 	ReceiveAnimSetSM receiveAnimSetSM;
+	SendSettingsSM sendSettingsSM;
+	ReceiveSettingsSM receiveSettingsSM;
 
 public:
 	Die();
@@ -68,19 +63,24 @@ public:
 	void UnregisterUpdateHandler(DieUpdateHandler handler);
 	void UnregisterUpdateToken(void* token);
 
+	void playAnimation(int animIndex);
+
 private:
 	void updateFaceAnimation();
+	void PauseModules();
+	void ResumeModules();
 
 #if defined(_CONSOLE)
 	void processConsole();
-	void processConsoleCommand(char* data, int len);
 #endif
-	void playAnimation(int animIndex);
 
 	// Message handlers
 	void OnPlayAnim(DieMessage* msg);
 	void OnRequestAnimSet(DieMessage* msg);
 	void OnUpdateAnimSet(DieMessage* msg);
+	void OnRequestSettings(DieMessage* msg);
+	void OnUpdateSettings(DieMessage* msg);
+	void OnRequestTelemetry(DieMessage* msg);
 };
 
 // The global die!

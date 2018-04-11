@@ -18,7 +18,6 @@ public class Telemetry : MonoBehaviour
     public Text recordText;
 
     Central central;
-    int messageCount = 0;
 
     Dictionary<Die, TelemetryDie> discoveredDice;
     Dictionary<Die, TelemetryDie> trackedDice;

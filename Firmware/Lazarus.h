@@ -24,6 +24,7 @@ namespace Systems
 		void onRadio();
 		void poke();
 		void update();
+		void stop();
 	};
 
 	extern Lazarus lazarus;

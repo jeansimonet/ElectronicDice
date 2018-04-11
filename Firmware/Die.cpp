@@ -30,7 +30,6 @@ Die::Die()
 {
 	currentFace = 0;
 	memset(messageHandlers, 0, sizeof(Die::HandlerAndToken) * DieMessage::MessageType_Count);
-	updateHandlerCount = 0;
 }
 
 EstimatorOnFace estimatorOnFace;
@@ -68,13 +67,9 @@ void Die::init()
 	leds.setLED(5, 2, 0xFFFF00);
 	debugPrint("Checking Settings...");
 	if (settings->CheckValid())
-	{
 		debugPrintln("ok");
-	}
 	else
-	{
 		debugPrintln("invalid");
-	}
 	leds.setLED(5, 2, 0x00FF00);
 
 	leds.setLED(5, 3, 0xFFFF00);
@@ -84,6 +79,9 @@ void Die::init()
 	RegisterMessageHandler(DieMessage::MessageType_PlayAnim, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnPlayAnim(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_RequestAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestAnimSet(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_TransferAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateAnimSet(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_RequestSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestSettings(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_TransferSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateSettings(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_RequestTelemetry, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestTelemetry(msg); });
 
 	// start the BLE stack
 	SimbleeBLE.end();
@@ -106,7 +104,6 @@ void Die::init()
 	debugPrint("Modules init...");
 	animController.begin(); // Talks to controller
 	accelController.begin();
-	telemetry.begin();
 	lazarus.init();
 	jerkMonitor.begin();
 	debugPrintln("ok");
@@ -174,12 +171,10 @@ void Die::update()
 	processConsole();
 #endif
 
-	timer.update();
 	updateFaceAnimation();
-	lazarus.update();
 
 	// Update handlers
-	for (int i = 0; i < updateHandlerCount; ++i)
+	for (int i = 0; i < updateHandlers.Count(); ++i)
 	{
 		updateHandlers[i].handler(updateHandlers[i].token);
 	}
@@ -215,6 +210,20 @@ void Die::updateFaceAnimation()
 	}
 }
 
+void Die::PauseModules()
+{
+	timer.stop();
+	lazarus.stop();
+	leds.clearAll();
+}
+
+void Die::ResumeModules()
+{
+	lazarus.init();
+	timer.begin();
+}
+
+
 #if defined(_CONSOLE)
 /// <summary>
 /// Processes any input on the serial port, if any
@@ -225,82 +234,7 @@ void Die::processConsole()
 	{
 		char buffer[32];
 		int len = console.readBytesUntil('\n', buffer, 32);
-		processConsoleCommand(buffer, len);
-	}
-}
-#endif
-
-#if defined(_CONSOLE)
-const char Keyword_PlayAnim[] = "playanim";
-const char Keyword_SetName[] = "name";
-const char Keyword_ClearLEDs[] = "clearleds";
-const char Keyword_SetLED[] = "setled";
-
-const char Keyword_Help[] = "help";
-
-/// /// <summary>
-/// Processes a console command, parsing the command name and parameters
-/// </summary>
-/// <param name="data">The command buffer</param>
-/// <param name="len">The length of the command buffer</param>
-void Die::processConsoleCommand(char* data, int len)
-{
-	char commandWord[20] = "";
-	int commandLength = parseWord(data, len, commandWord, 20);
-	if (commandLength > 0)
-	{
-		if (strcmp(commandWord, Keyword_PlayAnim) == 0)
-		{
-			// Parse animation number
-			char number[4] = "";
-			int numberLength = parseWord(data, len, number, 4);
-			if (numberLength > 0)
-			{
-				// Convert the number and run the animation!
-				int animNumber = atoi(number);
-				playAnimation(animNumber);
-			}
-		}
-		else if (strcmp(commandWord, Keyword_ClearLEDs) == 0)
-		{
-			leds.clearAll();
-		}
-		else if (strcmp(commandWord, Keyword_SetLED) == 0)
-		{
-			// Parse number of face
-			char face[4] = "";
-			int faceLength = parseWord(data, len, face, 4);
-			if (faceLength > 0)
-			{
-				char led[4] = "";
-				int ledLength = parseWord(data, len, led, 4);
-				if (ledLength > 0)
-				{
-					char color[10] = "";
-					int colorLength = parseWord(data, len, color, 10);
-					if (colorLength)
-					{
-						int f = atoi(face);
-						int l = atoi(led);
-						uint32_t c = strtol(color, nullptr, 16);
-						leds.setLED(f, l, c);
-					}
-				}
-			}
-		}
-		else if (strcmp(commandWord, Keyword_Help) == 0)
-		{
-			debugPrintln("Possible commands:");
-			debugPrintln("  playanim <number> - Plays one of the face animations");
-			debugPrintln("  clearleds - Turns all LEDs off");
-			debugPrintln("  setled <face> <index> <color> - Sets the given LED to the passed in color");
-		}
-		else
-		{
-			debugPrint("Unknown command \'");
-			debugPrint(commandWord);
-			debugPrintln("\', type help for list of available commands");
-		}
+		console.processCommand(buffer, len);
 	}
 }
 #endif
@@ -328,13 +262,7 @@ void Die::UnregisterMessageHandler(DieMessage::MessageType msgType)
 
 void Die::RegisterUpdate(void* token, DieUpdateHandler handler)
 {
-	if (updateHandlerCount < UPDATE_MAX_COUNT)
-	{
-		updateHandlers[updateHandlerCount].handler = handler;
-		updateHandlers[updateHandlerCount].token = token;
-		updateHandlerCount++;
-	}
-	else
+	if (!updateHandlers.Register(token, handler))
 	{
 		debugPrint("Too many update handlers");
 	}
@@ -342,40 +270,13 @@ void Die::RegisterUpdate(void* token, DieUpdateHandler handler)
 
 void Die::UnregisterUpdateHandler(DieUpdateHandler handler)
 {
-	int clientIndex = 0;
-	for (; clientIndex < 4; ++clientIndex)
-	{
-		if (updateHandlers[clientIndex].handler == handler)
-			break;
-	}
-
-	if (clientIndex != UPDATE_MAX_COUNT)
-	{
-		// Shift entries down
-		updateHandlerCount--;
-		for (; clientIndex < updateHandlerCount; ++clientIndex)
-			updateHandlers[clientIndex] = updateHandlers[clientIndex + 1];
-	}
+	updateHandlers.UnregisterWithHandler(handler);
 }
 
 void Die::UnregisterUpdateToken(void* token)
 {
-	int clientIndex = 0;
-	for (; clientIndex < 4; ++clientIndex)
-	{
-		if (updateHandlers[clientIndex].token == token)
-			break;
-	}
-
-	if (clientIndex != UPDATE_MAX_COUNT)
-	{
-		// Shift entries down
-		updateHandlerCount--;
-		for (; clientIndex < updateHandlerCount; ++clientIndex)
-			updateHandlers[clientIndex] = updateHandlers[clientIndex + 1];
-	}
+	updateHandlers.UnregisterWithToken(token);
 }
-
 
 void Die::OnPlayAnim(DieMessage* msg)
 {
@@ -385,17 +286,52 @@ void Die::OnPlayAnim(DieMessage* msg)
 
 void Die::OnRequestAnimSet(DieMessage* msg)
 {
+	PauseModules();
+
 	// This will setup the data transfers and unregister itself when done
-	sendAnimSetSM.Setup();
+	sendAnimSetSM.Setup(this, [](void* tok) {((Die*)tok)->ResumeModules(); });
 }
 
 void Die::OnUpdateAnimSet(DieMessage* msg)
 {
+	PauseModules();
+
 	auto updateAnimSetMsg = (DieMessageTransferAnimSet*)msg;
 	// This will setup the data transfers and unregister itself when done
-	receiveAnimSetSM.Setup(updateAnimSetMsg->count, updateAnimSetMsg->totalAnimationByteSize);
+	receiveAnimSetSM.Setup(updateAnimSetMsg->count, updateAnimSetMsg->totalAnimationByteSize,
+		this, [](void* tok) {((Die*)tok)->ResumeModules(); });
 }
 
+void Die::OnRequestSettings(DieMessage* msg)
+{
+	PauseModules();
+
+	// This will setup the data transfers and unregister itself when done
+	sendSettingsSM.Setup(this, [](void* tok) {((Die*)tok)->ResumeModules(); });
+}
+
+void Die::OnUpdateSettings(DieMessage* msg)
+{
+	PauseModules();
+
+	// This will setup the data transfers and unregister itself when done
+	receiveSettingsSM.Setup(this, [](void* tok) {((Die*)tok)->ResumeModules(); });
+}
+
+void Die::OnRequestTelemetry(DieMessage* msg)
+{
+	auto telemMsg = (DieMessageRequestTelemetry*)msg;
+	if (telemMsg->telemetry)
+	{
+		// Turn telemetry on
+		telemetry.begin();
+	}
+	else
+	{
+		// Turn telemetry off
+		telemetry.stop();
+	}
+}
 
 void Die::playAnimation(int animIndex)
 {

@@ -5,6 +5,7 @@
 #include "SimbleeBLE.h"
 #include "Accelerometer.h"
 #include "Lazarus.h"
+#include "Die.h"
 
 using namespace Systems;
 using namespace Devices;
@@ -37,6 +38,8 @@ void Lazarus::init()
 	pinMode(accelPin, INPUT_PULLUP);
 
 	lastMillis = millis();
+
+	die.RegisterUpdate(this, [](void* token) {((Lazarus*)token)->update(); });
 }
 
 /// <summary>
@@ -115,3 +118,10 @@ void Lazarus::sleepUntilInterrupt()
 	Simblee_pinWake(radioPin, DISABLE);
 }
 
+/// <summary>
+/// Stop wanting to put the die to sleep!
+/// </summary>
+void Lazarus::stop()
+{
+	die.UnregisterUpdateToken(this);
+}

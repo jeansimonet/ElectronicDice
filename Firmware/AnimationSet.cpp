@@ -70,18 +70,23 @@ ReceiveAnimSetSM::ReceiveAnimSetSM()
 	, currentAnim(0)
 	, currentState(State_Done)
 	, currentAnimFlashAddress(0)
+	, FinishedCallbackHandler(nullptr)
+	, FinishedCallbackToken(nullptr)
 {
 }
 
 /// <summary>
 /// Prepare to receive an animation set, erase the flash, etc...
 /// </summary>
-void ReceiveAnimSetSM::Setup(short animCount, short totalAnimByteSize)
+void ReceiveAnimSetSM::Setup(short animCount, short totalAnimByteSize, void* token, FinishedCallback handler)
 {
 	count = animCount;
 	currentAnim = 0;
 	currentState = State_ErasingFlash;
 	currentAnimFlashAddress = ANIMATION_SET_ADDRESS;
+
+	FinishedCallbackHandler = handler;
+	FinishedCallbackToken = token;
 
 	// This small array will keep track of the animation pointers we've
 	// written to flash, so that we can then write them in the animation set itself!
@@ -224,6 +229,13 @@ void ReceiveAnimSetSM::Finish()
 	}
 	animationPtrInFlash = nullptr;
 	die.UnregisterUpdateToken(this);
+
+	if (FinishedCallbackHandler != nullptr)
+	{
+		FinishedCallbackHandler(FinishedCallbackToken);
+		FinishedCallbackHandler = nullptr;
+		FinishedCallbackToken = nullptr;
+	}
 }
 
 
@@ -236,18 +248,23 @@ void ReceiveAnimSetSM::Finish()
 SendAnimSetSM::SendAnimSetSM()
 	: currentAnim(0)
 	, currentState(State_Done)
+	, FinishedCallbackHandler(nullptr)
+	, FinishedCallbackToken(nullptr)
 {
 }
 
 /// <summary>
 /// Prepare for sending the animation set data over bluetooth
 /// </summary>
-void SendAnimSetSM::Setup()
+void SendAnimSetSM::Setup(void* token, FinishedCallback handler)
 {
 	if (animationSet->CheckValid())
 	{
 		currentAnim = 0;
 		currentState = State_SendingSetup;
+
+		FinishedCallbackHandler = handler;
+		FinishedCallbackToken = token;
 
 		die.RegisterUpdate(this, [](void* token)
 		{
@@ -341,5 +358,12 @@ void SendAnimSetSM::Finish()
 	currentAnim = 0;
 	currentState = State_Done;
 	die.UnregisterUpdateToken(this);
+
+	if (FinishedCallbackHandler != nullptr)
+	{
+		FinishedCallbackHandler(FinishedCallbackToken);
+		FinishedCallbackHandler = nullptr;
+		FinishedCallbackToken = nullptr;
+	}
 }
 

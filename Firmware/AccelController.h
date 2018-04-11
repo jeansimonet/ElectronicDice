@@ -6,6 +6,7 @@
 #include "Arduino.h"
 #include "RingBuffer.h"
 #include "float3.h"
+#include "DelegateArray.h"
 
 #define ACCEL_BUFFER_SIZE 100 // 10ms * 100 = 1 seconds of buffer
 							  // 16 bytes * 128 = 2k of RAM
@@ -43,15 +44,7 @@ private:
 	// This small buffer stores about 1 second of Acceleration data
 	Core::RingBuffer<AccelFrame, ACCEL_BUFFER_SIZE> buffer;
 
-	struct Client
-	{
-		ClientMethod callback;
-		void* param;
-	};
-
-	// Clients needing to be notified when accelerometer readings come in
-	Client clients[MAX_CLIENTS];
-	int clientCount;
+	DelegateArray<ClientMethod, MAX_CLIENTS> clients;
 
 private:
 	// To be passed to the timer
@@ -71,6 +64,7 @@ public:
 	// Notification management
 	void hook(ClientMethod method, void* param);
 	void unHook(ClientMethod client);
+	void unHookWithParam(void* param);
 };
 
 extern AccelerationController accelController;

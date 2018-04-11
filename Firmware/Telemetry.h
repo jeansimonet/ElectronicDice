@@ -19,11 +19,9 @@ namespace Systems
 		AccelFrame lastAccelFrame;
 		bool lastAccelWasSent;
 
-	private:
-		static void accelControllerCallback(void* ignore, const AccelFrame& frame);
-
 	public:
 		void begin();
+		void stop();
 		void onAccelFrame(const AccelFrame& frame);
 	};
 

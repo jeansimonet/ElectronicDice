@@ -71,9 +71,9 @@ void AccelerationController::timerUpdate()
 	buffer.push(newFrame);
 
 	// Notify clients
-	for (int i = 0; i < clientCount; ++i)
+	for (int i = 0; i < clients.Count(); ++i)
 	{
-		clients[i].callback(clients[i].param, newFrame);
+		clients[i].handler(clients[i].token, newFrame);
 	}
 }
 
@@ -176,13 +176,7 @@ int AccelerationController::determineFace(float x, float y, float z)
 /// </summary>
 void AccelerationController::hook(AccelerationController::ClientMethod callback, void* parameter)
 {
-	if (clientCount < MAX_CLIENTS)
-	{
-		clients[clientCount].callback = callback;
-		clients[clientCount].param = parameter;
-		clientCount++;
-	}
-	else
+	if (!clients.Register(parameter, callback))
 	{
 		debugPrintln("Too many accelerometer hooks registered.");
 	}
@@ -193,33 +187,14 @@ void AccelerationController::hook(AccelerationController::ClientMethod callback,
 /// </summary>
 void AccelerationController::unHook(AccelerationController::ClientMethod callback)
 {
-	int clientIndex = 0;
-	for (; clientIndex < 4; ++clientIndex)
-	{
-		if (clients[clientIndex].callback == callback)
-		{
-			break;
-		}
-	}
+	clients.UnregisterWithHandler(callback);
+}
 
-	if (clientIndex != 4)
-	{
-		// Clear the entry
-		clients[clientIndex].callback = nullptr;
-		clients[clientIndex].param = nullptr;
-
-		// Shift entries down
-		for (; clientIndex < clientCount - 1; ++clientIndex)
-		{
-			clients[clientIndex] = clients[clientIndex + 1];
-		}
-
-		// Decrement total count
-		clientCount--;
-	}
-	else
-	{
-		debugPrintln("Accelerometer hook was not found in the list of registered hooks.");
-	}
+/// <summary>
+/// Method used by clients to stop getting accelerometer reading callbacks
+/// </summary>
+void AccelerationController::unHookWithParam(void* param)
+{
+	clients.UnregisterWithToken(param);
 }
 

@@ -278,18 +278,12 @@ public class Die
     public IEnumerator DownloadBulkData(System.Action<byte[]> onBufferReady)
     {
         // Wait for setup message
-        bool setupReady = false;
         short size = 0;
-        MessageReceivedDelegate waitForSetup = (msg) =>
+        yield return StartCoroutine(WaitForMessage(DieMessageType.BulkSetup, (msg) =>
         {
             var setupMsg = (DieMessageBulkSetup)msg;
             size = setupMsg.size;
-            setupReady = true;
-        };
-
-        AddMessageHandler(DieMessageType.BulkSetup, waitForSetup);
-        yield return new WaitUntil(() => setupReady);
-        RemoveMessageHandler(DieMessageType.BulkSetup, waitForSetup);
+        }));
 
         // Allocate a byte buffer
         byte[] buffer = new byte[size];
@@ -345,18 +339,12 @@ public class Die
         SendMessage(new DieMessageRequestAnimSet());
 
         // Now wait for the setup message back
-        bool setupReady = false;
         int animCount = 0;
-        MessageReceivedDelegate setupHandler = (msg) =>
+        yield return StartCoroutine(WaitForMessage(DieMessageType.TransferAnimSet, (msg) =>
         {
             var setupMsg = (DieMessageTransferAnimSet)msg;
             animCount = setupMsg.count;
-            setupReady = true;
-        };
-
-        AddMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
-        yield return new WaitUntil(() => setupReady);
-        RemoveMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
+        }));
 
         // Got the message, acknowledge it
         StartCoroutine(SendMessage(new DieMessageTransferAnimSetAck()));
@@ -394,16 +382,7 @@ public class Die
         SendMessage(new DieMessageRequestSettings());
 
         // Now wait for the setup message back
-        bool setupReady = false;
-        MessageReceivedDelegate setupHandler = (msg) =>
-        {
-            var setupMsg = (DieMessageTransferSettings)msg;
-            setupReady = true;
-        };
-
-        AddMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
-        yield return new WaitUntil(() => setupReady);
-        RemoveMessageHandler(DieMessageType.TransferAnimSet, setupHandler);
+        yield return StartCoroutine(WaitForMessage(DieMessageType.TransferSettings, null));
 
         // Got the message, acknowledge it
         StartCoroutine(SendMessage(new DieMessageTransferSettingsAck()));

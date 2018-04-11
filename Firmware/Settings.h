@@ -4,6 +4,7 @@
 #define _DICESETTINGS_h
 
 #include "Arduino.h"
+#include "BulkDataTransfer.h"
 
 #define SETTINGS_PAGE (251)
 #define SETTINGS_VALID_KEY (0x05E77165) // 0SETTINGS in leet speak ;)
@@ -40,12 +41,16 @@ private:
 	State currentState;
 	ReceiveBulkDataSM receiveBulkDataSM;
 
+	typedef void(*FinishedCallback)(void* token);
+	FinishedCallback FinishedCallbackHandler;
+	void* FinishedCallbackToken;
+
 private:
 	void Finish();
 
 public:
 	ReceiveSettingsSM();
-	void Setup();
+	void Setup(void* token, FinishedCallback handler);
 	void Update();
 };
 
@@ -70,12 +75,16 @@ private:
 	// Temporarily stores animation pointers as we program them in flash
 	SendBulkDataSM sendBulkDataSM;
 
+	typedef void(*FinishedCallback)(void* token);
+	FinishedCallback FinishedCallbackHandler;
+	void* FinishedCallbackToken;
+
 private:
 	void Finish();
 
 public:
 	SendSettingsSM();
-	void Setup();
+	void Setup(void* token, FinishedCallback handler);
 	void Update();
 };
 

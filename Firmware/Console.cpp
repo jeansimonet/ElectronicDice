@@ -1,8 +1,12 @@
 #include "Console.h"
+#include "Utils.h"
+#include "Die.h"
+#include "LEDs.h"
 
 #if defined(_CONSOLE)
 
 using namespace Systems;
+using namespace Core;
 
 Console Systems::console;
 
@@ -24,6 +28,79 @@ int Console::available()
 size_t Console::readBytesUntil(char terminator, char *buffer, size_t length)
 {
 	Serial.readBytesUntil(terminator, buffer, length);
+}
+
+const char Keyword_PlayAnim[] = "playanim";
+const char Keyword_SetName[] = "name";
+const char Keyword_ClearLEDs[] = "clearleds";
+const char Keyword_SetLED[] = "setled";
+
+const char Keyword_Help[] = "help";
+
+/// <summary>
+/// Processes a console command, parsing the command name and parameters
+/// </summary>
+/// <param name="data">The command buffer</param>
+/// <param name="len">The length of the command buffer</param>
+void Console::processCommand(char* data, int len)
+{
+	char commandWord[20] = "";
+	int commandLength = parseWord(data, len, commandWord, 20);
+	if (commandLength > 0)
+	{
+		if (strcmp(commandWord, Keyword_PlayAnim) == 0)
+		{
+			// Parse animation number
+			char number[4] = "";
+			int numberLength = parseWord(data, len, number, 4);
+			if (numberLength > 0)
+			{
+				// Convert the number and run the animation!
+				int animNumber = atoi(number);
+				die.playAnimation(animNumber);
+			}
+		}
+		else if (strcmp(commandWord, Keyword_ClearLEDs) == 0)
+		{
+			leds.clearAll();
+		}
+		else if (strcmp(commandWord, Keyword_SetLED) == 0)
+		{
+			// Parse number of face
+			char face[4] = "";
+			int faceLength = parseWord(data, len, face, 4);
+			if (faceLength > 0)
+			{
+				char led[4] = "";
+				int ledLength = parseWord(data, len, led, 4);
+				if (ledLength > 0)
+				{
+					char color[10] = "";
+					int colorLength = parseWord(data, len, color, 10);
+					if (colorLength)
+					{
+						int f = atoi(face);
+						int l = atoi(led);
+						uint32_t c = strtol(color, nullptr, 16);
+						leds.setLED(f, l, c);
+					}
+				}
+			}
+		}
+		else if (strcmp(commandWord, Keyword_Help) == 0)
+		{
+			println("Possible commands:");
+			println("  playanim <number> - Plays one of the face animations");
+			println("  clearleds - Turns all LEDs off");
+			println("  setled <face> <index> <color> - Sets the given LED to the passed in color");
+		}
+		else
+		{
+			print("Unknown command \'");
+			print(commandWord);
+			println("\', type help for list of available commands");
+		}
+	}
 }
 
 void Console::print(const char string[])

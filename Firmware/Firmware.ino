@@ -30,6 +30,7 @@ void setup()
 	SimbleeBLE.deviceName = "Dice_Boot";
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
+	delay(1000);
 	//----------------
 	// !!!IMPORTANT!!!
 	//----------------

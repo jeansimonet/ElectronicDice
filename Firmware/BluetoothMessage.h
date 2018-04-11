@@ -29,6 +29,7 @@ struct DieMessage
 		MessageType_PrintName,
 		MessageType_RequestAnimSet,
 		MessageType_RequestSettings,
+		MessageType_RequestTelemetry,
 		MessageType_Count
 	};
 
@@ -103,6 +104,14 @@ struct DieMessagePlayAnim
 	byte animation;
 
 	inline DieMessagePlayAnim() : DieMessage(DieMessage::MessageType_PlayAnim) {}
+};
+
+struct DieMessageRequestTelemetry
+	: public DieMessage
+{
+	bool telemetry;
+
+	inline DieMessageRequestTelemetry() : DieMessage(DieMessage::MessageType_RequestTelemetry) {}
 };
 
 #endif

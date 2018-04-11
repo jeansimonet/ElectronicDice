@@ -42,6 +42,7 @@ namespace Systems
 
 		int available();
 		size_t readBytesUntil(char terminator, char *buffer, size_t length);
+		void processCommand(char* data, int len);
 	};
 
 	extern Console console;

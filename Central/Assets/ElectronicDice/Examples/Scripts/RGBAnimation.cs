@@ -76,7 +76,6 @@ namespace Animations
             short count = (short)anim.tracks.Length;
             Marshal.WriteInt16(ptr, 0, anim.duration);
             Marshal.WriteInt16(ptr, 2, count);
-            int size = trackSize * count + 4;
 
             for (int i = 0; i < count; ++i)
             {
