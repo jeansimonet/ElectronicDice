@@ -9,6 +9,7 @@ using namespace Systems;
 #define DATAPIN		30
 #define CLOCKPIN	29
 #define NUMPIXELS	21
+#define POWERPIN	4
 
 // The actual led strip!
 Adafruit_DotStar strip(NUMPIXELS, DATAPIN, CLOCKPIN, DOTSTAR_BGR);
@@ -76,6 +77,11 @@ Face RGBFaces[] =
 
 void APA102LEDs::init()
 {
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(POWERPIN, 0);
+
+	delay(200);
+
 	strip.begin(); // Initialize pins for output
 	for (int i = 0; i < NUMPIXELS; ++i)
 	{

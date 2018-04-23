@@ -4,9 +4,13 @@
 
 namespace Tests
 {
+	void TestSerial();
 	void TestI2C();
 	void TestAcc();
 	void TestLED();
+	void TestLEDPower();
+	void TestSleepForever();
+	void TestSleepAwakeAcc();
 }
 
 #endif
