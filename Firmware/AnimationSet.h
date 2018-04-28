@@ -9,10 +9,11 @@
 
 #define MAX_ANIMATIONS (64)
 #define ANIMATION_SET_START_PAGE (250)
+#define PAGE_SIZE (1024) // bytes
 #define ANIMATION_SET_VALID_KEY (0x600DF00D) // Good Food ;)
 // We place animation set and animations in descending addresses
 // So the animation set is at the top of the page
-#define ANIMATION_SET_ADDRESS ((ANIMATION_SET_START_PAGE + 1) * 1024 - sizeof(AnimationSet))
+#define ANIMATION_SET_ADDRESS ((ANIMATION_SET_START_PAGE + 1) * PAGE_SIZE - sizeof(AnimationSet))
 
 /// <summary>
 /// The Animation set is the set of all die animations. It is mapped directly to flash!
@@ -22,7 +23,7 @@ class AnimationSet
 private:
 	// Indicates whether there is valid data
 	uint32_t headMarker;
-	Animation* animations[MAX_ANIMATIONS];
+	const Animation* animations[MAX_ANIMATIONS];
 	uint32_t count;
 	uint32_t tailMarker;
 
@@ -31,6 +32,22 @@ public:
 	int ComputeAnimationTotalSize() const;
 	uint32_t Count() const;
 	const Animation* GetAnimation(int index) const;
+
+	struct ProgrammingToken
+	{
+		// Temporarily stores animation pointers as we program them in flash
+		const Animation* animationPtrInFlash[MAX_ANIMATIONS];
+		int currentCount;
+		uint32_t nextAnimFlashAddress;
+	};
+
+	static bool EraseAnimations(size_t totalAnimByteSize, ProgrammingToken& outToken);
+	static bool TransferAnimation(const Animation* sourceAnim, ProgrammingToken& inOutToken);
+	static bool TransferAnimationRaw(const void* rawData, size_t rawDataSize, ProgrammingToken& inOutToken);
+	static bool TransferAnimationSet(const Animation** sourceAnims, uint32_t animCount);
+
+private:
+	static void PrintError(int error);
 };
 
 // The animation set in flash memory
@@ -53,12 +70,9 @@ private:
 	};
 
 	short count;
-	short currentAnim;
 	State currentState;
-	uint32_t currentAnimFlashAddress;
 
-	// Temporarily stores animation pointers as we program them in flash
-	Animation** animationPtrInFlash;
+	AnimationSet::ProgrammingToken progToken;
 	ReceiveBulkDataSM receiveBulkDataSM;
 
 	typedef void(*FinishedCallback)(void* token);

@@ -3,8 +3,14 @@
 #include "Accelerometer.h"
 #include "Adafruit_DotStar.h"
 #include "Accelerometer.h"
+#include "Timer.h"
+#include "LEDs.h"
+#include "AnimController.h"
+#include "Settings.h"
+#include "AnimationSet.h"
 
 using namespace Devices;
+using namespace Systems;
 
 /// <summary>
 /// Writes to the serial port
@@ -99,38 +105,41 @@ void Tests::TestAcc()
 					else
 					{
 						Serial.println("Ok");
-						//Serial.println("Reading acceleration");
-
-						//// Read registers!
-						//for (int i = 0; i < 1000; ++i)
-						//{
-						//	byte rawData[6];  // x/y/z accel register data stored here
-						//	Systems::wire.beginTransmission(0x1C);
-						//	Systems::wire.write(OUT_X_MSB);
-						//	Systems::wire.endTransmission(false); //endTransmission but keep the connection active
-
-						//	Systems::wire.requestFrom(0x1C, 6); //Ask for bytes, once done, bus is released by default
-
-						//	while (Systems::wire.available() < 6); //Hang out until we get the # of bytes we expect
-
-						//	for (int x = 0; x < 6; x++)
-						//		rawData[x] = Systems::wire.read();
-
-						//	short x = ((short)(rawData[0] << 8 | rawData[1])) >> 4;
-						//	short y = ((short)(rawData[2] << 8 | rawData[3])) >> 4;
-						//	short z = ((short)(rawData[4] << 8 | rawData[5])) >> 4;
-						//	Serial.print("x: ");
-						//	Serial.print(x);
-						//	Serial.print(", y: ");
-						//	Serial.print(y);
-						//	Serial.print(", z: ");
-						//	Serial.println(z);
-						//}
 					}
 				}
 			}
 			break;
 		}
+	}
+}
+
+
+/// <summary>
+/// Attempts to read from the Accelerometer repeatedly
+/// </summary>
+void Tests::TestAccDice()
+{
+	Serial.begin(9600);
+	Serial.print("Initializing I2C...");
+	Systems::wire.begin();
+	Serial.println("Ok...");
+
+
+	Serial.print("Initializing accelerometer");
+	accelerometer.init();
+	Serial.println("Ok");
+
+	Serial.println("Trying to read from Accelerometer...");
+	while (true)
+	{
+		accelerometer.read();
+		Serial.print("x: ");
+		Serial.print(accelerometer.cx);
+		Serial.print("  y: ");
+		Serial.print(accelerometer.cy);
+		Serial.print("  z: ");
+		Serial.println(accelerometer.cz);
+		delay(500);
 	}
 }
 
@@ -182,26 +191,36 @@ void Tests::TestLED()
 {
 	Serial.begin(9600);
 	Serial.println("Trying to Control APA102 LEDs.");
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(POWERPIN, 0);
 
 	strip.begin();
 	while (true)
 	{
-		Serial.println("Forcing Power ON.");
-		pinMode(POWERPIN, OUTPUT);
+		rainbowCycle(5);
+	}
+}
+
+/// <summary>
+/// Drive the LEDs Repeatedly
+/// </summary>
+void Tests::TestLEDSlow()
+{
+	Serial.begin(9600);
+	Serial.println("Trying to Control APA102 LEDs.");
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(POWERPIN, 0);
+
+	strip.begin();
+	while (true)
+	{
 		digitalWrite(POWERPIN, 0);
-
 		rainbowCycle(5);
-
-		Serial.println("Forcing Power OFF.");
-		pinMode(POWERPIN, OUTPUT);
+		for (int i = 0; i < 21; ++i)
+			strip.setPixelColor(i, 0);
+		strip.show();
 		digitalWrite(POWERPIN, 1);
-
-		rainbowCycle(5);
-
-		Serial.println("Forcing Input");
-		pinMode(POWERPIN, INPUT);
-
-		rainbowCycle(5);
+		delay(3000);
 	}
 }
 
@@ -226,6 +245,38 @@ void Tests::TestLEDPower()
 	}
 }
 
+void Tests::TestLEDDice()
+{
+	Serial.begin(9600);
+	Serial.print("Initializing LEDs...");
+	leds.init();
+	Serial.println("Ok");
+
+	while (true)
+	{
+		Serial.println("Increasing brightness from black to white");
+		for (int b = 0; b < 256; ++b)
+		{
+			leds.setAll(b | (b << 8) | (b << 16));
+			delay(10);
+		}
+		for (int b = 255; b >= 0; --b)
+		{
+			leds.setAll(b | (b << 8) | (b << 16));
+			delay(10);
+		}
+		Serial.println("Cycling colors");
+		for (int k = 0; k < 5; ++k)
+		{
+			for (int j = 0; j<256; j++)
+			{
+				leds.setAll(Wheel(j));
+				delay(5);
+			}
+		}
+	}
+}
+
 void Tests::TestSleepForever()
 {
 	Serial.begin(9600);
@@ -236,15 +287,22 @@ void Tests::TestSleepForever()
 }
 
 #define radioPin 31
-#define accelPin 23
+#define accelPin 20
 
 
 void Tests::TestSleepAwakeAcc()
 {
 	Serial.begin(9600);
+	Serial.print("Initializing I2C...");
+	Systems::wire.begin();
+	Serial.println("Ok");
 
-	Serial.print("Initializing accelerometer");
+	Serial.print("Initializing accelerometer...");
 	accelerometer.init();
+	Serial.println("Ok");
+
+	// Set accelerometer interrupt pin as an input!
+	pinMode(accelPin, INPUT_PULLUP);
 
 	while (true)
 	{
@@ -281,4 +339,236 @@ void Tests::TestSleepAwakeAcc()
 		Serial.print("1...");
 		delay(1000);
 	}
+}
+
+void Tests::TestSettings()
+{
+	Serial.begin(9600);
+
+	Serial.print("Checking Settings...");
+	bool ok = settings->CheckValid();
+	if (ok)
+	{
+		Serial.println("Ok");
+		Serial.print("Dice name: ");
+		Serial.println(settings->name);
+	}
+	else
+	{
+		Serial.println("Not initialized");
+	}
+
+	Serial.print("Erasing settings flash page");
+	if (Settings::EraseSettings())
+	{
+		Serial.println("Ok");
+		Serial.print("Writing some settings...");
+		Settings settingsToWrite;
+		strncpy(settingsToWrite.name, "TestingSettings", 16);
+		if (Settings::TransferSettings(&settingsToWrite))
+		{
+			Serial.println("Ok");
+			Serial.println("Settings content");
+			Serial.println(settings->headMarker, HEX);
+			Serial.println(settings->name);
+			Serial.println(settings->tailMarker, HEX);
+
+			Serial.print("Checking settings again...");
+			ok = settings->CheckValid();
+			if (ok)
+			{
+				Serial.println("Ok");
+				Serial.print("Dice name: ");
+				Serial.println(settings->name);
+			}
+			else
+			{
+				Serial.println("Not initialized");
+			}
+		}
+		else
+		{
+			Serial.println("Error writing settings");
+		}
+	}
+	else
+	{
+		Serial.println("Error erasing flash");
+	}
+}
+
+void Tests::TestAnimationSet()
+{
+	auto printAnimationSet = []()
+	{
+		Serial.print("Set contains ");
+		Serial.print(animationSet->Count());
+		Serial.println(" animations");
+
+		for (int i = 0; i < animationSet->Count(); ++i)
+		{
+			auto anim = animationSet->GetAnimation(i);
+			Serial.print("Anim ");
+			Serial.print(i);
+			Serial.print(" contains ");
+			Serial.print(anim->TrackCount());
+			Serial.println(" tracks");
+
+			for (int j = 0; j < anim->TrackCount(); ++j)
+			{
+				auto& track = anim->GetTrack(j);
+				Serial.print("Anim ");
+				Serial.print(i);
+				Serial.print(", track ");
+				Serial.print(j);
+				Serial.print(" has ");
+				Serial.print(track.count);
+				Serial.print(" keyframes, starts at ");
+				Serial.print(track.startTime);
+				Serial.print(" ms, lasts ");
+				Serial.print(track.duration);
+				Serial.print(" ms and controls LED ");
+				Serial.println(track.ledIndex);
+
+				for (int k = 0; k < track.count; ++k)
+				{
+					auto& keyframe = track.keyframes[k];
+					Serial.print("(");
+					Serial.print(keyframe.time);
+					Serial.print("ms = ");
+					Serial.print(keyframe.red);
+					Serial.print(", ");
+					Serial.print(keyframe.green);
+					Serial.print(", ");
+					Serial.print(keyframe.blue);
+					Serial.print(") ");
+				}
+			}
+		}
+		Serial.println();
+	};
+
+	Serial.begin(9600);
+
+	Serial.print("Checking AnimationSet...");
+	bool ok = animationSet->CheckValid();
+	if (ok)
+	{
+		Serial.println("Ok");
+		printAnimationSet();
+	}
+	else
+	{
+		Serial.println("Not initialized");
+	}
+
+	// We're going to program a few animations!
+	// Create them
+	AnimationTrack updown;
+	updown.keyframes[0].time = 0;
+	updown.keyframes[0].red = 0;
+	updown.keyframes[0].green = 0;
+	updown.keyframes[0].blue = 0;
+
+	updown.keyframes[1].time = 128;
+	updown.keyframes[1].red = 255;
+	updown.keyframes[1].green = 255;
+	updown.keyframes[1].blue = 255;
+
+	updown.keyframes[2].time = 255;
+	updown.keyframes[2].red = 0;
+	updown.keyframes[2].green = 0;
+	updown.keyframes[2].blue = 0;
+
+	updown.count = 3;
+	updown.startTime = 0;	// ms
+	updown.duration = 1000;	// ms
+	updown.ledIndex = 0;
+	
+	Animation* anim1 = Animation::AllocateAnimation(1);
+	anim1->SetTrack(updown, 0);
+
+	Serial.print("Erasing animation flash pages...");
+	AnimationSet::ProgrammingToken token;
+	if (AnimationSet::EraseAnimations(anim1->ComputeByteSize(), token))
+	{
+		Serial.println("Ok");
+		Serial.print("Writing 1 animation...");
+		if (AnimationSet::TransferAnimation(anim1, token))
+		{
+			Serial.println("Ok");
+			Serial.print("Writing animation set...");
+			if (AnimationSet::TransferAnimationSet(token.animationPtrInFlash, token.currentCount))
+			{
+				Serial.println("Ok");
+
+				// Clean up memory
+				free(anim1);
+
+				Serial.print("Checking AnimationSet again...");
+				if (animationSet->CheckValid())
+				{
+					Serial.println("Ok");
+					printAnimationSet();
+				}
+				else
+				{
+					Serial.println("Not initialized");
+				}
+			}
+			else
+			{
+				Serial.println("Error writing animation set");
+			}
+		}
+		else
+		{
+			Serial.println("Error writing animation");
+		}
+	}
+	else
+	{
+		Serial.println("Error erasing flash");
+	}
+}
+
+
+void Tests::TestTimerSetup()
+{
+	Serial.begin(9600);
+
+	Serial.print("Setting some callback...");
+	Systems::timer.hook(100000, [](void* ignore) {Serial.println("Callback!"); }, nullptr);
+	Serial.println("Ok");
+
+	Serial.print("Initializing Timer...");
+	Systems::timer.begin();
+	Serial.println("Ok");
+}
+
+void Tests::TestTimerUpdate()
+{
+	Systems::timer.update();
+}
+
+void Tests::TestAnimationsSetup()
+{
+	Serial.begin(9600);
+
+	Serial.print("Initializing LEDs...");
+	Serial.println("Ok");
+
+
+	Serial.print("Initializing animation controller...");
+	animController.begin();
+	Serial.println("Ok");
+
+	Serial.print("Initializing Timer...");
+	Systems::timer.begin();
+	Serial.println("Ok");
+}
+
+void Tests::TestAnimationsUpdate()
+{
+
 }

@@ -24,9 +24,10 @@ struct DieMessage
 		MessageType_TransferAnimReadyForNextAnim,
 		MessageType_TransferSettings,
 		MessageType_TransferSettingsAck,
+		MessageType_DebugLog,
 
 		MessageType_PlayAnim,
-		MessageType_PrintName,
+		MessageType_RequestState,
 		MessageType_RequestAnimSet,
 		MessageType_RequestSettings,
 		MessageType_RequestTelemetry,
@@ -97,6 +98,16 @@ struct DieMessageTransferAnimSet
 
 	inline DieMessageTransferAnimSet() : DieMessage(DieMessage::MessageType_TransferAnimSet) {}
 };
+
+#pragma pack(push, 1)
+struct DieMessageDebugLog
+	: public DieMessage
+{
+	char text[19];
+
+	inline DieMessageDebugLog() : DieMessage(DieMessage::MessageType_DebugLog) {}
+};
+#pragma pack(pop)
 
 struct DieMessagePlayAnim
 	: public DieMessage

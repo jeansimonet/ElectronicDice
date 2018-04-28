@@ -148,6 +148,53 @@ int Animation::totalDuration() const
 /// </summary>
 int Animation::ComputeByteSize() const
 {
-	return sizeof(Animation) + sizeof(AnimationTrack) * (count - 1);
+	return ComputeByteSizeForTracks(count);
+}
+
+/// <summary>
+/// Helper to add tracks to an animation. Used for testing
+/// </summary>
+bool Animation::SetTrack(const AnimationTrack& track, int index)
+{
+	if (index < count)
+	{
+		tracks[index] = track;
+		short trackEnd = track.startTime + track.duration;
+		if (duration < trackEnd)
+		{
+			duration = trackEnd;
+		}
+	}
+}
+
+int Animation::TrackCount() const
+{
+	return count;
+}
+
+/// <summary>
+/// Returns a track
+/// </summary>
+const AnimationTrack& Animation::GetTrack(int index) const
+{
+	return tracks[index];
+}
+
+
+/// <summary>
+/// Computes how much space an animation would actually take, given an expected number of tracks
+/// </summary>
+int Animation::ComputeByteSizeForTracks(int trackCount)
+{
+	return sizeof(Animation) + sizeof(AnimationTrack) * (trackCount - 1);
+}
+
+/// <summary>
+/// Allocates a new animation, client must free it!
+/// </summary>
+Animation* Animation::AllocateAnimation(int trackCount)
+{
+	Animation* ret = (Animation*)malloc(ComputeByteSizeForTracks(trackCount));
+	ret->count = trackCount;
 }
 

@@ -59,6 +59,108 @@ const Animation* AnimationSet::GetAnimation(int index) const
 }
 
 
+bool AnimationSet::EraseAnimations(size_t totalAnimByteSize, ProgrammingToken& outToken)
+{
+	// How many pages will we need?
+	int totalSize = totalAnimByteSize + sizeof(AnimationSet);
+	int pageCount = (totalSize + PAGE_SIZE - 1) / PAGE_SIZE; // a page is 1k, and we want to round up!
+
+	// Erase all necessary pages
+	bool eraseSuccessful = true;
+	for (int i = 0; i < pageCount; ++i)
+	{
+		int res = flashPageErase(ANIMATION_SET_START_PAGE - i);
+		if (res != 0)
+		{
+			debugPrint("Not enough free pages (needed ");
+			debugPrint(pageCount);
+			debugPrint(" pages for ");
+			debugPrint(totalSize);
+			debugPrintln(" bytes of animation data)");
+			eraseSuccessful = false;
+			break;
+		}
+	}
+	if (eraseSuccessful)
+	{
+		outToken.currentCount = 0;
+		outToken.nextAnimFlashAddress = ANIMATION_SET_ADDRESS;
+	}
+	return eraseSuccessful;
+}
+
+bool AnimationSet::TransferAnimation(const Animation* sourceAnimation, ProgrammingToken& inOutToken)
+{
+	return TransferAnimationRaw(sourceAnimation, sourceAnimation->ComputeByteSize(), inOutToken);
+}
+
+bool AnimationSet::TransferAnimationRaw(const void* rawData, size_t rawDataSize, ProgrammingToken& inOutToken)
+{
+	// The reason we're subtracting here is that we place animation set and animations in descending addresses
+	inOutToken.nextAnimFlashAddress -= rawDataSize;
+	Animation* dst = (Animation*)inOutToken.nextAnimFlashAddress;
+	int res = flashWriteBlock(dst, rawData, rawDataSize);
+	if (res == 0)
+	{
+		// Remember the address of this new animation
+		inOutToken.animationPtrInFlash[inOutToken.currentCount] = dst;
+		inOutToken.currentCount++;
+	}
+	else
+	{
+		PrintError(res);
+	}
+	return res == 0;
+}
+
+bool AnimationSet::TransferAnimationSet(const Animation ** sourceAnims, uint32_t animCount)
+{
+	// We overwrite the members manually!
+	uint32_t* progAnimationSetRaw = (uint32_t*)ANIMATION_SET_ADDRESS;
+	int res = flashWrite(progAnimationSetRaw, ANIMATION_SET_VALID_KEY);
+	if (res == 0)
+	{
+		progAnimationSetRaw += 1;
+		res = flashWriteBlock(progAnimationSetRaw, sourceAnims, sizeof(Animation*) * animCount);
+		if (res == 0)
+		{
+			progAnimationSetRaw += sizeof(Animation*) * MAX_ANIMATIONS / 4;
+			res = flashWrite(progAnimationSetRaw, animCount);
+			if (res == 0)
+			{
+				progAnimationSetRaw += 1;
+				res = flashWrite(progAnimationSetRaw, ANIMATION_SET_VALID_KEY);
+			}
+		}
+	}
+
+	if (res != 0)
+	{
+		PrintError(res);
+	}
+	return res == 0;
+}
+
+void AnimationSet::PrintError(int error)
+{
+	// Print error message if any
+	switch (error)
+	{
+	case 1:
+		debugPrint("Animations could not be written, reserved page");
+		break;
+	case 2:
+		debugPrint("Animations could not be written, sketch page");
+		break;
+	case 4:
+		debugPrint("Bad data size");
+		break;
+	default:
+		break;
+	}
+}
+
+
 //-----------------------------------------------------------------------------
 
 
@@ -67,9 +169,7 @@ const Animation* AnimationSet::GetAnimation(int index) const
 /// </summary>
 ReceiveAnimSetSM::ReceiveAnimSetSM()
 	: count(0)
-	, currentAnim(0)
 	, currentState(State_Done)
-	, currentAnimFlashAddress(0)
 	, FinishedCallbackHandler(nullptr)
 	, FinishedCallbackToken(nullptr)
 {
@@ -81,38 +181,17 @@ ReceiveAnimSetSM::ReceiveAnimSetSM()
 void ReceiveAnimSetSM::Setup(short animCount, short totalAnimByteSize, void* token, FinishedCallback handler)
 {
 	count = animCount;
-	currentAnim = 0;
 	currentState = State_ErasingFlash;
-	currentAnimFlashAddress = ANIMATION_SET_ADDRESS;
 
 	FinishedCallbackHandler = handler;
 	FinishedCallbackToken = token;
-
-	// This small array will keep track of the animation pointers we've
-	// written to flash, so that we can then write them in the animation set itself!
-	animationPtrInFlash = (Animation**)malloc(sizeof(Animation*) * count);
 
 	// How many pages will we need?
 	int totalSize = totalAnimByteSize + sizeof(AnimationSet);
 	int pageCount = (totalSize + 1023) / 1024; // a page is 1k, and we want to round up!
 
 	// Erase all necessary pages
-	bool eraseSuccessful = true;
-	for (int i = 0; i < pageCount; ++i)
-	{
-		if (flashPageErase(ANIMATION_SET_START_PAGE - i) != 0)
-		{
-			debugPrint("Not enough free pages (needed ");
-			debugPrint(pageCount);
-			debugPrint(" pages for ");
-			debugPrint(totalSize);
-			debugPrintln(" bytes of animation data)");
-			eraseSuccessful = false;
-			break;
-		}
-	}
-
-	if (eraseSuccessful)
+	if (AnimationSet::EraseAnimations(totalSize, progToken))
 	{
 		// Register for update so we can try to send ack messages
 		die.RegisterUpdate(this, [](void* token)
@@ -151,14 +230,8 @@ void ReceiveAnimSetSM::Update()
 			if (receiveBulkDataSM.TransferComplete())
 			{
 				// The anim data is ready, copy it to flash!
-				// The reason we're subtracting here is that we place animation set and animations in descending addresses
-				currentAnimFlashAddress -= receiveBulkDataSM.mallocSize;
-				Animation* dst = (Animation*)currentAnimFlashAddress;
-				if (flashWriteBlock(dst, receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize) != 0)
+				if (!AnimationSet::TransferAnimationRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize, progToken))
 				{
-					debugPrint("Could not write animation ");
-					debugPrint(currentAnim);
-					debugPrintln(" to flash");
 					receiveBulkDataSM.Finish();
 					Finish();
 				}
@@ -167,22 +240,10 @@ void ReceiveAnimSetSM::Update()
 					// Clean up memory allocated by the bulk transfer
 					receiveBulkDataSM.Finish();
 
-					// Remember the address of this new animation
-					animationPtrInFlash[currentAnim] = dst;
-					currentAnim++;
-
-					if (currentAnim == count)
+					if (progToken.currentCount == count)
 					{
 						// No more anims to receive, program AnimationSet in flash
-						// We overwrite it manually!
-						uint32_t* progAnimationSetRaw = (uint32_t*)ANIMATION_SET_ADDRESS;
-						flashWrite(progAnimationSetRaw, ANIMATION_SET_VALID_KEY);
-						progAnimationSetRaw += sizeof(uint32_t);
-						flashWriteBlock(progAnimationSetRaw, animationPtrInFlash, sizeof(Animation*) * count);
-						progAnimationSetRaw += sizeof(Animation*) * MAX_ANIMATIONS;
-						flashWrite(progAnimationSetRaw, count);
-						progAnimationSetRaw += sizeof(uint32_t);
-						flashWrite(progAnimationSetRaw, ANIMATION_SET_VALID_KEY);
+						AnimationSet::TransferAnimationSet(progToken.animationPtrInFlash, count);
 
 						// Clean up animation table too
 						Finish();
@@ -220,14 +281,7 @@ void ReceiveAnimSetSM::Update()
 void ReceiveAnimSetSM::Finish()
 {
 	count = 0;
-	currentAnim = 0;
 	currentState = State_Done;
-	currentAnimFlashAddress = 0;
-	if (animationPtrInFlash != nullptr)
-	{
-		free(animationPtrInFlash);
-	}
-	animationPtrInFlash = nullptr;
 	die.UnregisterUpdateToken(this);
 
 	if (FinishedCallbackHandler != nullptr)

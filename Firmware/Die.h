@@ -76,6 +76,7 @@ private:
 
 	// Message handlers
 	void OnPlayAnim(DieMessage* msg);
+	void OnRequestState(DieMessage* msg);
 	void OnRequestAnimSet(DieMessage* msg);
 	void OnUpdateAnimSet(DieMessage* msg);
 	void OnRequestSettings(DieMessage* msg);

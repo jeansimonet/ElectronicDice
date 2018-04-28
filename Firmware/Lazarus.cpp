@@ -13,7 +13,7 @@ using namespace Devices;
 Lazarus Systems::lazarus;
 
 #define radioPin 31
-#define accelPin 23
+#define accelPin 20
 
 #define AUTO_SLEEP_AFTER 10000 // 10s
 

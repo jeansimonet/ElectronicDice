@@ -19,6 +19,10 @@ public:
 	uint32_t tailMarker;
 
 	bool CheckValid() const;
+
+	static bool EraseSettings();
+	static bool TransferSettings(Settings* sourceSettings);
+	static bool TransferSettingsRaw(void* rawData, size_t rawDataSize);
 };
 
 extern const Settings* settings;

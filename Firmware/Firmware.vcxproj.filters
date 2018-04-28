@@ -98,6 +98,9 @@
     <ClInclude Include="DelegateArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BLEConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Adafruit_DotStar.cpp">
@@ -161,6 +164,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BluetoothMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BLEConsole.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

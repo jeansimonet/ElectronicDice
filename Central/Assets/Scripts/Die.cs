@@ -80,6 +80,7 @@ public class Die
         // Setup delegates for face and telemetry
         messageDelegates.Add(DieMessageType.State, OnStateMessage);
         messageDelegates.Add(DieMessageType.Telemetry, OnTelemetryMessage);
+        messageDelegates.Add(DieMessageType.DebugLog, OnDebugLogMessage);
     }
 
 	// Use this for initialization
@@ -97,8 +98,7 @@ public class Die
 	{
 		if (connected)
 		{
-			byte[] data = new byte[] { (byte)'A', (byte)'N', (byte)'I', (byte)'M', (byte)animationIndex };
-			_sendBytes.SendBytes(this, data, 5, null);
+            SendMessage(new DieMessagePlayAnim() { index = (byte)animationIndex });
 		}
 	}
 
@@ -107,10 +107,9 @@ public class Die
 	{
 		if (connected)
 		{
-			byte[] data = new byte[] { (byte)'R', (byte)'D', (byte)'G', (byte)'T' };
-			_sendBytes.SendBytes(this, data, 4, null);
-		}
-	}
+            SendMessage(new DieMessageRequestState());
+        }
+    }
 
 	public void ForceState(State forcedState)
 	{
@@ -252,6 +251,13 @@ public class Die
                 OnTelemetry.Invoke(acc, lastSampleTime);
             }
         }
+    }
+
+    void OnDebugLogMessage(DieMessage message)
+    {
+        var dlm = (DieMessageDebugLog)message;
+        string text = System.Text.Encoding.UTF8.GetString(dlm.data, 0, dlm.data.Length);
+        Debug.Log(name + ": " + text);
     }
 
     public IEnumerator UploadBulkData(byte[] bytes)

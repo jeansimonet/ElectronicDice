@@ -20,11 +20,13 @@ public enum DieMessageType : byte
     TransferAnimReadyForNextAnim,
     TransferSettings,
     TransferSettingsAck,
+    DebugLog,
 
     PlayAnim,
-    PrintName,
+    RequestState,
     RequestAnimSet,
     RequestSettings,
+    RequestTelemetry,
 }
 
 public interface DieMessage
@@ -66,8 +68,26 @@ public static class DieMessages
                 case DieMessageType.TransferAnimSetAck:
                     ret = FromByteArray<DieMessageTransferAnimSetAck>(data);
                     break;
+                case DieMessageType.TransferSettings:
+                    ret = FromByteArray<DieMessageTransferSettings>(data);
+                    break;
+                case DieMessageType.TransferSettingsAck:
+                    ret = FromByteArray<DieMessageTransferSettingsAck>(data);
+                    break;
+                case DieMessageType.DebugLog:
+                    ret = FromByteArray<DieMessageDebugLog>(data);
+                    break;
+                case DieMessageType.PlayAnim:
+                    ret = FromByteArray<DieMessagePlayAnim>(data);
+                    break;
                 case DieMessageType.RequestAnimSet:
                     ret = FromByteArray<DieMessageRequestAnimSet>(data);
+                    break;
+                case DieMessageType.RequestSettings:
+                    ret = FromByteArray<DieMessageRequestSettings>(data);
+                    break;
+                case DieMessageType.RequestTelemetry:
+                    ret = FromByteArray<DieMessageRequestTelemetry>(data);
                     break;
                 default:
                     break;
@@ -203,5 +223,38 @@ public class DieMessageRequestSettings
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.RequestSettings;
+}
+
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessageRequestTelemetry
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.RequestTelemetry;
+    public bool telemetry;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageDebugLog
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.DebugLog;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
+    public byte[] data;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessagePlayAnim
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.PlayAnim;
+    public byte index;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public class DieMessageRequestState
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.RequestState;
 }
 

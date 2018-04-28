@@ -77,6 +77,7 @@ void Die::init()
 
 	// Hook default message handlers
 	RegisterMessageHandler(DieMessage::MessageType_PlayAnim, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnPlayAnim(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_RequestState, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestState(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_RequestAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestAnimSet(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_TransferAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateAnimSet(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_RequestSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestSettings(msg); });
@@ -282,6 +283,14 @@ void Die::OnPlayAnim(DieMessage* msg)
 {
 	auto playAnimMsg = static_cast<DieMessagePlayAnim*>(msg);
 	playAnimation(playAnimMsg->animation);
+}
+
+void Die::OnRequestState(DieMessage* msg)
+{
+	// Send face message
+	DieMessageState faceMessage;
+	faceMessage.state = currentFace;
+	SimbleeBLE.send(reinterpret_cast<const char*>(&faceMessage), sizeof(DieMessageState));
 }
 
 void Die::OnRequestAnimSet(DieMessage* msg)

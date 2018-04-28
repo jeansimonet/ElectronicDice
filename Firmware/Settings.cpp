@@ -9,6 +9,61 @@ bool Settings::CheckValid() const
 	return headMarker == SETTINGS_VALID_KEY && tailMarker == SETTINGS_VALID_KEY;
 }
 
+bool Settings::EraseSettings()
+{
+	return flashPageErase(SETTINGS_PAGE) == 0;
+}
+
+bool Settings::TransferSettings(Settings* sourceSettings)
+{
+	char* sourceRaw = (char*)sourceSettings;
+	return TransferSettingsRaw(sourceRaw + sizeof(uint32_t), sizeof(Settings) - 2 * sizeof(uint32_t));
+}
+
+bool Settings::TransferSettingsRaw(void* rawData, size_t rawDataSize)
+{
+	int res = 0;
+	uint32_t expected = sizeof(Settings) - 2 * sizeof(uint32_t);
+	if (rawDataSize == expected)
+	{
+		uint32_t* settingsRaw = (uint32_t*)SETTINGS_ADDRESS;
+		res = flashWrite(settingsRaw, SETTINGS_VALID_KEY);
+		if (res == 0)
+		{
+			settingsRaw += 1;
+			res = flashWriteBlock(settingsRaw, rawData, rawDataSize);
+			if (res == 0)
+			{
+				settingsRaw += rawDataSize / 4;
+				res = flashWrite(settingsRaw, SETTINGS_VALID_KEY);
+			}
+		}
+	}
+	else
+	{
+		res = 4;
+	}
+
+	// Print error message if any
+	switch (res)
+	{
+	case 1:
+		debugPrint("Settings could not be written, reserved page");
+		break;
+	case 2:
+		debugPrint("Settings could not be written, sketch page");
+		break;
+	case 4:
+		debugPrint("Bad settings raw data size ");
+		debugPrint(rawDataSize);
+		debugPrint(", expected ");
+		debugPrintln(expected);
+		break;
+	default:
+		break;
+	}
+	return res == 0;
+}
 
 ReceiveSettingsSM::ReceiveSettingsSM()
 	: currentState(State_Done)
@@ -20,7 +75,7 @@ ReceiveSettingsSM::ReceiveSettingsSM()
 void ReceiveSettingsSM::Setup(void* token, FinishedCallback handler)
 {
 	currentState = State_ErasingFlash;
-	if (flashPageErase(SETTINGS_PAGE) != 0)
+	if (!Settings::EraseSettings())
 	{
 		debugPrintln("Error erasing flash for settings");
 		currentState = State_Done;
@@ -54,12 +109,10 @@ void ReceiveSettingsSM::Update()
 		if (receiveBulkDataSM.TransferComplete())
 		{
 			// Write the data to flash!
-			uint32_t* settingsRaw = (uint32_t*)SETTINGS_ADDRESS;
-			flashWrite(settingsRaw, SETTINGS_VALID_KEY);
-			settingsRaw += sizeof(uint32_t);
-			flashWriteBlock(settingsRaw, receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize);
-			settingsRaw += receiveBulkDataSM.mallocSize;
-			flashWrite(settingsRaw, SETTINGS_VALID_KEY);
+			if (!Settings::TransferSettingsRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize))
+			{
+				debugPrint("Error writting settings");
+			}
 
 			// And we're done!
 			receiveBulkDataSM.Finish();

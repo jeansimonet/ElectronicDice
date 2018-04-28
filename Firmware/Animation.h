@@ -57,6 +57,14 @@ public:
 	int stop(int retIndices[]) const;
 	int totalDuration() const;
 	int ComputeByteSize() const;
+
+	// Used for testing, manually creating animations
+	bool SetTrack(const AnimationTrack& track, int index);
+	int TrackCount() const;
+	const AnimationTrack& GetTrack(int index) const;
+
+	static int ComputeByteSizeForTracks(int trackCount);
+	static Animation* AllocateAnimation(int trackCount);
 };
 
 #endif
