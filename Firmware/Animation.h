@@ -38,6 +38,7 @@ public:
 
 	uint32_t evaluateNormalized(int time) const;
 	uint32_t evaluate(int time) const;
+	void AddKeyframe(byte time, byte red, byte green, byte blue);
 };
 
 /// <summary>

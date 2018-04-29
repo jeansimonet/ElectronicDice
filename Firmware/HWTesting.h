@@ -16,6 +16,8 @@ namespace Tests
 	void TestSleepAwakeAcc();
 	void TestSettings();
 	void TestAnimationSet();
+	void TestBattery();
+	void TestCharging();
 
 	void TestTimerSetup();
 	void TestTimerUpdate();

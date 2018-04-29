@@ -96,6 +96,18 @@ uint32_t AnimationTrack::evaluate(int time) const
 	return ret;
 }
 
+void AnimationTrack::AddKeyframe(byte time, byte red, byte green, byte blue)
+{
+	if (count < MAX_KEYFRAMES)
+	{
+		keyframes[count].time = time;
+		keyframes[count].red = red;
+		keyframes[count].green = green;
+		keyframes[count].blue = blue;
+		count++;
+	}
+}
+
 /// <summary>
 /// Kick off the animation
 /// </summary>

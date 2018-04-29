@@ -31,8 +31,10 @@ Die die;
 #define TEST_SETTINGS		13
 #define TEST_ANIMATION_SET	14
 #define TEST_ANIMATIONS		15
+#define TEST_BATTERY		17
+#define TEST_CHARGING		16
 
-#define TEST TEST_ANIMATION_SET
+#define TEST TEST_CHARGING
 
 
 void setup()
@@ -135,6 +137,12 @@ void SetupTest(int testIndex)
 		break;
 	case TEST_ANIMATIONS:
 		Tests::TestAnimationsSetup();
+		break;
+	case TEST_BATTERY:
+		Tests::TestBattery();
+		break;
+	case TEST_CHARGING:
+		Tests::TestCharging();
 		break;
 	default:
 		break;

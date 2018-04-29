@@ -443,9 +443,9 @@ void Tests::TestAnimationSet()
 					Serial.print(keyframe.blue);
 					Serial.print(") ");
 				}
+				Serial.println();
 			}
 		}
-		Serial.println();
 	};
 
 	Serial.begin(9600);
@@ -465,36 +465,61 @@ void Tests::TestAnimationSet()
 	// We're going to program a few animations!
 	// Create them
 	AnimationTrack updown;
-	updown.keyframes[0].time = 0;
-	updown.keyframes[0].red = 0;
-	updown.keyframes[0].green = 0;
-	updown.keyframes[0].blue = 0;
-
-	updown.keyframes[1].time = 128;
-	updown.keyframes[1].red = 255;
-	updown.keyframes[1].green = 255;
-	updown.keyframes[1].blue = 255;
-
-	updown.keyframes[2].time = 255;
-	updown.keyframes[2].red = 0;
-	updown.keyframes[2].green = 0;
-	updown.keyframes[2].blue = 0;
-
-	updown.count = 3;
+	updown.count = 0;
 	updown.startTime = 0;	// ms
 	updown.duration = 1000;	// ms
 	updown.ledIndex = 0;
+	updown.AddKeyframe(0,0,0,0);
+	updown.AddKeyframe(128, 255, 255, 255);
+	updown.AddKeyframe(255, 0, 0, 0);
 	
+	AnimationTrack updownRed;
+	updownRed.count = 0;
+	updownRed.startTime = 0;	// ms
+	updownRed.duration = 333;	// ms
+	updownRed.ledIndex = 1;
+	updownRed.AddKeyframe(0, 0, 0, 0);
+	updownRed.AddKeyframe(50, 255, 0, 0);
+	updownRed.AddKeyframe(200, 255, 0, 0);
+	updownRed.AddKeyframe(255, 0, 0, 0);
+
+	AnimationTrack updownGreen;
+	updownGreen.count = 0;
+	updownGreen.startTime = 333;	// ms
+	updownGreen.duration = 333;	// ms
+	updownGreen.ledIndex = 2;
+	updownGreen.AddKeyframe(0, 0, 0, 0);
+	updownGreen.AddKeyframe(50, 0, 255, 0);
+	updownGreen.AddKeyframe(200, 0, 255, 0);
+	updownGreen.AddKeyframe(255, 0, 0, 0);
+
+	AnimationTrack updownBlue;
+	updownBlue.count = 0;
+	updownBlue.startTime = 667;	// ms
+	updownBlue.duration = 333;	// ms
+	updownBlue.ledIndex = 3;
+	updownBlue.AddKeyframe(0, 0, 0, 0);
+	updownBlue.AddKeyframe(50, 0, 0, 255);
+	updownBlue.AddKeyframe(200, 0, 0, 255);
+	updownBlue.AddKeyframe(255, 0, 0, 0);
+
 	Animation* anim1 = Animation::AllocateAnimation(1);
 	anim1->SetTrack(updown, 0);
 
+	Animation* anim2 = Animation::AllocateAnimation(3);
+	anim2->SetTrack(updownRed, 0);
+	anim2->SetTrack(updownGreen, 1);
+	anim2->SetTrack(updownBlue, 2);
+
+	int totalAnimSize = anim1->ComputeByteSize() + anim2->ComputeByteSize();
+
 	Serial.print("Erasing animation flash pages...");
 	AnimationSet::ProgrammingToken token;
-	if (AnimationSet::EraseAnimations(anim1->ComputeByteSize(), token))
+	if (AnimationSet::EraseAnimations(totalAnimSize, token))
 	{
 		Serial.println("Ok");
-		Serial.print("Writing 1 animation...");
-		if (AnimationSet::TransferAnimation(anim1, token))
+		Serial.print("Writing 2 animation...");
+		if (AnimationSet::TransferAnimation(anim1, token) && AnimationSet::TransferAnimation(anim2, token))
 		{
 			Serial.println("Ok");
 			Serial.print("Writing animation set...");
@@ -503,6 +528,7 @@ void Tests::TestAnimationSet()
 				Serial.println("Ok");
 
 				// Clean up memory
+				free(anim2);
 				free(anim1);
 
 				Serial.print("Checking AnimationSet again...");
@@ -556,19 +582,82 @@ void Tests::TestAnimationsSetup()
 	Serial.begin(9600);
 
 	Serial.print("Initializing LEDs...");
+	leds.init();
 	Serial.println("Ok");
 
+	if (!animationSet->CheckValid())
+	{
+		Serial.println("No animation data, programming some");
+		TestAnimationSet();
+	}
 
-	Serial.print("Initializing animation controller...");
-	animController.begin();
-	Serial.println("Ok");
+	if (animationSet->CheckValid())
+	{
+		Serial.print("Initializing animation controller...");
+		animController.begin();
+		Serial.println("Ok");
 
-	Serial.print("Initializing Timer...");
-	Systems::timer.begin();
-	Serial.println("Ok");
+		Serial.print("Initializing Timer...");
+		Systems::timer.begin();
+		Serial.println("Ok");
+
+		// Kick off some animations
+		animController.play(animationSet->GetAnimation(0));
+		animController.play(animationSet->GetAnimation(1));
+	}
 }
 
 void Tests::TestAnimationsUpdate()
 {
+	Systems::timer.update();
+}
 
+#define BATTERY_ANALOG_PIN (6)
+
+void Tests::TestBattery()
+{
+	Serial.begin(9600);
+
+	Serial.println("Reading battery voltage...");
+
+	// Setup analog input??
+
+	while (true)
+	{
+		uint32_t value = analogRead(BATTERY_ANALOG_PIN);
+		float voltage = value * 3.3f * 2 / 1023.0f;
+		Serial.print(voltage, 2);
+		Serial.println("v");
+		delay(1000);
+	}
+}
+
+#define CHARGING_PIN (22)
+
+void Tests::TestCharging()
+{
+	Serial.begin(9600);
+
+	Serial.println("Checking charging state...");
+
+	pinMode(CHARGING_PIN, INPUT_PULLUP);
+
+	bool currentlyCharging = digitalRead(CHARGING_PIN) == LOW;
+	if (currentlyCharging)
+		Serial.println("Charging");
+	else
+		Serial.println("Not charging");
+	while (true)
+	{
+		bool newCharging = digitalRead(CHARGING_PIN) == LOW;
+		if (newCharging != currentlyCharging)
+		{
+			currentlyCharging = newCharging;
+			if (currentlyCharging)
+				Serial.println("Charging");
+			else
+				Serial.println("Not charging");
+		}
+		delay(100);
+	}
 }
