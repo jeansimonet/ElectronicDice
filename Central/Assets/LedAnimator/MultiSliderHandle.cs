@@ -25,6 +25,7 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 	public MultiSliderHandle DuplicateSelf()
 	{
 		var dupHandle = GameObject.Instantiate<MultiSliderHandle>(this, transform.parent);
+		dupHandle.ChangeColor(Palette.Instance.ActiveColor);
 		_slider.Repaint(); //TODO slider should be notified instead
 		_slider.SelectHandle(dupHandle);
 		return dupHandle;
