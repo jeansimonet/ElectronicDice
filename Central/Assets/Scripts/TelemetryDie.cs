@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System.Linq;
 
 public struct Sample
@@ -24,8 +25,6 @@ class GraphInstance
 
 public class TelemetryDie : MonoBehaviour
 {
-    public GraphUI graphPrefab;
-    public UnityEngine.UI.Text nameField;
     public const int MaxPoints = 1000;
     public const int GraphMaxTime = 5000; // millis
 
@@ -34,6 +33,11 @@ public class TelemetryDie : MonoBehaviour
 
     void Awake()
     {
+        int childCount = transform.childCount;
+        for (int i = 1; i < childCount; ++i)
+        {
+            GameObject.Destroy(transform.GetChild(i).gameObject);
+        }
     }
 
     void Start()
@@ -42,10 +46,9 @@ public class TelemetryDie : MonoBehaviour
 
     public void Setup(string name)
     {
-        nameField.text = name;
         gameObject.name = name;
 
-        for (int i = 0; i < transform.childCount; ++i)
+        for (int i = 1; i < transform.childCount; ++i)
         {
             GameObject.Destroy(transform.GetChild(i).gameObject);
         }
@@ -129,14 +132,16 @@ public class TelemetryDie : MonoBehaviour
         // Create the samples
         var samples = new Samples();
 
-        // Instantiate a ui object!
-        var ui = GameObject.Instantiate<GraphUI>(graphPrefab);
-        ui.transform.SetParent(transform, false);
-        ui.transform.localScale = Vector3.one;
-        ui.transform.localPosition = Vector3.zero;
-        ui.transform.localRotation = Quaternion.identity;
+        var template = transform.GetChild(0).gameObject;
+        var go = template;
+        if (graphs.Count > 0)
+        {
+            // Copy first item rather than use it
+            go = GameObject.Instantiate(template, transform);
+        }
 
-        var rectX = ui.GetComponent<RectTransform>();
+        var ui = go.GetComponent<GraphUI>();
+        var rectX = go.GetComponent<RectTransform>();
         rectX.offsetMax = new Vector2(0.0f, 0.0f);
         rectX.offsetMin = new Vector2(0.0f, 0.0f);
 
@@ -146,6 +151,7 @@ public class TelemetryDie : MonoBehaviour
         ui.timeSpanMillis = GraphMaxTime;
         ui.color = color;
         ui.samples = samples;
+        ui.Setup(graphName);
 
         // And store it
         graphs.Add(new GraphInstance()

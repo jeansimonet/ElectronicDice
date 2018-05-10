@@ -7,7 +7,8 @@ using System.Linq;
 
 public class GraphUI : MonoBehaviour
 {
-    UILineRenderer lineRenderer;
+    public UILineRenderer lineRenderer;
+    public Text nameText;
 
     public Samples samples
     {
@@ -64,7 +65,11 @@ public class GraphUI : MonoBehaviour
 
     private void Awake()
     {
-        lineRenderer = GetComponent<UILineRenderer>();
+    }
+
+    public void Setup(string axisName)
+    {
+        nameText.text = axisName;
     }
 
     Vector2 ScaleSample(float s, int t)
