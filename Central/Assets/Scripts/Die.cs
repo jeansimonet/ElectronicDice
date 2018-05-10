@@ -173,9 +173,10 @@ public class Die
 			Debug.LogError("Die " + name + " received data while disconnected!");
 			return;
 		}
-		
+
 		// Process the message coming from the actual die!
 		var message = DieMessages.FromByteArray(data);
+        Debug.Log("Die " + name + " received message " + message.type);
         MessageReceivedDelegate del;
         if (messageDelegates.TryGetValue(message.type, out del))
         {

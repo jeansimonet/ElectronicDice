@@ -121,7 +121,7 @@ public static class DieMessages
     }
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageState
     : DieMessage
 {
@@ -129,7 +129,7 @@ public class DieMessageState
     public byte face;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageAcc
     : DieMessage
 {
@@ -139,7 +139,7 @@ public class DieMessageAcc
     public AccelFrame[] data;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageBulkSetup
     : DieMessage
 {
@@ -147,14 +147,14 @@ public class DieMessageBulkSetup
     public short size;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageBulkSetupAck
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.BulkSetupAck;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageBulkData
     : DieMessage
 {
@@ -165,14 +165,14 @@ public class DieMessageBulkData
     public byte[] data;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageBulkDataAck
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.BulkDataAck;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageTransferAnimSet
     : DieMessage
 {
@@ -181,28 +181,28 @@ public class DieMessageTransferAnimSet
     public short totalAnimationByteSize;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageTransferAnimSetAck
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.TransferAnimSetAck;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageTransferAnimReadyForNextAnim
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.TransferAnimReadyForNextAnim;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRequestAnimSet
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.RequestAnimSet;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageTransferSettings
     : DieMessage
 {
@@ -211,14 +211,14 @@ public class DieMessageTransferSettings
     public short totalAnimationByteSize;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageTransferSettingsAck
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.TransferSettingsAck;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRequestSettings
     : DieMessage
 {
@@ -226,7 +226,7 @@ public class DieMessageRequestSettings
 }
 
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRequestTelemetry
     : DieMessage
 {
@@ -243,7 +243,7 @@ public class DieMessageDebugLog
     public byte[] data;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessagePlayAnim
     : DieMessage
 {
@@ -251,7 +251,7 @@ public class DieMessagePlayAnim
     public byte index;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRequestState
     : DieMessage
 {

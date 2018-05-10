@@ -170,7 +170,7 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
                 yield return new WaitForSecondsRealtime(Random.Range(0, 0.25f));
                 if (action != null)
                 {
-                    action(die.name, die.address);
+                    action(die.address, die.name);
                 }
             }
         }
@@ -189,7 +189,7 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
                         yield return new WaitForSecondsRealtime(Random.Range(0, 0.25f));
                         if (action != null)
                         {
-                            action(die.name, die.address);
+                            action(die.address, die.name);
                         }
                     }
                 }
@@ -204,10 +204,10 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
         }
     }
 
-    IEnumerator ConnectToPeripheralCr(string name, System.Action<string> connectAction, System.Action<string, string> serviceAction, System.Action<string, string, string> characteristicAction, System.Action<string> disconnectAction)
+    IEnumerator ConnectToPeripheralCr(string address, System.Action<string> connectAction, System.Action<string, string> serviceAction, System.Action<string, string, string> characteristicAction, System.Action<string> disconnectAction)
     {
         // Find the die
-        var die = virtualDice.First(d => d.address == name);
+        var die = virtualDice.First(d => d.address == address);
         if (die != null)
         {
             yield return new WaitForSecondsRealtime(Random.Range(0, 0.1f));
