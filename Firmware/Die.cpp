@@ -83,6 +83,7 @@ void Die::init()
 	RegisterMessageHandler(DieMessage::MessageType_RequestSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestSettings(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_TransferSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateSettings(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_RequestTelemetry, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestTelemetry(msg); });
+	RegisterMessageHandler(DieMessage::MessateType_ProgramDefaultAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnProgramDefaultAnimSet(msg); });
 
 	// start the BLE stack
 	SimbleeBLE.end();
@@ -140,10 +141,22 @@ void Die::onReceive(char *data, int len)
 	// Wake up if necessary
 	lazarus.onRadio();
 
+	debugPrint("Received ");
+	for (int i = 0; i < len; ++i)
+	{
+		debugPrint(data[i], HEX);
+		debugPrint(" ");
+	}
+	debugPrintln();
+
 	if (len >= sizeof(DieMessage))
 	{
 		auto msg = reinterpret_cast<DieMessage*>(data);
 		auto handler = messageHandlers[(int)msg->type];
+#if defined(_CONSOLE)
+		debugPrint("Received ");
+		debugPrintln(DieMessage::GetMessageTypeString(msg->type));
+#endif
 		if (handler.handler != nullptr)
 		{
 			handler.handler(handler.token, msg);
@@ -333,6 +346,22 @@ void Die::OnUpdateSettings(DieMessage* msg)
 void Die::OnRequestTelemetry(DieMessage* msg)
 {
 	auto telemMsg = (DieMessageRequestTelemetry*)msg;
+	debugPrint("Receive request telemetry message: ");
+	debugPrintln(telemMsg->telemetry);
+
+	DieMessageRequestTelemetry sample;
+	sample.telemetry = true;
+	char* buffer = reinterpret_cast<char*>(&sample);
+	int len = sizeof(sample);
+	debugPrint("Cannon ");
+	for (int i = 0; i < len; ++i)
+	{
+		debugPrint(buffer[i], HEX);
+		debugPrint(" ");
+	}
+	debugPrintln();
+
+
 	if (telemMsg->telemetry)
 	{
 		// Turn telemetry on
@@ -353,3 +382,8 @@ void Die::playAnimation(int animIndex)
 	}
 }
 
+void Die::OnProgramDefaultAnimSet(DieMessage* msg)
+{
+	auto animSetMsg = (DieMessageProgramDefaultAnimSet*)msg;
+	AnimationSet::ProgramDefaultAnimationSet(animSetMsg->color);
+}

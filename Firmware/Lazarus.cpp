@@ -18,7 +18,7 @@ Lazarus Systems::lazarus;
 #define radioPin 6
 #define accelPin 20
 
-#define AUTO_SLEEP_AFTER 10000 // 10s
+#define AUTO_SLEEP_AFTER 5000 // 5s
 
 /// <summary>
 /// Constructor
@@ -42,7 +42,6 @@ void Lazarus::init()
 
 	lastMillis = millis();
 	sleeping = false;
-	shouldWake = false;
 
 	die.RegisterUpdate(this, [](void* token) {((Lazarus*)token)->update(); });
 }
@@ -65,7 +64,6 @@ void Lazarus::onRadio()
 		NRF_GPIO->PIN_CNF[radioPin] =
 			(GPIO_PIN_CNF_PULL_Pulldown << GPIO_PIN_CNF_PULL_Pos);
 		digitalWrite(radioPin, LOW);
-		shouldWake = true;
 		debugPrintln("Did we?");
 	}
 	else
@@ -103,10 +101,10 @@ void Lazarus::update()
 /// </summary>
 void Lazarus::sleepUntilInterrupt()
 {
-	debugPrintln("Lazarus: No activity for last 10s, going to sleep.");
+	debugPrintln("Lazarus: No activity for last 5s, going to sleep.");
 
 	timer.stop();
-	leds.clearAll();
+	leds.stop();
 
 	// Setup interrupt on accelerometer
 	accelerometer.enableTransientInterrupt();
@@ -120,15 +118,8 @@ void Lazarus::sleepUntilInterrupt()
 	// Indicate that we are sleeping!
 	sleeping = true;
 
-	// Sleep forever, in 3 second increments because I can't seem to get
-	// radio messages to wake us up!
-	while (!shouldWake && !Simblee_pinWoke(accelPin) && !Simblee_pinWoke(radioPin))
-	{
-		Simblee_ULPDelay(SECONDS(3));
-	}
-
-	// Reset flags
-	shouldWake = false;
+	// Sleep until someboby poked us!
+	Simblee_ULPDelay(INFINITE);
 
 	// If we get here, we either got an accelerometer interrupt, or bluetooth message
 	// Reset both pinwake flags

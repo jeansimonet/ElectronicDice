@@ -38,7 +38,7 @@ Die die;
 #define TEST_ALL_CONNECTIONS 19
 
 //#define TEST TEST_LED_SLOW
-#define TEST TEST_LED
+//#define TEST TEST_LED
 
 #define POWERPIN	4
 #define NUMPIXELS	21
@@ -55,13 +55,6 @@ void setup()
 	digitalWrite(DATAPIN, LOW);
 	digitalWrite(CLOCKPIN, LOW);
 	digitalWrite(POWERPIN, HIGH);
-
-	pinMode(CHARGING_PIN, INPUT_PULLUP);
-	if (digitalRead(CHARGING_PIN) == LOW)
-	{
-		// We are charging, don't do anything!
-		Simblee_systemOff();
-	}
 
 	//----------------
 	// !!!IMPORTANT!!!

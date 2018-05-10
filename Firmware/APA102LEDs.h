@@ -19,6 +19,7 @@ namespace Devices
 	{
 	public:
 		void init();
+		void stop();
 		void set(int face, int led, uint32_t color, bool flush);
 		void set(int ledIndex, uint32_t color, bool flush);
 		void show();

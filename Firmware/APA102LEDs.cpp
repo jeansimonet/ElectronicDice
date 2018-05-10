@@ -80,14 +80,20 @@ void APA102LEDs::init()
 	pinMode(POWERPIN, OUTPUT);
 	digitalWrite(POWERPIN, 0);
 
-	delay(200);
-
 	strip.begin(); // Initialize pins for output
 	for (int i = 0; i < NUMPIXELS; ++i)
 	{
 		strip.setPixelColor(i, 0);
 	}
 	strip.show();  // Turn all LEDs off ASAP
+}
+
+void APA102LEDs::stop()
+{
+	clear();
+	digitalWrite(DATAPIN, LOW);
+	digitalWrite(CLOCKPIN, LOW);
+	digitalWrite(POWERPIN, HIGH);
 }
 
 void APA102LEDs::set(int face, int led, uint32_t color, bool flush)

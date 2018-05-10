@@ -82,6 +82,7 @@ private:
 	void OnRequestSettings(DieMessage* msg);
 	void OnUpdateSettings(DieMessage* msg);
 	void OnRequestTelemetry(DieMessage* msg);
+	void OnProgramDefaultAnimSet(DieMessage* msg);
 };
 
 // The global die!

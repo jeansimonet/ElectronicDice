@@ -35,11 +35,24 @@ public class Die3D : MonoBehaviour
 
     public void UpdateAcceleration(Vector3 acc)
     {
-        // -acc is up
-        Vector3 up = (-acc).normalized;
-        Vector3 right = Vector3.Cross(up, transform.forward);
-        Vector3 newForward = Vector3.Cross(right, up);
-        currentDiceRot = Quaternion.LookRotation(newForward, up);
+        // The accelerometer is right-handed in the following way:
+        // z is up
+        // x is forward
+        // y is left
+        // We want unity orientation, which is:
+        // y is up
+        // z is forward
+        // x is right
+        Vector3 unityAcc = new Vector3(-acc.y, acc.z, acc.x);
+
+        // acc is gravity (i.e. down)
+        // we want the on screen die to have its up vector match exactly the measured up
+        // and we don't really know what its forward vec should be, so we just pick
+        // the closest to the current forward vector
+        Vector3 measuredUp = (-unityAcc).normalized;
+        Vector3 right = Vector3.Cross(measuredUp, die.transform.forward);
+        Vector3 newForward = Vector3.Cross(right, measuredUp);
+        currentDiceRot = Quaternion.LookRotation(newForward, measuredUp);
     }
 
     void OnDestroy()

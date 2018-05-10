@@ -31,12 +31,14 @@ struct DieMessage
 		MessageType_RequestAnimSet,
 		MessageType_RequestSettings,
 		MessageType_RequestTelemetry,
+		MessateType_ProgramDefaultAnimSet,
 		MessageType_Count
 	};
 
 	MessageType type;
 
 	inline DieMessage(MessageType msgType) : type(msgType) {}
+	static const char* GetMessageTypeString(MessageType msgType);
 
 protected:
 	inline DieMessage() : type(MessageType_None) {}
@@ -125,5 +127,12 @@ struct DieMessageRequestTelemetry
 	inline DieMessageRequestTelemetry() : DieMessage(DieMessage::MessageType_RequestTelemetry) {}
 };
 
+struct DieMessageProgramDefaultAnimSet
+	: public DieMessage
+{
+	uint32_t color;
+
+	inline DieMessageProgramDefaultAnimSet() : DieMessage(DieMessage::MessateType_ProgramDefaultAnimSet) {}
+};
 #endif
 

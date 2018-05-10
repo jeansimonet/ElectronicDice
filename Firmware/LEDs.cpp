@@ -28,6 +28,8 @@ void LEDs::stop()
 {
 #if !defined(RGB_LED)
 	controller.stop();
+#else
+	RGBLeds.stop();
 #endif
 }
 

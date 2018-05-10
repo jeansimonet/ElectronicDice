@@ -3,6 +3,7 @@
 #include "Die.h"
 #include "SimbleeBLE.h"
 #include "BluetoothMessage.h"
+#include "Utils.h"
 
 // The animation set always points at a specific address in memory
 const AnimationSet* animationSet = (const AnimationSet*)ANIMATION_SET_ADDRESS;
@@ -140,6 +141,54 @@ bool AnimationSet::TransferAnimationSet(const Animation ** sourceAnims, uint32_t
 	}
 	return res == 0;
 }
+
+bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
+{
+	// We're going to program a few animations!
+	// Create them
+	AnimationTrack updown;
+	updown.count = 0;
+	updown.startTime = 0;	// ms
+	updown.duration = 1000;	// ms
+	updown.ledIndex = 0;
+	updown.AddKeyframe(0, 0, 0, 0);
+	updown.AddKeyframe(128, Core::getRed(color), Core::getGreen(color), Core::getBlue(color));
+	updown.AddKeyframe(255, 0, 0, 0);
+
+	int totalAnimSize = 0;
+	Animation* faceAnims[6];
+	for (int i = 0; i < 6; ++i)
+	{
+		Animation* anim = Animation::AllocateAnimation(i+1); // face i has i+1 led
+		anim->SetTrack(updown, i);
+		faceAnims[i] = anim;
+		totalAnimSize += anim->ComputeByteSize();
+	}
+
+	AnimationSet::ProgrammingToken token;
+	bool ret = EraseAnimations(totalAnimSize, token);
+	if (ret)
+	{
+		for (int i = 0; ret && i < 6; ++i)
+		{
+			ret = TransferAnimation(faceAnims[i], token);
+		}
+
+		if (ret)
+		{
+			ret = AnimationSet::TransferAnimationSet(token.animationPtrInFlash, token.currentCount);
+		}
+	}
+
+	// Clean up memory
+	for (int i = 0; i < 6; ++i)
+	{
+		free(faceAnims[i]);
+	}
+
+	return ret;
+}
+
 
 void AnimationSet::PrintError(int error)
 {

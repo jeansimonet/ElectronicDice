@@ -20,7 +20,6 @@ namespace Systems
 
 	public:
 		bool sleeping;
-		bool shouldWake;
 
 		Lazarus();
 		void init();

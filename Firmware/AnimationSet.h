@@ -45,7 +45,7 @@ public:
 	static bool TransferAnimation(const Animation* sourceAnim, ProgrammingToken& inOutToken);
 	static bool TransferAnimationRaw(const void* rawData, size_t rawDataSize, ProgrammingToken& inOutToken);
 	static bool TransferAnimationSet(const Animation** sourceAnims, uint32_t animCount);
-
+	static bool ProgramDefaultAnimationSet(uint32_t color);
 private:
 	static void PrintError(int error);
 };
