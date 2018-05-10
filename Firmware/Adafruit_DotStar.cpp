@@ -136,6 +136,11 @@ void Adafruit_DotStar::show(void) {
 		} while (--n);
 	}
 	for (i = 0; i < ((numLEDs + 15) / 16); i++) sw_spi_out(0xFF); // End-frame marker (see note above)
+
+	//// Drop lines low again, reduces power consumption
+	//digitalWrite(dataPin, LOW);
+	//digitalWrite(clockPin, LOW);
+
 }
 
 void Adafruit_DotStar::clear() { // Write 0s (off) to full pixel buffer

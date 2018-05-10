@@ -34,7 +34,21 @@ public class TelemetryDie : MonoBehaviour
 
     void Awake()
     {
-        // Add our telemetry graphs
+    }
+
+    void Start()
+    {
+    }
+
+    public void Setup(string name)
+    {
+        nameField.text = name;
+        gameObject.name = name;
+
+        for (int i = 0; i < transform.childCount; ++i)
+        {
+            GameObject.Destroy(transform.GetChild(i).gameObject);
+        }
         graphs = new List<GraphInstance>();
 
         // Graph the magnitude and euler angles
@@ -44,16 +58,14 @@ public class TelemetryDie : MonoBehaviour
         //AddGraph((acc, dt) => acc.magnitude, -4, 4, Color.yellow, "Mag");
     }
 
-    private void Start()
-    {
-        nameField.text = gameObject.name;
-    }
-
     public void Clear()
     {
-        foreach (var graph in graphs)
+        if (graphs != null)
         {
-            graph.samples.samples.Clear();
+            foreach (var graph in graphs)
+            {
+                graph.samples.samples.Clear();
+            }
         }
     }
 

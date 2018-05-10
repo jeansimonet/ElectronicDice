@@ -8,9 +8,14 @@
 #include "AnimController.h"
 #include "Settings.h"
 #include "AnimationSet.h"
+#include "SimbleeBLE.h"
 
 using namespace Devices;
 using namespace Systems;
+
+#define BATTERY_ANALOG_PIN 2
+#define DATAPIN		30
+#define CLOCKPIN	29
 
 /// <summary>
 /// Writes to the serial port
@@ -150,21 +155,21 @@ extern Adafruit_DotStar strip;
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos)
+uint32_t Wheel(byte WheelPos, byte intensity = 255)
 {
 	if (WheelPos < 85)
 	{
-		return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+		return strip.Color(WheelPos * 3 * intensity / 255, (255 - WheelPos * 3) * intensity / 255, 0);
 	}
 	else if (WheelPos < 170)
 	{
 		WheelPos -= 85;
-		return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+		return strip.Color((255 - WheelPos * 3) * intensity / 255, 0, WheelPos * 3 * intensity / 255);
 	}
 	else
 	{
 		WheelPos -= 170;
-		return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+		return strip.Color(0, WheelPos * 3 * intensity / 255, (255 - WheelPos * 3) * intensity / 255);
 	}
 }
 
@@ -208,19 +213,38 @@ void Tests::TestLEDSlow()
 {
 	Serial.begin(9600);
 	Serial.println("Trying to Control APA102 LEDs.");
+	Serial.end();
+
+	randomSeed(analogRead(4));
 	pinMode(POWERPIN, OUTPUT);
 	digitalWrite(POWERPIN, 0);
 
 	strip.begin();
 	while (true)
 	{
-		digitalWrite(POWERPIN, 0);
-		rainbowCycle(5);
+		// Output a random color on all leds
+		uint32_t color = Wheel(random(0xFF), 32);
+		for (int i = 0; i < 21; ++i)
+			strip.setPixelColor(i, color);
+
+		// Do it twice, just to be sure
+		strip.show();
+		delay(10);
+		strip.show();
+		delay(10);
+
+		// Turn all leds off
 		for (int i = 0; i < 21; ++i)
 			strip.setPixelColor(i, 0);
 		strip.show();
+
+		// Go to sleep
 		digitalWrite(POWERPIN, 1);
-		delay(3000);
+		digitalWrite(DATAPIN, 0);
+		digitalWrite(CLOCKPIN, 0);
+		SimbleeBLE_ULPDelay(SECONDS(10));
+
+		digitalWrite(POWERPIN, 0);
 	}
 }
 
@@ -281,6 +305,9 @@ void Tests::TestSleepForever()
 {
 	Serial.begin(9600);
 	Serial.println("Going to sleep forever now, bye!");
+
+	// Turn off radio
+	SimbleeBLE_end();
 
 	// Sleep forever
 	Simblee_ULPDelay(INFINITE);
@@ -612,21 +639,19 @@ void Tests::TestAnimationsUpdate()
 	Systems::timer.update();
 }
 
-#define BATTERY_ANALOG_PIN (6)
 
 void Tests::TestBattery()
 {
 	Serial.begin(9600);
 
 	Serial.println("Reading battery voltage...");
-
-	// Setup analog input??
-
 	while (true)
 	{
-		uint32_t value = analogRead(BATTERY_ANALOG_PIN);
-		float voltage = value * 3.3f * 2 / 1023.0f;
-		Serial.print(voltage, 2);
+		int value = analogRead(BATTERY_ANALOG_PIN);
+		float voltage = value * 3.3f / 1023.0f; // use calibration value here!
+		Serial.print(value);
+		Serial.print(" units, ");
+		Serial.print(voltage);
 		Serial.println("v");
 		delay(1000);
 	}
@@ -660,4 +685,192 @@ void Tests::TestCharging()
 		}
 		delay(100);
 	}
+}
+
+/// <summary>
+/// Drive the LEDs Repeatedly
+/// </summary>
+void Tests::TestBatteryDischarge()
+{
+	Serial.begin(9600);
+	Serial.println("Trying to Control APA102 LEDs and read battery voltage");
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(POWERPIN, 0);
+
+	strip.begin();
+	while (true)
+	{
+		rainbowCycle(5);
+		uint32_t value = analogRead(BATTERY_ANALOG_PIN);
+		float voltage = value * 2 * 3.55f / 1023.0f; // use calibration value here!
+		Serial.print(voltage, 2);
+		Serial.println("v");
+	}
+}
+
+void Tests::TestAllHardwareConnections()
+{
+	Serial.begin(9600);
+	Serial.println("Trying to Control APA102 LEDs.");
+
+	// Turn leds on
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(POWERPIN, 0);
+
+	strip.begin();
+	rainbowCycle(5);
+
+	// Turn leds off
+	pinMode(DATAPIN, OUTPUT);
+	pinMode(CLOCKPIN, OUTPUT);
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(DATAPIN, 0);
+	digitalWrite(CLOCKPIN, 0);
+	digitalWrite(POWERPIN, 1);
+
+	Serial.println("Trying to read accelerometer.");
+
+	// Initialize I2C
+	Systems::wire.begin();
+
+	for (int i = 0; i < 3; ++i)
+	{
+		Serial.println("Trying to read from Accelerometer...");
+		Systems::wire.beginTransmission(0x1C);
+		Systems::wire.write(WHO_AM_I);
+		uint8_t ret = Systems::wire.endTransmission(false); //endTransmission but keep the connection active
+		switch (ret)
+		{
+		case 4:
+			Serial.println("Unknown error");
+			break;
+		case 3:
+			Serial.println("NACK on Data");
+			break;
+		case 2:
+			Serial.println("NACK on Address");
+			break;
+		case 1:
+			Serial.println("Data too long");
+			break;
+		case 0:
+		{
+			Systems::wire.requestFrom((uint8_t)0x1C, (byte)1); // Ask for 1 byte, once done, bus is released by default
+
+			int start = millis();
+			bool timeout = false;
+			while (!Systems::wire.available() && !timeout)
+			{
+				timeout = (millis() - start) > 1000;
+			}
+
+			if (timeout)
+			{
+				Serial.println("Timeout waiting for data");
+			}
+			else
+			{
+				byte c = Systems::wire.read(); //Return this one byte
+				if (c != 0x2A) // WHO_AM_I should always be 0x2A
+				{
+					Serial.print("Wrong device id, got ");
+					Serial.print(c, HEX);
+					Serial.println(", expected 2A");
+				}
+				else
+				{
+					Serial.println("Ok");
+				}
+			}
+		}
+		break;
+		}
+	}
+
+	// Testing acc interrupt
+	Serial.print("Testing interrupt pin");
+	Serial.print("Initializing accelerometer...");
+	accelerometer.init();
+	Serial.println("Ok");
+
+	// Set accelerometer interrupt pin as an input!
+	pinMode(accelPin, INPUT_PULLUP);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		// Setup interrupt on accelerometer
+		Serial.print("Setting up accelerometer, and ");
+		accelerometer.enableTransientInterrupt();
+
+		// Prepare to wakeup on matching interrupt pin
+		Simblee_pinWake(accelPin, LOW);
+
+		// Sleep forever
+		Serial.println("going to sleep...");
+		Serial.println("Check that current draw is minimal!");
+		Simblee_ULPDelay(INFINITE);
+
+		// If we get here, we either got an accelerometer interrupt, or bluetooth message
+
+		// Reset both pinwake flags
+		if (Simblee_pinWoke(accelPin))
+			Simblee_resetPinWake(accelPin);
+
+		// Disable accelerometer interrupts
+		accelerometer.clearTransientInterrupt();
+		accelerometer.disableTransientInterrupt();
+
+		// Disable pinWake
+		Simblee_pinWake(accelPin, DISABLE);
+
+		Serial.println("...And I'm back!");
+		delay(1000);
+		Serial.print("Zzzz...");
+		delay(1000);
+	}
+
+	Serial.println("Checking charging state...");
+
+	pinMode(CHARGING_PIN, INPUT_PULLUP);
+
+	bool currentlyCharging = digitalRead(CHARGING_PIN) == LOW;
+	if (currentlyCharging)
+		Serial.println("Charging");
+	else
+		Serial.println("Not charging");
+
+	for (int i = 0; i < 2; ++i)
+	{
+		Serial.println("Place on charger");
+		while (!currentlyCharging)
+		{
+			bool newCharging = digitalRead(CHARGING_PIN) == LOW;
+			if (newCharging != currentlyCharging)
+			{
+				currentlyCharging = newCharging;
+				if (currentlyCharging)
+					Serial.println("Charging");
+				else
+					Serial.println("Not charging");
+			}
+			delay(100);
+		}
+		Serial.println("Remove from charger");
+		while (currentlyCharging)
+		{
+			bool newCharging = digitalRead(CHARGING_PIN) == LOW;
+			if (newCharging != currentlyCharging)
+			{
+				currentlyCharging = newCharging;
+				if (currentlyCharging)
+					Serial.println("Charging");
+				else
+					Serial.println("Not charging");
+			}
+			delay(100);
+		}
+	}
+
+	Serial.println("All Tests Passed!");
+
 }

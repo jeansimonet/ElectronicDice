@@ -117,6 +117,7 @@ void Timer::stop()
 {
 	NRF_TIMER2->TASKS_STOP = 1;	// Stop timer
 	die.UnregisterUpdateToken(this);
+	calls.clear();
 }
 
 int total = 0;

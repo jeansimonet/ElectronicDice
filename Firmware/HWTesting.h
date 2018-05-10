@@ -18,12 +18,15 @@ namespace Tests
 	void TestAnimationSet();
 	void TestBattery();
 	void TestCharging();
+	void TestBatteryDischarge();
 
 	void TestTimerSetup();
 	void TestTimerUpdate();
 
 	void TestAnimationsSetup();
 	void TestAnimationsUpdate();
+
+	void TestAllHardwareConnections();
 }
 
 #endif

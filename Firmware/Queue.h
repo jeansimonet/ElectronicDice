@@ -61,6 +61,18 @@ namespace Core
 			interrupts();
 			return ret;
 		}
+
+		/// <summary>
+		/// Clear the event queue
+		/// </summary>
+		void clear()
+		{
+			noInterrupts();
+			count = 0;
+			writer = 0;
+			reader = 0;
+			interrupts();
+		}
 	};
 
 }

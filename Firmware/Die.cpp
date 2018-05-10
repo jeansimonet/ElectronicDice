@@ -86,16 +86,10 @@ void Die::init()
 
 	// start the BLE stack
 	SimbleeBLE.end();
-	if (settings->CheckValid())
-	{
-		SimbleeBLE.advertisementData = settings->name;
-		SimbleeBLE.deviceName = settings->name;
-	}
-	else
-	{
-		SimbleeBLE.advertisementData = "ElectronicDie";
-		SimbleeBLE.deviceName = "ElectronicDie";
-	}
+	const char* name = settings->CheckValid() ? settings->name : "ElectronicDie";
+	SimbleeBLE.advertisementData = name;
+	SimbleeBLE.deviceName = name;
+
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
 	debugPrintln("ok");
@@ -119,16 +113,20 @@ void Die::init()
 	delay(300);
 	leds.clearAll();
 
+	debugPrint("Dice ");
+	debugPrint(name);
+	debugPrintln(" active");
+
 	timer.begin(); // Kicks off the timers!
 }
 
 void Die::onConnect()
 {
-	// Wake up if necessary!
-	lazarus.onRadio();
-	
 	// Insert code
 	debugPrintln("Connected!");
+
+	// Wake up if necessary!
+	lazarus.onRadio();
 }
 
 void Die::onDisconnect()
@@ -167,6 +165,11 @@ bool Die::SendMessage(const DieMessage* msg, int msgSize)
 
 void Die::update()
 {
+	if (lazarus.sleeping)
+	{
+		debugPrintln("Still sleeping but update is on!");
+	}
+
 	// Update systems that need it!
 #if defined(_CONSOLE)
 	processConsole();
@@ -196,9 +199,9 @@ void Die::updateFaceAnimation()
 		{
 			currentFace = newFace;
 
-			// Toggle leds
-			animController.stopAll();
-			playAnimation(currentFace);
+			//// Toggle leds
+			//animController.stopAll();
+			//playAnimation(currentFace);
 
 			debugPrint("sending face number ");
 			debugPrintln(currentFace);

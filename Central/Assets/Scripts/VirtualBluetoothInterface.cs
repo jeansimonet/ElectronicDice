@@ -14,6 +14,7 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
 
     int globalAddressCounter;
     IEnumerator currentCoroutine;
+    bool scanning = false;
 
     string dieServiceGUID = "fe84";
     string subscribeCharacteristic = "2d30c082-f39f-4ce6-923f-3484ea480596";
@@ -153,13 +154,16 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
 
     IEnumerator ScanForPeripheralsWithServicesCr(string[] serviceUUIDs, System.Action<string, string> action)
     {
-        // Shuffle the dice so we don't always "discover" them in the same order
+        scanning = true;
+        // Shuffle the current dice so we don't always "discover" them in the same order
         List<VirtualDie> shuffledDice = new List<VirtualDie>(virtualDice);
         shuffledDice.Shuffle();
 
         // Check if they are indeed the right kind of devices
         foreach (var die in shuffledDice)
         {
+            if (!scanning)
+                break;
             // Todo: Handle long GUIDS!!!
             if (serviceUUIDs.Any(uuid => uuid.ToLower() == dieServiceGUID))
             {
@@ -168,6 +172,34 @@ public class VirtualBluetoothInterface : MonoBehaviour, ICoroutineManager
                 {
                     action(die.name, die.address);
                 }
+            }
+        }
+
+        // No we wait for new dice maybe
+        int currentListSize = shuffledDice.Count;
+        while (scanning)
+        {
+            if (virtualDice.Count > currentListSize)
+            {
+                var newListCopy = new List<VirtualDie>(virtualDice.Where(d => !shuffledDice.Contains(d)));
+                foreach (var die in newListCopy)
+                {
+                    if (serviceUUIDs.Any(uuid => uuid.ToLower() == dieServiceGUID))
+                    {
+                        yield return new WaitForSecondsRealtime(Random.Range(0, 0.25f));
+                        if (action != null)
+                        {
+                            action(die.name, die.address);
+                        }
+                    }
+                }
+
+                shuffledDice.AddRange(newListCopy);
+                currentListSize = shuffledDice.Count;
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.1f);
             }
         }
     }

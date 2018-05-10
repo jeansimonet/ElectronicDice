@@ -59,15 +59,40 @@ public class Die
 		}
 	}
 
-	public delegate void TelemetryEvent(Vector3 acc, int millis);
-	public TelemetryEvent OnTelemetry;
+	public delegate void TelemetryEvent(Die die, Vector3 acc, int millis);
+	public event TelemetryEvent OnTelemetry
+    {
+        add
+        {
+            if (_OnTelemetry == null)
+            {
+                // The first time around, we make sure to request telemetry from the die
+                RequestTelemetry(true);
+            }
+            _OnTelemetry += value;
+        }
+        remove
+        {
+            _OnTelemetry -= value;
+            if (_OnTelemetry == null || _OnTelemetry.GetInvocationList().Length == 0)
+            {
+                if (state != State.Disconnected)
+                {
+                    // Deregister from the die telemetry
+                    RequestTelemetry(false);
+                }
+                // Otherwise we can't send bluetooth packets to the die, can we?
+            }
+        }
+    }
 
-	public delegate void StateChangedEvent(State newState);
+	public delegate void StateChangedEvent(Die die, State newState);
 	public StateChangedEvent OnStateChanged;
 
 	// For telemetry
 	int lastSampleTime; // ms
 	ISendBytes _sendBytes;
+    TelemetryEvent _OnTelemetry;
 
     // Internal delegate per message type
     delegate void MessageReceivedDelegate(DieMessage msg);
@@ -121,18 +146,27 @@ public class Die
 	{
 		_sendBytes = sb;
 		state = State.Unknown;
+        if (OnStateChanged != null)
+        {
+            OnStateChanged(this, State.Unknown);
+        }
 
 		// Ping the die so we know its initial state
 		Ping();
 	}
 
-	public void Disconnect()
-	{
-		_sendBytes = null;
-		state = State.Disconnected;
-	}
+    public void Disconnect()
+    {
+        state = State.Disconnected;
+        if (OnStateChanged != null)
+        {
+            OnStateChanged(this, State.Disconnected);
+        }
+        _sendBytes = null;
+    }
 
-	public void DataReceived(byte[] data)
+
+    public void DataReceived(byte[] data)
 	{
 		if (!connected)
 		{
@@ -169,6 +203,13 @@ public class Die
         {
             del -= newDel;
         }
+    }
+
+    void PostMessage<T>(T message)
+        where T : DieMessage
+    {
+        byte[] msgBytes = DieMessages.ToByteArray(message);
+        _sendBytes.SendBytes(this, msgBytes, msgBytes.Length, null);
     }
 
     IEnumerator SendMessage<T>(T message)
@@ -225,7 +266,7 @@ public class Die
         // Notify anyone who cares
         if (OnStateChanged != null)
         {
-            OnStateChanged.Invoke(state);
+            OnStateChanged.Invoke(this, state);
         }
     }
 
@@ -233,7 +274,7 @@ public class Die
     {
         // Don't bother doing anything with the message if we don't have
         // anybody interested in telemetry data.
-        if (OnTelemetry != null)
+        if (_OnTelemetry != null)
         {
             var telem = (DieMessageAcc)message;
 
@@ -248,7 +289,7 @@ public class Die
                 lastSampleTime += telem.data[i].DeltaTime;
 
                 // Notify anyone who cares
-                OnTelemetry.Invoke(acc, lastSampleTime);
+                _OnTelemetry.Invoke(this, acc, lastSampleTime);
             }
         }
     }
@@ -400,4 +441,10 @@ public class Die
         // We've read the settings
         settingsReadCallback.Invoke(newSettings);
     }
+
+    void RequestTelemetry(bool on)
+    {
+        PostMessage(new DieMessageRequestTelemetry() { telemetry = on });
+    }
+
 }

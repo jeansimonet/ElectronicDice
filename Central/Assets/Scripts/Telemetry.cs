@@ -120,7 +120,7 @@ public class Telemetry : MonoBehaviour
             trackedDice.Add(d.Key, d.Value);
 
             // Register for telemetry events
-            d.Key.OnTelemetry += (acc, millis) => OnDieTelemetryReceived(d.Key, acc, millis);
+            d.Key.OnTelemetry += OnDieTelemetryReceived;
         }
         discoveredDice.Clear();
 

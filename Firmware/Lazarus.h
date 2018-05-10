@@ -19,6 +19,9 @@ namespace Systems
 		void sleepUntilInterrupt();
 
 	public:
+		bool sleeping;
+		bool shouldWake;
+
 		Lazarus();
 		void init();
 		void onRadio();

@@ -1,6 +1,7 @@
 #include "JerkMonitor.h"
 #include "Accelerometer.h"
 #include "Lazarus.h"
+#include "Debug.h"
 
 using namespace Systems;
 using namespace Devices;
@@ -8,7 +9,7 @@ using namespace Devices;
 JerkMonitor Systems::jerkMonitor;
 
 #define SIGMA_DECAY (0.95f)
-#define SIGMA_THRESHOLD (0.1f)
+#define SIGMA_THRESHOLD (20)
 
 void JerkMonitor::begin()
 {
@@ -29,6 +30,8 @@ void JerkMonitor::onAccelFrame(const AccelFrame& frame)
 	float jerkZ = accelerometer.convert(frame.jerkZ);
 	float jerk2 = jerkX * jerkX + jerkY * jerkY + jerkZ * jerkZ;
 	sigma = sigma * SIGMA_DECAY + jerk2 * (1.0f - SIGMA_DECAY);
+	//debugPrint("Sigma: ");
+	//debugPrintln(sigma);
 
 	// If the current sigma is high enough (i.e. the die is moving) poke lazarus
 	if (sigma > SIGMA_THRESHOLD)

@@ -12,6 +12,7 @@
 
 #include "HWTesting.h"
 #include "Die.h"
+#include "LEDs.h"
 
 Die die;
 
@@ -33,12 +34,35 @@ Die die;
 #define TEST_ANIMATIONS		15
 #define TEST_BATTERY		17
 #define TEST_CHARGING		16
+#define TEST_BATT_DISCHARGE 18
+#define TEST_ALL_CONNECTIONS 19
 
-#define TEST TEST_CHARGING
+//#define TEST TEST_LED_SLOW
+#define TEST TEST_LED
 
+#define POWERPIN	4
+#define NUMPIXELS	21
+#define DATAPIN		30
+#define CLOCKPIN	29
+#define CHARGING_PIN 22
 
 void setup()
 {
+	// Turn off LED power
+	pinMode(DATAPIN, OUTPUT);
+	pinMode(CLOCKPIN, OUTPUT);
+	pinMode(POWERPIN, OUTPUT);
+	digitalWrite(DATAPIN, LOW);
+	digitalWrite(CLOCKPIN, LOW);
+	digitalWrite(POWERPIN, HIGH);
+
+	pinMode(CHARGING_PIN, INPUT_PULLUP);
+	if (digitalRead(CHARGING_PIN) == LOW)
+	{
+		// We are charging, don't do anything!
+		Simblee_systemOff();
+	}
+
 	//----------------
 	// !!!IMPORTANT!!!
 	//----------------
@@ -47,7 +71,7 @@ void setup()
 	SimbleeBLE.deviceName = "Dice_Boot";
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
-	delay(1000);
+	delay(3000);
 	//----------------
 	// !!!IMPORTANT!!!
 	//----------------
@@ -144,6 +168,12 @@ void SetupTest(int testIndex)
 	case TEST_CHARGING:
 		Tests::TestCharging();
 		break;
+	case TEST_BATT_DISCHARGE:
+		Tests::TestBatteryDischarge();
+		break;
+	case TEST_ALL_CONNECTIONS:
+		Tests::TestAllHardwareConnections();
+		break;
 	default:
 		break;
 	}
@@ -163,3 +193,4 @@ void UpdateTest(int testIndex)
 		break;
 	}
 }
+

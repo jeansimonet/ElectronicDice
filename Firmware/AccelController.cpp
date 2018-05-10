@@ -9,7 +9,7 @@ using namespace Core;
 
 // This defines how frequently we try to read the accelerometer
 #define TIMER2_RESOLUTION (10000)	// 10ms
-#define JERK_SCALE (1000)		// To make the jerk in the same range as the acceleration
+#define JERK_SCALE (1000)			// To make the jerk in the same range as the acceleration
 
 AccelerationController accelController;
 
@@ -51,8 +51,29 @@ void AccelerationController::timerUpdate()
 	newFrame.Z = accelerometer.z;
 	newFrame.Time = millis();
 
+	//debugPrint("Accel frame: ");
+	//debugPrint(newFrame.X);
+	//debugPrint(", ");
+	//debugPrint(newFrame.Y);
+	//debugPrint(", ");
+	//debugPrint(newFrame.Z);
+	//debugPrint(", ");
+	//debugPrint(newFrame.Time);
+	//debugPrintln("ms");
+
 	// Compute delta!
 	auto& lastFrame = buffer.last();
+
+	//debugPrint("Last frame: ");
+	//debugPrint(lastFrame.X);
+	//debugPrint(", ");
+	//debugPrint(lastFrame.Y);
+	//debugPrint(", ");
+	//debugPrint(lastFrame.Z);
+	//debugPrint(", ");
+	//debugPrint(lastFrame.Time);
+	//debugPrintln("ms");
+
 	short deltaX = newFrame.X - lastFrame.X;
 	short deltaY = newFrame.Y - lastFrame.Y;
 	short deltaZ = newFrame.Z - lastFrame.Z;
@@ -67,6 +88,13 @@ void AccelerationController::timerUpdate()
 	newFrame.jerkX = deltaX * JERK_SCALE / deltaTime;
 	newFrame.jerkY = deltaY * JERK_SCALE / deltaTime;
 	newFrame.jerkZ = deltaZ * JERK_SCALE / deltaTime;
+
+	//debugPrint("new frame jerk: ");
+	//debugPrint(newFrame.jerkX);
+	//debugPrint(", ");
+	//debugPrint(newFrame.jerkY);
+	//debugPrint(", ");
+	//debugPrintln(newFrame.jerkZ);
 
 	buffer.push(newFrame);
 
