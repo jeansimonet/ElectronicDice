@@ -122,7 +122,7 @@ struct DieMessagePlayAnim
 struct DieMessageRequestTelemetry
 	: public DieMessage
 {
-	bool telemetry;
+	byte telemetry;
 
 	inline DieMessageRequestTelemetry() : DieMessage(DieMessage::MessageType_RequestTelemetry) {}
 };
