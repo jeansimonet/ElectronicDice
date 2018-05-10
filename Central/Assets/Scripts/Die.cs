@@ -90,6 +90,9 @@ public class Die
 	public delegate void StateChangedEvent(Die die, State newState);
 	public StateChangedEvent OnStateChanged;
 
+    public delegate void SettingsChangedEvent(Die die);
+    public SettingsChangedEvent OnSettingsChanged;
+
 	// For telemetry
 	int lastSampleTime; // ms
 	ISendBytes _sendBytes;
@@ -449,11 +452,21 @@ public class Die
 
     public void SetNewColor()
     {
+        StartCoroutine(SetNewColorCr());
+    }
+
+    IEnumerator SetNewColorCr()
+    {
         Color newColor = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 0.5f);
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
-        PostMessage(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB });
+        yield return StartCoroutine(SendMessage(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }));
+
+        if (OnSettingsChanged != null)
+        {
+            OnSettingsChanged(this);
+        }
     }
 
     public void Flash()
@@ -463,8 +476,17 @@ public class Die
 
     public void Rename(string newName)
     {
+        StartCoroutine(RenameCr(newName));
+    }
+
+    IEnumerator RenameCr(string newName)
+    {
         gameObject.name = newName;
         name = newName;
-        PostMessage(new DieMessageRename() { newName = newName });
+        yield return StartCoroutine(SendMessage(new DieMessageRename() { newName = newName }));
+        if (OnSettingsChanged != null)
+        {
+            OnSettingsChanged(this);
+        }
     }
 }

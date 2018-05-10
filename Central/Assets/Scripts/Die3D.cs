@@ -5,6 +5,7 @@ using UnityEngine;
 public class Die3D : MonoBehaviour
 {
     public Camera dieCamera;
+    public Light dieLight;
     public GameObject dieRoot;
     public GameObject dieObject;
     public int RenderTextureSize = 512;
@@ -28,6 +29,8 @@ public class Die3D : MonoBehaviour
 
         dieCamera.cullingMask = 1 << layerIndex; // only render particle effects
         dieCamera.targetTexture = renderTexture;
+
+        dieLight.cullingMask = 1 << layerIndex;
 
         dieRoot.layer = layerIndex;
         dieObject.layer = layerIndex;

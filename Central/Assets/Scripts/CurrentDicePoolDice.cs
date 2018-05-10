@@ -39,6 +39,11 @@ public class CurrentDicePoolDice
 
     public void Setup(Die die, Central central)
     {
+        if (this.die != null)
+        {
+            die.OnSettingsChanged -= OnDieSettingsChanged;
+        }
+
         this.die = die;
         this.central = central;
         nameText.text = die.name;
@@ -48,6 +53,8 @@ public class CurrentDicePoolDice
 
         diceButton.onClick.RemoveAllListeners();
         diceButton.onClick.AddListener(ShowHideCommands);
+
+        this.die.OnSettingsChanged += OnDieSettingsChanged;
     }
 
     void ShowHideCommands()
@@ -80,6 +87,7 @@ public class CurrentDicePoolDice
 
         setColorButton.onClick.RemoveAllListeners();
         setColorButton.onClick.AddListener(SetNewDieColor);
+
     }
 
     void HideCommands()
@@ -91,16 +99,15 @@ public class CurrentDicePoolDice
 
     void ForgetDie()
     {
-        HideCommands();
-
         // Tell central to forget about this die
         central.ForgetDie(die, null);
+        HideCommands();
     }
 
     void RenameDie()
     {
-        HideCommands();
         renameDieDialog.Show(die);
+        HideCommands();
     }
 
     void FlashDie()
@@ -113,5 +120,15 @@ public class CurrentDicePoolDice
     {
         HideCommands();
         die.SetNewColor();
+    }
+
+    void UpdateDieName()
+    {
+        nameText.text = die.name;
+    }
+
+    void OnDieSettingsChanged(Die die)
+    {
+        UpdateDieName();
     }
 }

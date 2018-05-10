@@ -10,6 +10,8 @@ public class TelemetryDemoDie : MonoBehaviour
     public RawImage dieImage;
     public Die3D die3D;
 
+    Die die;
+
 
     private void Awake()
     {
@@ -26,10 +28,18 @@ public class TelemetryDemoDie : MonoBehaviour
 
     public void Setup(Die die)
     {
+        if (this.die != null)
+        {
+            this.die.OnSettingsChanged -= OnDieSettingsChanged;
+        }
+
         nameField.text = die.name;
         graphs.Setup(die.name);
         var rt = die3D.Setup(1);
         dieImage.texture = rt;
+
+        this.die = die;
+        this.die.OnSettingsChanged += OnDieSettingsChanged;
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)
@@ -37,5 +47,10 @@ public class TelemetryDemoDie : MonoBehaviour
         graphs.OnTelemetryReceived(acc, millis);
         die3D.UpdateAcceleration(acc);
 
+    }
+
+    void OnDieSettingsChanged(Die die)
+    {
+        nameField.text = die.name;
     }
 }
