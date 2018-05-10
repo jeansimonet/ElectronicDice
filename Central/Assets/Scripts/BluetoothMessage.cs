@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using System.Linq;
+using System.Reflection;
 
 /// <summary>
 /// These message identifiers have to match up with the ones on the firmware of course!
@@ -36,6 +38,49 @@ public interface DieMessage
 
 public static class DieMessages
 {
+    private static void ReverseEndianness(System.Type type, byte[] data, int offSet = 0)
+    {
+        var fields = type.GetFields()
+            .Select(f => new
+            {
+                Field = f,
+                Offset = Marshal.OffsetOf(type, f.Name).ToInt32(),
+            }).ToList();
+
+        foreach (var field in fields)
+        {
+            if (field.Field.FieldType.IsArray)
+            {
+                //handle arrays, assuming fixed length
+                var attr = field.Field.GetCustomAttributes(typeof(MarshalAsAttribute), false).FirstOrDefault();
+                var marshalAsAttribute = attr as MarshalAsAttribute;
+                if (marshalAsAttribute == null || marshalAsAttribute.SizeConst == 0)
+                    throw new System.NotSupportedException(
+                        "Array fields must be decorated with a MarshalAsAttribute with SizeConst specified.");
+
+                var arrayLength = marshalAsAttribute.SizeConst;
+                var elementType = field.Field.FieldType.GetElementType();
+                var elementSize = Marshal.SizeOf(elementType);
+                var arrayOffset = field.Offset + offSet;
+
+                for (int i = arrayOffset; i < arrayOffset + elementSize * arrayLength; i += elementSize)
+                {
+                    ReverseEndianness(elementType, data, i);
+                }
+            }
+            else if (!field.Field.FieldType.IsPrimitive) //or !field.Field.FiledType.GetFields().Length == 0
+            {
+                //handle nested structs
+                ReverseEndianness(field.Field.FieldType, data, field.Offset);
+            }
+            else
+            {
+                //handle primitive types
+                System.Array.Reverse(data, offSet + field.Offset, Marshal.SizeOf(field.Field.FieldType));
+            }
+        }
+    }
+
     public static DieMessage FromByteArray(byte[] data)
     {
         DieMessage ret = null;
@@ -99,6 +144,7 @@ public static class DieMessages
     static DieMessage FromByteArray<T>(byte[] data)
         where T : DieMessage
     {
+        ReverseEndianness(typeof(T), data);
         int size = Marshal.SizeOf(typeof(T));
         System.IntPtr ptr = Marshal.AllocHGlobal(size);
         Marshal.Copy(data, 0, ptr, size);
@@ -117,6 +163,7 @@ public static class DieMessages
         byte[] ret = new byte[size];
         Marshal.Copy(ptr, ret, 0, size);
         Marshal.FreeHGlobal(ptr);
+        ReverseEndianness(typeof(T), ret);
         return ret;
     }
 }

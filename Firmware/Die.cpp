@@ -351,16 +351,6 @@ void Die::OnRequestTelemetry(DieMessage* msg)
 
 	DieMessageRequestTelemetry sample;
 	sample.telemetry = true;
-	char* buffer = reinterpret_cast<char*>(&sample);
-	int len = sizeof(sample);
-	debugPrint("Cannon ");
-	for (int i = 0; i < len; ++i)
-	{
-		debugPrint(buffer[i], HEX);
-		debugPrint(" ");
-	}
-	debugPrintln();
-
 
 	if (telemMsg->telemetry)
 	{
