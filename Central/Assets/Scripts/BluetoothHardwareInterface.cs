@@ -127,7 +127,7 @@ public class BluetoothLEHardwareInterface
 	[DllImport("DiceBLEWin")]
 	private static extern void _winBluetoothLEDisconnectAll();
 
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif ((UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX) && !UNITY_EDITOR_OSX
 	[DllImport ("__Internal")]
 	private static extern void _iOSBluetoothLELog (string message);
 	
@@ -213,7 +213,7 @@ public class BluetoothLEHardwareInterface
         {
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
             _winBluetoothLELog(message);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLELog (message);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -245,7 +245,7 @@ public class BluetoothLEHardwareInterface
 		// Register for updates
 		_winBluetoothLEConnectCallbacks(UnitySendMessageWrapper, DebugLog, DebugLogWarning, DebugLogError);
 		_winBluetoothLEInitialize(asCentral, asPeripheral);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEInitialize (asCentral, asPeripheral);
 #elif UNITY_ANDROID
 		if (_android == null)
@@ -268,7 +268,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEDeInitialize();
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEDeInitialize ();
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -286,7 +286,7 @@ public class BluetoothLEHardwareInterface
 	public static void BluetoothEnable (bool enable)
 	{
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		//_iOSBluetoothLELog (message);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -298,7 +298,7 @@ public class BluetoothLEHardwareInterface
 	{
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEPauseMessages(isPaused);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEPauseMessages (isPaused);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -344,7 +344,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEScanForPeripheralsWithServices(serviceUUIDsString, (actionAdvertisingInfo != null), rssiOnly, clearPeripheralList);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEScanForPeripheralsWithServices (serviceUUIDsString, (actionAdvertisingInfo != null), rssiOnly, clearPeripheralList);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -377,7 +377,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLERetrieveListOfPeripheralsWithServices(serviceUUIDsString);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLERetrieveListOfPeripheralsWithServices (serviceUUIDsString);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -389,7 +389,7 @@ public class BluetoothLEHardwareInterface
 	{
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEStopScan();
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEStopScan ();
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -401,7 +401,7 @@ public class BluetoothLEHardwareInterface
 	{
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEDisconnectAll();
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEDisconnectAll ();
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -421,7 +421,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEConnectToPeripheral(name);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEConnectToPeripheral (name);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -436,7 +436,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEDisconnectPeripheral(name);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEDisconnectPeripheral (name);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -453,7 +453,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 			bluetoothDeviceScript.DidUpdateCharacteristicValueAction[name][characteristic] = action;
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 			bluetoothDeviceScript.DidUpdateCharacteristicValueAction [name] [characteristic] = action;
 #elif UNITY_ANDROID
 			bluetoothDeviceScript.DidUpdateCharacteristicValueAction [name] [FullUUID (characteristic).ToLower ()] = action;
@@ -462,7 +462,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEReadCharacteristic(name, service, characteristic);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEReadCharacteristic (name, service, characteristic);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -477,7 +477,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEWriteCharacteristic(name, service, characteristic, data, length, withResponse);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEWriteCharacteristic (name, service, characteristic, data, length, withResponse);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -501,7 +501,7 @@ public class BluetoothLEHardwareInterface
 			if (!bluetoothDeviceScript.DidUpdateCharacteristicValueAction.ContainsKey(name))
 				bluetoothDeviceScript.DidUpdateCharacteristicValueAction[name] = new Dictionary<string, Action<string, byte[]>>();
 			bluetoothDeviceScript.DidUpdateCharacteristicValueAction[name][characteristic] = action;
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 			if (!bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction.ContainsKey (name))
 				bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction [name] = new Dictionary<string, Action<string>> ();
 			bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction [name] [characteristic] = notificationAction;
@@ -522,7 +522,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLESubscribeCharacteristic(name, service, characteristic);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLESubscribeCharacteristic (name, service, characteristic);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -546,7 +546,7 @@ public class BluetoothLEHardwareInterface
 			if (!bluetoothDeviceScript.DidUpdateCharacteristicValueWithDeviceAddressAction.ContainsKey(name))
 				bluetoothDeviceScript.DidUpdateCharacteristicValueWithDeviceAddressAction[name] = new Dictionary<string, Action<string, string, byte[]>>();
 			bluetoothDeviceScript.DidUpdateCharacteristicValueWithDeviceAddressAction[name][characteristic] = action;
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 			if (!bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction.ContainsKey (name))
 				bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction[name] = new Dictionary<string, Action<string, string>>();
 			bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction[name][characteristic] = notificationAction;
@@ -567,7 +567,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLESubscribeCharacteristic(name, service, characteristic);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLESubscribeCharacteristic (name, service, characteristic);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -591,7 +591,7 @@ public class BluetoothLEHardwareInterface
 			if (!bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction.ContainsKey(name))
 				bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction[name] = new Dictionary<string, Action<string>>();
 			bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicAction[name][characteristic] = null;
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 			if (!bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction.ContainsKey (name))
 				bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction[name] = new Dictionary<string, Action<string, string>>();
 			bluetoothDeviceScript.DidUpdateNotificationStateForCharacteristicWithDeviceAddressAction[name][characteristic] = null;
@@ -612,7 +612,7 @@ public class BluetoothLEHardwareInterface
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 		_winBluetoothLEUnSubscribeCharacteristic(name, service, characteristic);
-#elif UNITY_IPHONE || UNITY_TVOS
+#elif (UNITY_IPHONE || UNITY_TVOS) && !UNITY_EDITOR_OSX
 		_iOSBluetoothLEUnSubscribeCharacteristic (name, service, characteristic);
 #elif UNITY_ANDROID
 		if (_android != null)
@@ -624,7 +624,7 @@ public class BluetoothLEHardwareInterface
 	{
 		if (!Application.isEditor)
 		{
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLEPeripheralName (newName);
 #endif
 		}
@@ -637,7 +637,7 @@ public class BluetoothLEHardwareInterface
 			if (bluetoothDeviceScript != null)
 				bluetoothDeviceScript.ServiceAddedAction = action;
 
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLECreateService (uuid, primary);
 #endif
 		}
@@ -647,7 +647,7 @@ public class BluetoothLEHardwareInterface
 	{
 		if (!Application.isEditor)
 		{
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLERemoveService (uuid);
 #endif
 		}
@@ -657,7 +657,7 @@ public class BluetoothLEHardwareInterface
 	{
 		if (!Application.isEditor)
 		{
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLERemoveServices ();
 #endif
 		}
@@ -670,7 +670,7 @@ public class BluetoothLEHardwareInterface
 			if (bluetoothDeviceScript != null)
 				bluetoothDeviceScript.PeripheralReceivedWriteDataAction = action;
 
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLECreateCharacteristic (uuid, (int)properties, (int)permissions, data, length);
 #endif
 		}
@@ -683,7 +683,7 @@ public class BluetoothLEHardwareInterface
 			if (bluetoothDeviceScript != null)
 				bluetoothDeviceScript.PeripheralReceivedWriteDataAction = null;
 
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLERemoveCharacteristic (uuid);
 #endif
 		}
@@ -693,7 +693,7 @@ public class BluetoothLEHardwareInterface
 	{
 		if (!Application.isEditor)
 		{
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLERemoveCharacteristics ();
 #endif
 		}
@@ -706,7 +706,7 @@ public class BluetoothLEHardwareInterface
 			if (bluetoothDeviceScript != null)
 				bluetoothDeviceScript.StartedAdvertisingAction = action;
 
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLEStartAdvertising ();
 #endif
 		}
@@ -719,7 +719,7 @@ public class BluetoothLEHardwareInterface
 			if (bluetoothDeviceScript != null)
 				bluetoothDeviceScript.StoppedAdvertisingAction = action;
 
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLEStopAdvertising ();
 #endif
 		}
@@ -729,7 +729,7 @@ public class BluetoothLEHardwareInterface
 	{
 		if (!Application.isEditor)
 		{
-#if UNITY_IPHONE
+#if UNITY_IPHONE && !UNITY_EDITOR_OSX
 			_iOSBluetoothLEUpdateCharacteristicValue (uuid, data, length);
 #endif
 		}

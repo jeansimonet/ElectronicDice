@@ -84,6 +84,7 @@ public class Central
     void Start()
 	{
 		_state = CentralState.Initializing;
+        #if !UNITY_EDITOR_OSX
 		BluetoothLEHardwareInterface.Initialize(true, false,
 		() =>
 		{
@@ -95,6 +96,9 @@ public class Central
             Debug.LogError("Error initializing Bluetooth Central: " + err);
 
         });
+        #else
+        _state = CentralState.Idle;
+        #endif
 	}
 
     public void RegisterClient(IClient client)
