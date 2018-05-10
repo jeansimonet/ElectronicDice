@@ -5,7 +5,8 @@ using UnityEngine;
 public class Die3D : MonoBehaviour
 {
     public Camera dieCamera;
-    public GameObject die;
+    public GameObject dieRoot;
+    public GameObject dieObject;
     public int RenderTextureSize = 512;
     public float MaxRotationSpeed = 1080.0f; // d/s
 
@@ -28,7 +29,8 @@ public class Die3D : MonoBehaviour
         dieCamera.cullingMask = 1 << layerIndex; // only render particle effects
         dieCamera.targetTexture = renderTexture;
 
-        die.layer = layerIndex;
+        dieRoot.layer = layerIndex;
+        dieObject.layer = layerIndex;
 
         return renderTexture;
     }
@@ -50,7 +52,7 @@ public class Die3D : MonoBehaviour
         // and we don't really know what its forward vec should be, so we just pick
         // the closest to the current forward vector
         Vector3 measuredUp = (-unityAcc).normalized;
-        Vector3 right = Vector3.Cross(measuredUp, die.transform.forward);
+        Vector3 right = Vector3.Cross(measuredUp, dieRoot.transform.forward);
         Vector3 newForward = Vector3.Cross(right, measuredUp);
         currentDiceRot = Quaternion.LookRotation(newForward, measuredUp);
     }
@@ -69,6 +71,6 @@ public class Die3D : MonoBehaviour
     void Update ()
     {
         float maxDelta = Time.deltaTime * MaxRotationSpeed;
-        die.transform.localRotation = Quaternion.RotateTowards(die.transform.localRotation, currentDiceRot, maxDelta);
+        dieRoot.transform.localRotation = Quaternion.RotateTowards(dieRoot.transform.localRotation, currentDiceRot, maxDelta);
 	}
 }

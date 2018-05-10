@@ -35,6 +35,7 @@ float3 AccelFrame::getJerk() const
 AccelerationController::AccelerationController()
 	: face(0)
 {
+	auto& lastFrame = buffer.last();
 }
 
 /// <summary>
@@ -51,28 +52,8 @@ void AccelerationController::timerUpdate()
 	newFrame.Z = accelerometer.z;
 	newFrame.Time = millis();
 
-	//debugPrint("Accel frame: ");
-	//debugPrint(newFrame.X);
-	//debugPrint(", ");
-	//debugPrint(newFrame.Y);
-	//debugPrint(", ");
-	//debugPrint(newFrame.Z);
-	//debugPrint(", ");
-	//debugPrint(newFrame.Time);
-	//debugPrintln("ms");
-
 	// Compute delta!
 	auto& lastFrame = buffer.last();
-
-	//debugPrint("Last frame: ");
-	//debugPrint(lastFrame.X);
-	//debugPrint(", ");
-	//debugPrint(lastFrame.Y);
-	//debugPrint(", ");
-	//debugPrint(lastFrame.Z);
-	//debugPrint(", ");
-	//debugPrint(lastFrame.Time);
-	//debugPrintln("ms");
 
 	short deltaX = newFrame.X - lastFrame.X;
 	short deltaY = newFrame.Y - lastFrame.Y;

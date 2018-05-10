@@ -42,6 +42,8 @@ const char* DieMessage::GetMessageTypeString(DieMessage::MessageType msgType)
 		return "RequestTelemetry";
 	case MessateType_ProgramDefaultAnimSet:
 		return "ProgramDefaultAnimSet";
+	case DieMessage::MessageType_Rename:
+		return "Rename";
 	default:
 		return "<missing>";
 	}

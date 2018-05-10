@@ -458,4 +458,24 @@ public class Die
         PostMessage(new DieMessageRequestTelemetry() { telemetry = on ? (byte)1 : (byte)0 });
     }
 
+    public void SetNewColor()
+    {
+        Color newColor = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 0.5f);
+        Color32 color32 = newColor;
+        int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
+
+        PostMessage(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB });
+    }
+
+    public void Flash()
+    {
+        PostMessage(new DieMessageFlash());
+    }
+
+    public void Rename(string newName)
+    {
+        gameObject.name = newName;
+        name = newName;
+        PostMessage(new DieMessageRename() { newName = newName });
+    }
 }

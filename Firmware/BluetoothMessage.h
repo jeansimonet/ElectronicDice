@@ -5,6 +5,8 @@
 
 #include "Arduino.h"
 
+#pragma pack(push, 1)
+
 /// <summary>
 ///  Base class for messages from the die to the app
 /// </summary>
@@ -32,6 +34,7 @@ struct DieMessage
 		MessageType_RequestSettings,
 		MessageType_RequestTelemetry,
 		MessateType_ProgramDefaultAnimSet,
+		MessageType_Rename,
 		MessageType_Count
 	};
 
@@ -63,10 +66,10 @@ struct DieMessageAcc
 {
 	struct AccelFrame
 	{
-		short x;
-		short y;
-		short z;
-		short deltaTime;
+		int16_t x;
+		int16_t y;
+		int16_t z;
+		int16_t deltaTime;
 	};
 
 	AccelFrame data[2];
@@ -101,7 +104,6 @@ struct DieMessageTransferAnimSet
 	inline DieMessageTransferAnimSet() : DieMessage(DieMessage::MessageType_TransferAnimSet) {}
 };
 
-#pragma pack(push, 1)
 struct DieMessageDebugLog
 	: public DieMessage
 {
@@ -109,7 +111,6 @@ struct DieMessageDebugLog
 
 	inline DieMessageDebugLog() : DieMessage(DieMessage::MessageType_DebugLog) {}
 };
-#pragma pack(pop)
 
 struct DieMessagePlayAnim
 	: public DieMessage
@@ -134,5 +135,16 @@ struct DieMessageProgramDefaultAnimSet
 
 	inline DieMessageProgramDefaultAnimSet() : DieMessage(DieMessage::MessateType_ProgramDefaultAnimSet) {}
 };
+
+struct DieMessageRename
+	: public DieMessage
+{
+	char newName[16];
+
+	inline DieMessageRename() : DieMessage(DieMessage::MessageType_Rename) {}
+};
+
+#pragma pack(pop)
+
 #endif
 

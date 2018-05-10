@@ -29,6 +29,9 @@ public enum DieMessageType : byte
     RequestAnimSet,
     RequestSettings,
     RequestTelemetry,
+    MessateType_ProgramDefaultAnimSet,
+    MessageType_Rename,
+    MessageType_Flash,
 }
 
 public interface DieMessage
@@ -315,5 +318,30 @@ public class DieMessageRequestState
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.RequestState;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageProgramDefaultAnimSet
+    : DieMessage
+{
+    public uint color;
+    public DieMessageType type { get; set; } = DieMessageType.MessateType_ProgramDefaultAnimSet;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageRename
+    : DieMessage
+{
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    public string newName;
+    public DieMessageType type { get; set; } = DieMessageType.MessageType_Rename;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageFlash
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.MessageType_Flash;
 }
 

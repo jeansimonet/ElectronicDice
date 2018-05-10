@@ -7,17 +7,25 @@ public class CurrentDicePoolDice
     : MonoBehaviour
 {
     public Text nameText;
-    public Text voltageText;
     public Text statusText;
     public Image diceImage;
     public Button diceButton;
     public CanvasGroup commandGroup;
-    public Button replaceButton;
+    public Button renameButton;
     public Button forgetButton;
-    public Button pingButon;
+    public Button flashButton;
+    public Button setColorButton;
+    public RenameDieDialog renameDieDialog;
 
     public Die die { get; private set; }
     public Central central;
+    bool commandsShown
+    {
+        get
+        {
+            return commandGroup.interactable;
+        }
+    }
 
 	// Use this for initialization
 	void Start () {
@@ -34,13 +42,24 @@ public class CurrentDicePoolDice
         this.die = die;
         this.central = central;
         nameText.text = die.name;
-        voltageText.text = "<voltage>";
         statusText.text = die.connected ? "Ready" : "Missing";
         diceImage.color = Color.white;
         HideCommands();
 
         diceButton.onClick.RemoveAllListeners();
-        diceButton.onClick.AddListener(ShowCommands);
+        diceButton.onClick.AddListener(ShowHideCommands);
+    }
+
+    void ShowHideCommands()
+    {
+        if (commandsShown)
+        {
+            HideCommands();
+        }
+        else
+        {
+            ShowCommands();
+        }
     }
 
     void ShowCommands()
@@ -52,6 +71,15 @@ public class CurrentDicePoolDice
         // Register commands
         forgetButton.onClick.RemoveAllListeners();
         forgetButton.onClick.AddListener(ForgetDie);
+
+        renameButton.onClick.RemoveAllListeners();
+        renameButton.onClick.AddListener(RenameDie);
+
+        flashButton.onClick.RemoveAllListeners();
+        flashButton.onClick.AddListener(FlashDie);
+
+        setColorButton.onClick.RemoveAllListeners();
+        setColorButton.onClick.AddListener(SetNewDieColor);
     }
 
     void HideCommands()
@@ -67,5 +95,23 @@ public class CurrentDicePoolDice
 
         // Tell central to forget about this die
         central.ForgetDie(die, null);
+    }
+
+    void RenameDie()
+    {
+        HideCommands();
+        renameDieDialog.Show(die);
+    }
+
+    void FlashDie()
+    {
+        HideCommands();
+        die.Flash();
+    }
+
+    void SetNewDieColor()
+    {
+        HideCommands();
+        die.SetNewColor();
     }
 }

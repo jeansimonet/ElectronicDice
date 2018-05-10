@@ -84,6 +84,7 @@ void Die::init()
 	RegisterMessageHandler(DieMessage::MessageType_TransferSettings, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnUpdateSettings(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_RequestTelemetry, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestTelemetry(msg); });
 	RegisterMessageHandler(DieMessage::MessateType_ProgramDefaultAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnProgramDefaultAnimSet(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_Rename, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRenameDie(msg); });
 
 	// start the BLE stack
 	SimbleeBLE.end();
@@ -377,3 +378,27 @@ void Die::OnProgramDefaultAnimSet(DieMessage* msg)
 	auto animSetMsg = (DieMessageProgramDefaultAnimSet*)msg;
 	AnimationSet::ProgramDefaultAnimationSet(animSetMsg->color);
 }
+
+void Die::OnRenameDie(DieMessage* msg)
+{
+	auto animSetMsg = (DieMessageRename*)msg;
+	Settings settingsToWrite;
+	strncpy(settingsToWrite.name, animSetMsg->newName, 16);
+	if (Settings::EraseSettings())
+	{
+		if (Settings::TransferSettings(&settingsToWrite))
+		{
+			debugPrint("Renaming die to ");
+			debugPrintln(animSetMsg->newName);
+		}
+		else
+		{
+			debugPrintln("Error writing settings while trying to rename die");
+		}
+	}
+	else
+	{
+		debugPrintln("Error erasing flash to rename die");
+	}
+}
+

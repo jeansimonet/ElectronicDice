@@ -13,7 +13,7 @@ void Telemetry::begin()
 	teleMessage.type = DieMessage::MessageType_Telemetry;
 	for (int i = 0; i < 1; ++i)
 	{
-		teleMessage.data[i] = { 0,0,0 };
+		teleMessage.data[i] = { 0,0,0,0 };
 	}
 
 	lastAccelWasSent = false;
@@ -41,33 +41,6 @@ void Telemetry::onAccelFrame(const AccelFrame& frame)
 		teleMessage.data[1].y = frame.Y;
 		teleMessage.data[1].z = frame.Z;
 		teleMessage.data[1].deltaTime = frame.Time - lastAccelFrame.Time;
-
-		debugPrint("raw: ");
-		debugPrint(teleMessage.data[0].x);
-		debugPrint(",");
-		debugPrint(teleMessage.data[0].y);
-		debugPrint(",");
-		debugPrint(teleMessage.data[0].z);
-		debugPrint(":");
-		debugPrintln(teleMessage.data[0].deltaTime);
-
-		debugPrint("raw: ");
-		debugPrint(teleMessage.data[1].x);
-		debugPrint(",");
-		debugPrint(teleMessage.data[1].y);
-		debugPrint(",");
-		debugPrint(teleMessage.data[1].z);
-		debugPrint(":");
-		debugPrintln(teleMessage.data[1].deltaTime);
-		//char* buffer = reinterpret_cast<char*>(&teleMessage);
-		//int len = sizeof(teleMessage);
-		//debugPrint("Sending Telemetry ");
-		//for (int i = 0; i < len; ++i)
-		//{
-		//	debugPrint(buffer[i], HEX);
-		//	debugPrint(" ");
-		//}
-		//debugPrintln();
 
 		// Send the message
 		SimbleeBLE.send(reinterpret_cast<const char*>(&teleMessage), sizeof(DieMessageAcc));
