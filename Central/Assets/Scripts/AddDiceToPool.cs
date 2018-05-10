@@ -95,6 +95,7 @@ public class AddDiceToPool : MonoBehaviour {
 
     private void AddAvailableDice(Die die)
     {
+        Debug.Log("notified of discovered die name:" + die.name + ", addr:" + die.address);
         // Make sure to turn on the list!
         noDiceIndicator.SetActive(false);
         availableDiceListRoot.SetActive(true);

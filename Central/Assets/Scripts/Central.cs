@@ -128,7 +128,7 @@ public class Central
             }
 
             System.Action<string, string> dieDiscovered =
-                (name, address) =>
+                (address, name) =>
                 {
                     if (!diceList.Any(dc => dc.address == address))
                     {
@@ -189,37 +189,57 @@ public class Central
         System.Action<Die> dieConnectedCallback,
         System.Action<Die> dieDisconnectedCallback)
 	{
+        Debug.Log("Connecting to " + die.name);
         if (_state == CentralState.Idle)
         {
             _state = CentralState.Connecting;
             bool readCharacDiscovered = false;
             bool writeCharacDiscovered = false;
 
+            System.Action gotReadOrWriteCharacteristic = () =>
+            {
+                // Do we have both read and write access? If so we're good to go!
+                if (readCharacDiscovered && writeCharacDiscovered)
+                {
+                    Debug.Log("got both read and write");
+                    // We're ready to go
+                    die.Connect(this);
+                    _state = CentralState.Idle;
+                    if (dieConnectedCallback != null)
+                        dieConnectedCallback(die);
+                    if (onDieConnected != null)
+                        onDieConnected(die);
+                    foreach (var client in clients)
+                    {
+                        client.OnNewDie(die);
+                    }
+                }
+            };
+
             System.Action<string, string, string> onCharacteristicDiscovered =
                 (ad, serv, charac) =>
                 {
+                    Debug.Log("Got characteristic " + serv + ":" + charac);
                     // Check for the service guid to match that for our dice (it's the Simblee one)
-                    if (ad == die.address && serv == serviceGUID)
+                    if (ad == die.address && serv.ToLower() == serviceGUID.ToLower())
                     {
                         // Check the discovered characteristic
-                        if (charac == subscribeCharacteristic)
+                        if (charac.ToLower() == subscribeCharacteristic.ToLower())
                         {
                             // It's the read characteristic, subscribe to it!
                             System.Action<string, byte[]> onDataReceived =
                                 (dev, data) =>
                                 {
-                                    if (dev == die.address)
-                                    {
-                                        die.DataReceived(data);
-                                    }
+                                    die.DataReceived(data);
                                 };
 
                             if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
                             {
+                                Debug.Log("subscribing " + serviceGUID + ":" + subscribeCharacteristic);
                                 BluetoothLEHardwareInterface.SubscribeCharacteristic(die.address,
                                 serviceGUID,
                                 subscribeCharacteristic,
-                                null,
+                                (par) => Debug.Log("Subscribe successful"),
                                 onDataReceived);
                             }
                             else
@@ -231,28 +251,15 @@ public class Central
                                 onDataReceived);
                             }
                             readCharacDiscovered = true;
+                            gotReadOrWriteCharacteristic();
                         }
-                        else if (charac == writeCharacteristic)
+                        else if (charac.ToLower() == writeCharacteristic.ToLower())
                         {
                             // It's the write characteristic, remember that
                             writeCharacDiscovered = true;
+                            gotReadOrWriteCharacteristic();
                         }
-
-                        // Do we have both read and write access? If so we're good to go!
-                        if (readCharacDiscovered && writeCharacDiscovered)
-                        {
-                            // We're ready to go
-                            die.Connect(this);
-                            _state = CentralState.Idle;
-                            if (dieConnectedCallback != null)
-                                dieConnectedCallback(die);
-                            if (onDieConnected != null)
-                                onDieConnected(die);
-                            foreach (var client in clients)
-                            {
-                                client.OnNewDie(die);
-                            }
-                        }
+                        // Else we don't care about this characteristic
                     }
                 };
 
