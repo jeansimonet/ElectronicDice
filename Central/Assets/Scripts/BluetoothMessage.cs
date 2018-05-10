@@ -278,7 +278,7 @@ public class DieMessageRequestTelemetry
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.RequestTelemetry;
-    public bool telemetry;
+    public byte telemetry;
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
