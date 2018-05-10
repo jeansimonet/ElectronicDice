@@ -150,11 +150,11 @@ int AccelerationController::determineFace(float x, float y, float z)
 			// X is greatest direction
 			if (x > 0)
 			{
-				return 5;
+				return 2;
 			}
 			else
 			{
-				return 2;
+				return 5;
 			}
 		}
 		else
@@ -162,11 +162,11 @@ int AccelerationController::determineFace(float x, float y, float z)
 			// Z is greatest direction
 			if (z > 0)
 			{
-				return 6;
+				return 1;
 			}
 			else
 			{
-				return 1;
+				return 6;
 			}
 		}
 	}
@@ -177,11 +177,11 @@ int AccelerationController::determineFace(float x, float y, float z)
 			// Z is greatest direction
 			if (z > 0)
 			{
-				return 6;
+				return 1;
 			}
 			else
 			{
-				return 1;
+				return 6;
 			}
 		}
 		else
@@ -189,11 +189,11 @@ int AccelerationController::determineFace(float x, float y, float z)
 			// Y is greatest direction
 			if (y > 0)
 			{
-				return 4;
+				return 3;
 			}
 			else
 			{
-				return 3;
+				return 4;
 			}
 		}
 	}
