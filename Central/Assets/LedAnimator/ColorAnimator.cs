@@ -51,6 +51,25 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 		}
 	}
 
+	public Animations.RGBAnimationTrack Serialize(float unitSize)
+	{
+		int offset = 120; //TODO
+		var rect = (ColorSlider.transform as RectTransform).rect;
+		string spriteName = _image.sprite.name;
+		int face = int.Parse(spriteName[spriteName.IndexOf('-') - 1].ToString());
+		int point = int.Parse(spriteName[spriteName.IndexOf('-') + 1].ToString());
+		float start = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMin - offset, 0, 0)).x / unitSize;
+		float end = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMax - offset, 0, 0)).x / unitSize;
+		return new Animations.RGBAnimationTrack()
+		{
+			startTime = (short)Mathf.RoundToInt(1000 * start),
+			duration = (short)Mathf.RoundToInt(1000 * (end - start)),
+			ledIndex = (byte)(Enumerable.Range(1, face - 1).Sum() + point - 1),
+			count = 1,
+			keyframes = ColorSlider.Serialize(end - start),
+		};
+	}
+
 	IFocusable[] FindFocusables()
 	{
 		return GetComponentsInChildren<IFocusable>().Where(f => (object)f != this).ToArray();
