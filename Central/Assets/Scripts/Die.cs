@@ -176,16 +176,7 @@ public class Die
 		}
 
 		// Process the message coming from the actual die!
-        StringBuilder builder = new StringBuilder();
-        builder.Append("Die " + name + " received ");
-        for (int i = 0; i < data.Length; ++i)
-        {
-            builder.Append(((int)data[i]).ToString("X"));
-            builder.Append(' ');
-        }
-        Debug.Log(builder.ToString());
 		var message = DieMessages.FromByteArray(data);
-        Debug.Log("Die " + name + " received message " + message.type);
         MessageReceivedDelegate del;
         if (messageDelegates.TryGetValue(message.type, out del))
         {
@@ -291,13 +282,11 @@ public class Die
             for (int i = 0; i < 2; ++i)
             {
                 // Compute actual accelerometer readings (in Gs)
-                Debug.Log("raw:" + telem.data[i].X + "," + telem.data[i].Y + "," + telem.data[i].Z + ":" + telem.data[i].DeltaTime);
                 float cx = (float)telem.data[i].X / (float)(1 << 11) * (float)(scale);
                 float cy = (float)telem.data[i].Y / (float)(1 << 11) * (float)(scale);
                 float cz = (float)telem.data[i].Z / (float)(1 << 11) * (float)(scale);
                 Vector3 acc = new Vector3(cx, cy, cz);
                 lastSampleTime += telem.data[i].DeltaTime; 
-                Debug.Log("acc:" + acc.x + "," + acc.y + "," + acc.z + ":" + lastSampleTime);
 
                 // Notify anyone who cares
                 _OnTelemetry.Invoke(this, acc, lastSampleTime);

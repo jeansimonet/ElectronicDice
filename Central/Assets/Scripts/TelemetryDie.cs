@@ -55,9 +55,9 @@ public class TelemetryDie : MonoBehaviour
         graphs = new List<GraphInstance>();
 
         // Graph the magnitude and euler angles
-        AddGraph((acc, dt) => acc.x, -8, 8, Color.red, "X");
-        AddGraph((acc, dt) => acc.y, -8, 8, Color.green, "Y");
-        AddGraph((acc, dt) => acc.z, -8, 8, Color.blue, "Z");
+        AddGraph((acc, dt) => acc.x, -4, 4, Color.red, "X");
+        AddGraph((acc, dt) => acc.y, -4, 4, Color.green, "Y");
+        AddGraph((acc, dt) => acc.z, -4, 4, Color.blue, "Z");
         //AddGraph((acc, dt) => acc.magnitude, -4, 4, Color.yellow, "Mag");
     }
 

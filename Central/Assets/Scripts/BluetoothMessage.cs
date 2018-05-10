@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 /// <summary>
 /// These message identifiers have to match up with the ones on the firmware of course!
@@ -36,60 +37,8 @@ public interface DieMessage
     DieMessageType type { get; set; }
 }
 
-public class EndiannessArraySizeAttribute
-    : System.Attribute
-{
-    public EndiannessArraySizeAttribute(int size)
-    {
-        this.size = size;
-    }
-    public int size;
-}
-
 public static class DieMessages
 {
-    private static void ReverseEndianness(System.Type type, byte[] data, int offSet = 0)
-    {
-        var fields = type.GetFields()
-            .Select(f => new
-            {
-                Field = f,
-                Offset = Marshal.OffsetOf(type, f.Name).ToInt32(),
-            }).ToList();
-
-        foreach (var field in fields)
-        {
-            if (field.Field.FieldType.IsArray)
-            {
-                //handle arrays, assuming fixed length
-                var attr = field.Field.GetCustomAttributes(typeof(EndiannessArraySizeAttribute), false).FirstOrDefault() as EndiannessArraySizeAttribute;
-                if (attr == null || attr.size == 0)
-                    throw new System.NotSupportedException(
-                        "Array fields must be decorated with a EndiannessArraySize.");
-
-                var arrayLength = attr.size;
-                var elementType = field.Field.FieldType.GetElementType();
-                var elementSize = Marshal.SizeOf(elementType);
-                var arrayOffset = field.Offset + offSet;
-
-                for (int i = arrayOffset; i < arrayOffset + elementSize * arrayLength; i += elementSize)
-                {
-                    ReverseEndianness(elementType, data, i);
-                }
-            }
-            else if (!field.Field.FieldType.IsPrimitive) //or !field.Field.FiledType.GetFields().Length == 0
-            {
-                //handle nested structs
-                ReverseEndianness(field.Field.FieldType, data, field.Offset);
-            }
-            else
-            {
-                //handle primitive types
-                System.Array.Reverse(data, offSet + field.Offset, Marshal.SizeOf(field.Field.FieldType));
-            }
-        }
-    }
-
     public static DieMessage FromByteArray(byte[] data)
     {
         DieMessage ret = null;
@@ -153,7 +102,6 @@ public static class DieMessages
     static DieMessage FromByteArray<T>(byte[] data)
         where T : DieMessage
     {
-        ReverseEndianness(typeof(T), data);
         int size = Marshal.SizeOf(typeof(T));
         System.IntPtr ptr = Marshal.AllocHGlobal(size);
         Marshal.Copy(data, 0, ptr, size);
@@ -172,7 +120,6 @@ public static class DieMessages
         byte[] ret = new byte[size];
         Marshal.Copy(ptr, ret, 0, size);
         Marshal.FreeHGlobal(ptr);
-        ReverseEndianness(typeof(T), ret);
         return ret;
     }
 }
@@ -192,7 +139,6 @@ public class DieMessageAcc
     public DieMessageType type { get; set; } = DieMessageType.Telemetry;
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    [EndiannessArraySize(2)] // same as SizeConst
     public AccelFrame[] data;
 }
 
@@ -219,7 +165,6 @@ public class DieMessageBulkData
     public byte size;
     public short offset;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-    [EndiannessArraySize(16)] // same as SizeConst
     public byte[] data;
 }
 
@@ -298,7 +243,6 @@ public class DieMessageDebugLog
 {
     public DieMessageType type { get; set; } = DieMessageType.DebugLog;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
-    [EndiannessArraySize(19)] // same as SizeConst
     public byte[] data;
 }
 

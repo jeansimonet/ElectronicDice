@@ -193,7 +193,6 @@ public class Central
         System.Action<Die> dieConnectedCallback,
         System.Action<Die> dieDisconnectedCallback)
 	{
-        Debug.Log("Connecting to " + die.name);
         if (_state == CentralState.Idle)
         {
             _state = CentralState.Connecting;
@@ -205,7 +204,6 @@ public class Central
                 // Do we have both read and write access? If so we're good to go!
                 if (readCharacDiscovered && writeCharacDiscovered)
                 {
-                    Debug.Log("got both read and write");
                     // We're ready to go
                     die.Connect(this);
                     _state = CentralState.Idle;
@@ -223,7 +221,6 @@ public class Central
             System.Action<string, string, string> onCharacteristicDiscovered =
                 (ad, serv, charac) =>
                 {
-                    Debug.Log("Got characteristic " + serv + ":" + charac);
                     // Check for the service guid to match that for our dice (it's the Simblee one)
                     if (ad == die.address && serv.ToLower() == serviceGUID.ToLower())
                     {
@@ -239,11 +236,10 @@ public class Central
 
                             if (virtualBluetooth == null || !virtualBluetooth.IsVirtualDie(die.address))
                             {
-                                Debug.Log("subscribing " + serviceGUID + ":" + subscribeCharacteristic);
                                 BluetoothLEHardwareInterface.SubscribeCharacteristic(die.address,
                                 serviceGUID,
                                 subscribeCharacteristic,
-                                (par) => Debug.Log("Subscribe successful"),
+                                null,
                                 onDataReceived);
                             }
                             else
