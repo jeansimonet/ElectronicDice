@@ -132,7 +132,7 @@ public class Die
 	public void Ping()
 	{
 		if (connected)
-		{
+		{ 
             SendMessage(new DieMessageRequestState());
         }
     }
@@ -455,7 +455,7 @@ public class Die
 
     void RequestTelemetry(bool on)
     {
-        PostMessage(new DieMessageRequestTelemetry() { telemetry = on });
+        PostMessage(new DieMessageRequestTelemetry() { telemetry = on ? (byte)1 : (byte)0 });
     }
 
 }
