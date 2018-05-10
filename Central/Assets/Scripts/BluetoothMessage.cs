@@ -36,6 +36,16 @@ public interface DieMessage
     DieMessageType type { get; set; }
 }
 
+public class EndiannessArraySizeAttribute
+    : System.Attribute
+{
+    public EndiannessArraySizeAttribute(int size)
+    {
+        this.size = size;
+    }
+    public int size;
+}
+
 public static class DieMessages
 {
     private static void ReverseEndianness(System.Type type, byte[] data, int offSet = 0)
@@ -52,13 +62,12 @@ public static class DieMessages
             if (field.Field.FieldType.IsArray)
             {
                 //handle arrays, assuming fixed length
-                var attr = field.Field.GetCustomAttributes(typeof(MarshalAsAttribute), false).FirstOrDefault();
-                var marshalAsAttribute = attr as MarshalAsAttribute;
-                if (marshalAsAttribute == null || marshalAsAttribute.SizeConst == 0)
+                var attr = field.Field.GetCustomAttributes(typeof(EndiannessArraySizeAttribute), false).FirstOrDefault() as EndiannessArraySizeAttribute;
+                if (attr == null || attr.size == 0)
                     throw new System.NotSupportedException(
-                        "Array fields must be decorated with a MarshalAsAttribute with SizeConst specified.");
+                        "Array fields must be decorated with a EndiannessArraySize.");
 
-                var arrayLength = marshalAsAttribute.SizeConst;
+                var arrayLength = attr.size;
                 var elementType = field.Field.FieldType.GetElementType();
                 var elementSize = Marshal.SizeOf(elementType);
                 var arrayOffset = field.Offset + offSet;
@@ -183,6 +192,7 @@ public class DieMessageAcc
     public DieMessageType type { get; set; } = DieMessageType.Telemetry;
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+    [EndiannessArraySize(2)] // same as SizeConst
     public AccelFrame[] data;
 }
 
@@ -209,6 +219,7 @@ public class DieMessageBulkData
     public byte size;
     public short offset;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+    [EndiannessArraySize(16)] // same as SizeConst
     public byte[] data;
 }
 
@@ -287,6 +298,7 @@ public class DieMessageDebugLog
 {
     public DieMessageType type { get; set; } = DieMessageType.DebugLog;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
+    [EndiannessArraySize(19)] // same as SizeConst
     public byte[] data;
 }
 
