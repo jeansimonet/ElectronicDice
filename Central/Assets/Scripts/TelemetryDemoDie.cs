@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class TelemetryDemoDie : MonoBehaviour
 {
+    public Text nameField;
     public TelemetryDie graphs;
     public RawImage dieImage;
     public Die3D die3D;
@@ -25,6 +26,7 @@ public class TelemetryDemoDie : MonoBehaviour
 
     public void Setup(Die die)
     {
+        nameField.text = die.name;
         graphs.Setup(die.name);
         var rt = die3D.Setup(1);
         dieImage.texture = rt;
