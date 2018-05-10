@@ -6,6 +6,16 @@ using UnityEngine.UI;
 
 public class MultiSlider : MonoBehaviour, IFocusable
 {
+	struct ColorAndPos
+	{
+		public Color Color;
+		public float Pos;
+		public ColorAndPos(Color color, float pos)
+		{
+			Color = color; Pos = pos;
+		}
+	}
+
 	public enum SliderDirection { Horizontal, Verical }
 
 	public SliderDirection Direction = SliderDirection.Horizontal;
@@ -18,17 +28,20 @@ public class MultiSlider : MonoBehaviour, IFocusable
 	public MultiSliderHandle[] AllHandles { get { return transform.GetComponentsInChildren<MultiSliderHandle>(); } }
 
 	Texture2D _texture;
+	Sprite _sprite;
 
 	public void GiveFocus()
 	{
 		HasFocus = true;
 		GetComponentsInParent<IFocusable>().First(f => (object)f != this).GiveFocus();
+		GetComponent<Outline>().enabled = HasFocus;
 	}
 
 	public void RemoveFocus()
 	{
 		HasFocus = false;
 		SelectHandle(null);
+		GetComponent<Outline>().enabled = HasFocus;
 	}
 
 	public void SelectHandle(MultiSliderHandle multiSliderHandle)
@@ -58,26 +71,20 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		}
 	}
 
-	struct ColorAndPos
+	public Animations.RGBKeyframe[] Serialize(float duration)
 	{
-		public Color Color;
-		public float Pos;
-		public ColorAndPos(Color color, float pos)
+		return GetColorAndPos().Select(c => new Animations.RGBKeyframe()
 		{
-			Color = color; Pos = pos;
-		}
+			time = (byte)(255 * c.Pos / duration),
+			red = ((Color32)c.Color).r,
+			green = ((Color32)c.Color).g,
+			blue = ((Color32)c.Color).b,
+		}).ToArray();
 	}
 
 	public void Repaint()
 	{
-		var rect = (transform as RectTransform).rect;
-		var colorsAndPos = transform.OfType<RectTransform>().Select(t => t.GetComponent<Image>()).Where(i => i != null)
-			.OrderBy(i => i.transform.localPosition.x)
-			.Select(i => new ColorAndPos(i.color, (i.transform.localPosition.x - rect.xMin) / rect.width))
-			.ToList();
-
-		colorsAndPos.Insert(0, new ColorAndPos(colorsAndPos[0].Color, 0));
-		colorsAndPos.Add(new ColorAndPos(colorsAndPos.Last().Color, 1));
+		var colorsAndPos = GetColorAndPos();
 
 		Color[] pixels = _texture.GetPixels();
 		int x = 0, lastMax = 0;
@@ -98,17 +105,41 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		_texture.Apply(false);
 	}
 
+	List<ColorAndPos> GetColorAndPos()
+	{
+		var rect = (transform as RectTransform).rect;
+		var colorsAndPos = transform.OfType<RectTransform>().Select(t => t.GetComponent<Image>()).Where(i => i != null)
+			.OrderBy(i => i.transform.localPosition.x)
+			.Select(i => new ColorAndPos(i.color, (i.transform.localPosition.x - rect.xMin) / rect.width)).ToList();
+
+		colorsAndPos.Insert(0, new ColorAndPos(colorsAndPos[0].Color, 0));
+		colorsAndPos.Add(new ColorAndPos(colorsAndPos.Last().Color, 1));
+
+		return colorsAndPos;
+	}
+
+	void OnDestroy()
+	{
+		Object.Destroy(_sprite);
+		_sprite = null;
+		Object.Destroy(_texture);
+		_texture = null;
+	}
+
 	// Use this for initialization
 	void Start()
 	{
-		var texture = GetComponent<Image>().sprite.texture;
+		var img = GetComponent<Image>();
+		var texture = img.sprite.texture;
 		if (texture.mipmapCount != 1)
 		{
 			Debug.LogWarning("Texture used for color gradient should have only one mipmap level");
 		}
 
-		_texture = texture;
-		Debug.LogError("TODO: need to duplicate texture!!");
+		_texture = new Texture2D(texture.width, texture.height, texture.format, false);
+		Graphics.CopyTexture(texture, _texture);
+		_sprite = Sprite.Create(_texture, img.sprite.rect, img.sprite.pivot);
+		img.sprite = _sprite;
 
 		Repaint();
 	}
