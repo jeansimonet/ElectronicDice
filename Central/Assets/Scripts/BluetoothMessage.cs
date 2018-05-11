@@ -269,17 +269,17 @@ public class DieMessageRequestState
 public class DieMessageProgramDefaultAnimSet
     : DieMessage
 {
-    public uint color;
     public DieMessageType type { get; set; } = DieMessageType.MessateType_ProgramDefaultAnimSet;
+    public uint color;
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRename
     : DieMessage
 {
+    public DieMessageType type { get; set; } = DieMessageType.MessageType_Rename;
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string newName;
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_Rename;
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
