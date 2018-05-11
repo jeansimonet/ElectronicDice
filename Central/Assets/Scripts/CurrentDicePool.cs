@@ -69,6 +69,7 @@ public class CurrentDicePool
         // Add all currently selected dice
         foreach(Die die in central.diceList)
         {
+            Debug.Log("Considering die " + die.name + " (state:" + die.state + ")");
             if (die.connected)
             {
                 AddDie(die);
@@ -117,8 +118,11 @@ public class CurrentDicePool
         var cmp = dice.Find(dui => dui.die == die);
         if (cmp != null)
         {
+            if (dice.Count > 1)
+            {
+                GameObject.Destroy(cmp.gameObject);
+            }
             dice.Remove(cmp);
-            GameObject.Destroy(cmp.gameObject);
             if (dice.Count == 0)
             {
                 // Deactivate displays!

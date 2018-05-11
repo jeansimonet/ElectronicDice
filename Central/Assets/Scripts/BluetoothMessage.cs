@@ -270,7 +270,6 @@ public class DieMessageProgramDefaultAnimSet
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.MessateType_ProgramDefaultAnimSet;
-
     public uint color;
 }
 
@@ -279,7 +278,6 @@ public class DieMessageRename
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.MessageType_Rename;
-
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string newName;
 }
