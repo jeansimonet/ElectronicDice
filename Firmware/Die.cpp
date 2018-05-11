@@ -145,6 +145,8 @@ void Die::onReceive(char *data, int len)
 	lazarus.onRadio();
 
 	debugPrint("Received ");
+	debugPrint(len);
+	debugPrint(" bytes: ");
 	for (int i = 0; i < len; ++i)
 	{
 		debugPrint(data[i], HEX);
@@ -158,7 +160,10 @@ void Die::onReceive(char *data, int len)
 		auto handler = messageHandlers[(int)msg->type];
 #if defined(_CONSOLE)
 		debugPrint("Received ");
-		debugPrintln(DieMessage::GetMessageTypeString(msg->type));
+		debugPrint(DieMessage::GetMessageTypeString(msg->type));
+		debugPrint("(");
+		debugPrint(msg->type);
+		debugPrintln(")");
 #endif
 		if (handler.handler != nullptr)
 		{
@@ -215,9 +220,9 @@ void Die::updateFaceAnimation()
 		{
 			currentFace = newFace;
 
-			//// Toggle leds
-			//animController.stopAll();
-			//playAnimation(currentFace);
+			// Toggle leds
+			animController.stopAll();
+			playAnimation(currentFace);
 
 			debugPrint("sending face number ");
 			debugPrintln(currentFace);
@@ -378,30 +383,47 @@ void Die::playAnimation(int animIndex)
 
 void Die::OnProgramDefaultAnimSet(DieMessage* msg)
 {
-	// Stop everything
-	PauseModules();
+	bool sleep = lazarus.sleeping;
+	if (!sleep)
+	{
+		// Stop everything
+		PauseModules();
+	}
 
 	auto animSetMsg = (DieMessageProgramDefaultAnimSet*)msg;
 	AnimationSet::ProgramDefaultAnimationSet(animSetMsg->color);
 
-	// Resume 
-	ResumeModules();
+	if (!sleep)
+	{
+		// Resume 
+		ResumeModules();
+	}
 }
 
 void Die::OnRenameDie(DieMessage* msg)
 {
+	bool sleep = lazarus.sleeping;
+	if (!sleep)
+	{
+		// Stop everything
+		PauseModules();
+	}
+
 	// Stop everything
 	PauseModules();
 
 	auto animSetMsg = (DieMessageRename*)msg;
+	debugPrint("Renaming die to ");
+	debugPrint(animSetMsg->newName);
+	debugPrint("...");
+
 	Settings settingsToWrite;
 	strncpy(settingsToWrite.name, animSetMsg->newName, 16);
 	if (Settings::EraseSettings())
 	{
 		if (Settings::TransferSettings(&settingsToWrite))
 		{
-			debugPrint("Renaming die to ");
-			debugPrintln(animSetMsg->newName);
+			debugPrintln("Done");
 		}
 		else
 		{
@@ -413,8 +435,11 @@ void Die::OnRenameDie(DieMessage* msg)
 		debugPrintln("Error erasing flash to rename die");
 	}
 
-	// Resume everything
-	ResumeModules();
+	if (!sleep)
+	{
+		// Resume 
+		ResumeModules();
+	}
 }
 
 void Die::OnFlash(DieMessage* msg)
@@ -425,10 +450,7 @@ void Die::OnFlash(DieMessage* msg)
 	// Rainbow!
 	leds.init();
 
-	for (int i = 0; i < 3; ++i)
-	{
-		Rainbow::rainbowCycle(5);
-	}
+	Rainbow::rainbowCycle(5);
 
 	leds.stop();
 

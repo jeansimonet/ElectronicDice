@@ -44,6 +44,8 @@ const char* DieMessage::GetMessageTypeString(DieMessage::MessageType msgType)
 		return "ProgramDefaultAnimSet";
 	case DieMessage::MessageType_Rename:
 		return "Rename";
+	case DieMessage::MessageType_Flash:
+		return "Flash";
 	default:
 		return "<missing>";
 	}
