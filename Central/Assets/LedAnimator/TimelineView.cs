@@ -28,6 +28,7 @@ public class TimelineView : MonoBehaviour
 	public float Duration { get; private set; }
 	public int Zoom { get; private set; }
 	public float Unit { get { return _unitWidth * Zoom; } }
+	public float StartOffset { get { return transform.InverseTransformPoint(_ticksRoot.transform.TransformPoint(_ticksRoot.rect.xMin, 0, 0)).x; } }
 
 	public ColorAnimator ActiveColorAnimator { get; private set; }
 
@@ -69,16 +70,6 @@ public class TimelineView : MonoBehaviour
 		}
 	}
 
-	public void DuplicateCurrentAnimHandle()
-	{
-		if ((ActiveColorAnimator != null) && (ActiveColorAnimator.ColorSlider != null))
-		{
-			var handle = ActiveColorAnimator.ColorSlider.ActiveHandle.DuplicateSelf();
-			handle.ChangeColor(Palette.Instance.ActiveColor);
-			ActiveColorAnimator.ColorSlider.SelectHandle(handle);
-		}
-	}
-
 	public void TestSerialize()
 	{
 		var a = Serialize();
@@ -116,7 +107,7 @@ public class TimelineView : MonoBehaviour
 		return new Animations.RGBAnimation()
 		{
 			duration = (short)Mathf.RoundToInt(1000 * Duration),
-			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(Unit)).ToArray()
+			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(StartOffset, Unit)).ToArray()
 		};
 	}
 

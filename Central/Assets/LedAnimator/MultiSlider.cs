@@ -71,11 +71,11 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		}
 	}
 
-	public Animations.RGBKeyframe[] Serialize(float duration)
+	public Animations.RGBKeyframe[] Serialize()
 	{
 		return GetColorAndPos().Select(c => new Animations.RGBKeyframe()
 		{
-			time = (byte)(255 * c.Pos / duration),
+			time = (byte)Mathf.RoundToInt(255 * c.Pos),
 			red = ((Color32)c.Color).r,
 			green = ((Color32)c.Color).g,
 			blue = ((Color32)c.Color).b,
@@ -136,6 +136,7 @@ public class MultiSlider : MonoBehaviour, IFocusable
 			Debug.LogWarning("Texture used for color gradient should have only one mipmap level");
 		}
 
+		// Create owned texture because it will modify it
 		_texture = new Texture2D(texture.width, texture.height, texture.format, false);
 		Graphics.CopyTexture(texture, _texture);
 		_sprite = Sprite.Create(_texture, img.sprite.rect, img.sprite.pivot);

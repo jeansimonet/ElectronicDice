@@ -22,13 +22,12 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 		_slider.Repaint();
 	}
 
-	public MultiSliderHandle DuplicateSelf()
+	public void DuplicateSelf()
 	{
 		var dupHandle = GameObject.Instantiate<MultiSliderHandle>(this, transform.parent);
-		dupHandle.ChangeColor(Palette.Instance.ActiveColor);
+		//Keep same color dupHandle.ChangeColor(Palette.Instance.ActiveColor);
 		_slider.Repaint(); //TODO slider should be notified instead
 		_slider.SelectHandle(dupHandle);
-		return dupHandle;
 	}
 
 	public void RemoveSelf()
@@ -45,21 +44,19 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 	void IDragHandler.OnDrag(PointerEventData eventData)
 	{
 		var rect = (_slider.transform as RectTransform).rect;
-		float xMin = _slider.transform.TransformPoint(Vector3.right * rect.xMin).x;
-		float xMax = _slider.transform.TransformPoint(Vector3.right * rect.xMax).x;
-		float yMin = _slider.transform.TransformPoint(Vector3.up * rect.yMin).y;
-		float yMax = _slider.transform.TransformPoint(Vector3.up * rect.yMax).y;
+		Vector2 min = _slider.transform.TransformPoint(rect.xMin, rect.yMin, 0);
+		Vector2 max = _slider.transform.TransformPoint(rect.xMax, rect.yMax, 0);
 
 		if (_slider.Direction == SliderDirection.Horizontal)
 		{
-			float x = Mathf.Clamp(Input.mousePosition.x, xMin, xMax);
-			float y = Mathf.Lerp(yMin, yMax, _slider.HandlePosition);
+			float x = Mathf.Clamp(Input.mousePosition.x, min.x, max.x);
+			float y = Mathf.Lerp(min.y, max.y, _slider.HandlePosition);
 			transform.position = new Vector2(x, y);
 		}
 		else
 		{
-			float y = Mathf.Clamp(Input.mousePosition.y, yMin, yMax);
-			float x = Mathf.Lerp(xMin, xMax, _slider.HandlePosition);
+			float y = Mathf.Clamp(Input.mousePosition.y, min.y, max.y);
+			float x = Mathf.Lerp(min.x, max.x, _slider.HandlePosition);
 			transform.position = new Vector2(x, y);
 		}
 

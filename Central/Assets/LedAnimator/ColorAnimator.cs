@@ -33,6 +33,11 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 		_image.sprite = sprite;
 	}
 
+	public void RemoveSelf()
+	{
+		Debug.LogError("Not implemented");
+	}
+
 	public void GiveFocus()
 	{
 		if (!HasFocus)
@@ -51,22 +56,21 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 		}
 	}
 
-	public Animations.RGBAnimationTrack Serialize(float unitSize)
+	public Animations.RGBAnimationTrack Serialize(float startOffset, float unitSize)
 	{
-		int offset = 120; //TODO
 		var rect = (ColorSlider.transform as RectTransform).rect;
 		string spriteName = _image.sprite.name;
 		int face = int.Parse(spriteName[spriteName.IndexOf('-') - 1].ToString());
 		int point = int.Parse(spriteName[spriteName.IndexOf('-') + 1].ToString());
-		float start = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMin - offset, 0, 0)).x / unitSize;
-		float end = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMax - offset, 0, 0)).x / unitSize;
+		float start = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMin, 0, 0)).x - startOffset;
+		float end = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMax, 0, 0)).x - startOffset;
 		return new Animations.RGBAnimationTrack()
 		{
-			startTime = (short)Mathf.RoundToInt(1000 * start),
-			duration = (short)Mathf.RoundToInt(1000 * (end - start)),
+			startTime = (short)Mathf.RoundToInt(1000 * start / unitSize),
+			duration = (short)Mathf.RoundToInt(1000 * (end - start) / unitSize),
 			ledIndex = (byte)(Enumerable.Range(1, face - 1).Sum() + point - 1),
 			count = 1,
-			keyframes = ColorSlider.Serialize(end - start),
+			keyframes = ColorSlider.Serialize(),
 		};
 	}
 
