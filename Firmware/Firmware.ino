@@ -39,7 +39,7 @@ Die die;
 #define TEST_ALL_CONNECTIONS 19
 
 //#define TEST TEST_LED_SLOW
-#define TEST TEST_LED
+//#define TEST TEST_LED
 
 #define POWERPIN	4
 #define NUMPIXELS	21

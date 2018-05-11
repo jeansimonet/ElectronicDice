@@ -71,6 +71,14 @@ void Die::init()
 		debugPrintln("ok");
 	else
 		debugPrintln("invalid");
+	debugPrint("Checking AnimationSet...");
+	if (animationSet->CheckValid())
+		debugPrintln("ok");
+	else
+	{
+		debugPrintln("invalid");
+		AnimationSet::ProgramDefaultAnimationSet(0x808000);
+	}
 	leds.setLED(5, 2, 0x00FF00);
 
 	leds.setLED(5, 3, 0xFFFF00);
