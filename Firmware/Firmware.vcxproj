@@ -124,6 +124,7 @@
     </ClInclude>
     <ClInclude Include="LEDs.h" />
     <ClInclude Include="Queue.h" />
+    <ClInclude Include="Rainbow.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Settings.h">
       <FileType>CppCode</FileType>
@@ -156,6 +157,7 @@
     <ClCompile Include="I2C.cpp" />
     <ClCompile Include="Lazarus.cpp" />
     <ClCompile Include="LEDs.cpp" />
+    <ClCompile Include="Rainbow.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="JerkMonitor.cpp" />
     <ClCompile Include="Telemetry.cpp" />

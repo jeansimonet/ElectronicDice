@@ -21,6 +21,7 @@
 #include "JerkMonitor.h"
 
 #include "EstimatorOnFace.h"
+#include "Rainbow.h"
 
 using namespace Core;
 using namespace Systems;
@@ -85,6 +86,7 @@ void Die::init()
 	RegisterMessageHandler(DieMessage::MessageType_RequestTelemetry, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestTelemetry(msg); });
 	RegisterMessageHandler(DieMessage::MessateType_ProgramDefaultAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnProgramDefaultAnimSet(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_Rename, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRenameDie(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_Flash, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnFlash(msg); });
 
 	// start the BLE stack
 	SimbleeBLE.end();
@@ -232,13 +234,14 @@ void Die::PauseModules()
 {
 	timer.stop();
 	lazarus.stop();
-	leds.clearAll();
+	leds.stop();
 }
 
 void Die::ResumeModules()
 {
 	lazarus.init();
 	timer.begin();
+	leds.init();
 }
 
 
@@ -375,12 +378,21 @@ void Die::playAnimation(int animIndex)
 
 void Die::OnProgramDefaultAnimSet(DieMessage* msg)
 {
+	// Stop everything
+	PauseModules();
+
 	auto animSetMsg = (DieMessageProgramDefaultAnimSet*)msg;
 	AnimationSet::ProgramDefaultAnimationSet(animSetMsg->color);
+
+	// Resume 
+	ResumeModules();
 }
 
 void Die::OnRenameDie(DieMessage* msg)
 {
+	// Stop everything
+	PauseModules();
+
 	auto animSetMsg = (DieMessageRename*)msg;
 	Settings settingsToWrite;
 	strncpy(settingsToWrite.name, animSetMsg->newName, 16);
@@ -400,5 +412,28 @@ void Die::OnRenameDie(DieMessage* msg)
 	{
 		debugPrintln("Error erasing flash to rename die");
 	}
+
+	// Resume everything
+	ResumeModules();
 }
+
+void Die::OnFlash(DieMessage* msg)
+{
+	// Stop everything
+	PauseModules();
+
+	// Rainbow!
+	leds.init();
+
+	for (int i = 0; i < 3; ++i)
+	{
+		Rainbow::rainbowCycle(5);
+	}
+
+	leds.stop();
+
+	// Resume everything
+	ResumeModules();
+}
+
 

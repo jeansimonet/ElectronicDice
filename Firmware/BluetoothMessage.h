@@ -35,6 +35,7 @@ struct DieMessage
 		MessageType_RequestTelemetry,
 		MessateType_ProgramDefaultAnimSet,
 		MessageType_Rename,
+		MessageType_Flash,
 		MessageType_Count
 	};
 

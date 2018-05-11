@@ -84,6 +84,7 @@ private:
 	void OnRequestTelemetry(DieMessage* msg);
 	void OnProgramDefaultAnimSet(DieMessage* msg);
 	void OnRenameDie(DieMessage* msg);
+	void OnFlash(DieMessage* msg);
 };
 
 // The global die!

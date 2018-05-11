@@ -3,6 +3,7 @@
 //----------------
 // Make sure to include ota_bootloader.h so it 
 // includes the bootloader hex in the image.
+#include "Rainbow.h"
 #include <ota_bootloader.h>
 #include "BLEConsole.h"
 #include <SimbleeBLE.h>
