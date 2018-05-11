@@ -9,6 +9,8 @@ public class TelemetryDemoDie : MonoBehaviour
     public TelemetryDie graphs;
     public RawImage dieImage;
     public Die3D die3D;
+    public Button changeColorButton;
+    public Button showOffButton;
 
     Die die;
 
@@ -17,14 +19,16 @@ public class TelemetryDemoDie : MonoBehaviour
     {
     }
     // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     public void Setup(Die die)
     {
@@ -40,6 +44,12 @@ public class TelemetryDemoDie : MonoBehaviour
 
         this.die = die;
         this.die.OnSettingsChanged += OnDieSettingsChanged;
+
+        changeColorButton.onClick.RemoveAllListeners();
+        changeColorButton.onClick.AddListener(ChangeColor);
+
+        showOffButton.onClick.RemoveAllListeners();
+        showOffButton.onClick.AddListener(ShowOff);
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)
@@ -52,5 +62,15 @@ public class TelemetryDemoDie : MonoBehaviour
     void OnDieSettingsChanged(Die die)
     {
         nameField.text = die.name;
+    }
+
+    void ChangeColor()
+    {
+        die.SetNewColor();
+    }
+
+    void ShowOff()
+    {
+        die.Flash();
     }
 }

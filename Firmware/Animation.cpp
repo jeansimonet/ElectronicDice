@@ -207,6 +207,7 @@ int Animation::ComputeByteSizeForTracks(int trackCount)
 Animation* Animation::AllocateAnimation(int trackCount)
 {
 	Animation* ret = (Animation*)malloc(ComputeByteSizeForTracks(trackCount));
+	ret->duration = 0;
 	ret->count = trackCount;
 }
 
