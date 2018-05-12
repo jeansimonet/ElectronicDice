@@ -61,15 +61,6 @@ public class TimelineView : MonoBehaviour
 		});
 	}
 
-	public void RemoveCurrentAnim()
-	{
-		if (ActiveColorAnimator != null)
-		{
-			GameObject.Destroy(ActiveColorAnimator.gameObject);
-			ActiveColorAnimator = null;
-		}
-	}
-
 	public void TestSerialize()
 	{
 		var a = Serialize();
@@ -172,6 +163,16 @@ public class TimelineView : MonoBehaviour
 				child.SetParent(null);
 				GameObject.Destroy(child.gameObject);
 			}
+		}
+		bool skip = true;
+		foreach (Transform child in _ticksRoot)
+		{
+			if (!skip)
+			{
+				child.SetParent(null);
+				GameObject.Destroy(child.gameObject);
+			}
+			skip = false;
 		}
 
 		_widthPadding = (transform as RectTransform).rect.width - _ticksRoot.rect.width;

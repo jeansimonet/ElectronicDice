@@ -11,6 +11,8 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 	Image _image = null;
 	[SerializeField]
 	MovableArea _movableColorSlider = null;
+	[SerializeField]
+	RectTransform _confirmRemovePanel = null;
 
 	public event System.Action<ColorAnimator> GotFocus;
 	public bool HasFocus { get; private set; }
@@ -33,9 +35,15 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 		_image.sprite = sprite;
 	}
 
+	public void ConfirmRemoveSelf()
+	{
+		_confirmRemovePanel.gameObject.SetActive(true);
+	}
+
 	public void RemoveSelf()
 	{
-		Debug.LogError("Not implemented");
+		GameObject.Destroy(gameObject);
+		//TODO ActiveColorAnimator = null;
 	}
 
 	public void GiveFocus()
@@ -82,6 +90,7 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 	// Use this for initialization
 	void Start()
 	{
+		_confirmRemovePanel.gameObject.SetActive(false);
 	}
 
 	// Update is called once per frame

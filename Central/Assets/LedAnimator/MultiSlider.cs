@@ -84,6 +84,8 @@ public class MultiSlider : MonoBehaviour, IFocusable
 
 	public void Repaint()
 	{
+		Debug.Log("Repainting " + name);
+
 		var colorsAndPos = GetColorAndPos();
 
 		Color[] pixels = _texture.GetPixels();
