@@ -82,11 +82,46 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		}).ToArray();
 	}
 
+	public void Deserialize(Animations.RGBKeyframe[] keyframes)
+	{
+		Clear();
+
+		bool first = true;
+		foreach (var kf in keyframes)
+		{
+			var handle = AllHandles[0]; // Initially we should have only one handle
+			if (!first)
+			{
+				handle = handle.Duplicate();
+			}
+			handle.ChangeColor(new Color32(kf.red, kf.green, kf.blue, 255), noRepaint: true);
+			StartCoroutine(TempCr(handle, kf.time, first)); //TODO
+
+			first = false;
+		}
+
+		Repaint();
+	}
+
+	IEnumerator TempCr(MultiSliderHandle handle, float t, bool first)
+	{
+		yield return null;
+		yield return null;
+		var rect = (transform as RectTransform).rect;
+		Vector2 pos = handle.transform.localPosition;
+		pos.x = t / 255f * rect.width + rect.xMin;
+		handle.transform.localPosition = pos;
+		yield return null;
+		if (first) Repaint();
+	}
+
 	public void Repaint()
 	{
-		Debug.Log("Repainting " + name);
+		//TODO check number of repaint Debug.Log("Repainting " + name);
 
 		var colorsAndPos = GetColorAndPos();
+		colorsAndPos.Insert(0, new ColorAndPos(colorsAndPos[0].Color, 0));
+		colorsAndPos.Add(new ColorAndPos(colorsAndPos.Last().Color, 1));
 
 		Color[] pixels = _texture.GetPixels();
 		int x = 0, lastMax = 0;
@@ -110,14 +145,23 @@ public class MultiSlider : MonoBehaviour, IFocusable
 	List<ColorAndPos> GetColorAndPos()
 	{
 		var rect = (transform as RectTransform).rect;
-		var colorsAndPos = transform.OfType<RectTransform>().Select(t => t.GetComponent<Image>()).Where(i => i != null)
-			.OrderBy(i => i.transform.localPosition.x)
-			.Select(i => new ColorAndPos(i.color, (i.transform.localPosition.x - rect.xMin) / rect.width)).ToList();
+		return transform.OfType<RectTransform>().Select(t => t.GetComponent<MultiSliderHandle>())
+			.Where(h => h != null)
+			.OrderBy(h => h.transform.localPosition.x)
+			.Select(h => new ColorAndPos(h.Color, (h.transform.localPosition.x - rect.xMin) / rect.width)).ToList();
+	}
 
-		colorsAndPos.Insert(0, new ColorAndPos(colorsAndPos[0].Color, 0));
-		colorsAndPos.Add(new ColorAndPos(colorsAndPos.Last().Color, 1));
+	void Clear()
+	{
+		SelectHandle(null);
 
-		return colorsAndPos;
+		// Keep just one handle
+		var all = AllHandles;
+		foreach (var handle in all.Skip(1))
+		{
+			handle.transform.SetParent(null);
+			GameObject.Destroy(handle.gameObject);
+		}
 	}
 
 	void OnDestroy()
@@ -128,8 +172,7 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		_texture = null;
 	}
 
-	// Use this for initialization
-	void Start()
+	void Awake()
 	{
 		var img = GetComponent<Image>();
 		var texture = img.sprite.texture;
@@ -143,7 +186,11 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		Graphics.CopyTexture(texture, _texture);
 		_sprite = Sprite.Create(_texture, img.sprite.rect, img.sprite.pivot);
 		img.sprite = _sprite;
+	}
 
+	// Use this for initialization
+	void Start()
+	{
 		Repaint();
 	}
 

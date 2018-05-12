@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,11 @@ public class LedSelector : MonoBehaviour
 	public void Close()
 	{
 		DoClose();
+	}
+
+	public Sprite GetLedSprite(string spriteName)
+	{
+		return _ledsRoot.GetComponentsInChildren<Image>().Select(s => s.sprite).FirstOrDefault(s => s.name == spriteName);
 	}
 
 	void DoClose(Sprite sprite = null)
