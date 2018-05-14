@@ -42,7 +42,7 @@ Die die;
 
 //#define TEST TEST_LED
 //#define TEST TEST_SLEEP
-#define TEST TEST_LED_SLOW
+//#define TEST TEST_LED_SLOW
 //#define TEST TEST_ALL_CONNECTIONS
 //#define TEST TEST_SLEEP_ACC
 //#define TEST TEST_MAGNET

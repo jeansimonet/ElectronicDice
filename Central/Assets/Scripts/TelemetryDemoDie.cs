@@ -11,6 +11,7 @@ public class TelemetryDemoDie : MonoBehaviour
     public Die3D die3D;
     public Button changeColorButton;
     public Button showOffButton;
+    public Text faceNumberText;
 
     Die die;
 
@@ -27,7 +28,7 @@ public class TelemetryDemoDie : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        faceNumberText.text = die.face.ToString();
     }
 
     public void Setup(Die die)
@@ -66,7 +67,9 @@ public class TelemetryDemoDie : MonoBehaviour
 
     void ChangeColor()
     {
-        die.SetNewColor();
+        var color = die.SetNewColor();
+        die3D.pipsColor = color;
+        faceNumberText.color = color;
     }
 
     void ShowOff()

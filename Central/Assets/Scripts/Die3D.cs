@@ -8,14 +8,25 @@ public class Die3D : MonoBehaviour
     public Light dieLight;
     public GameObject dieRoot;
     public GameObject dieObject;
+    public MeshRenderer dieMeshRenderer;
     public int RenderTextureSize = 512;
     public float MaxRotationSpeed = 1080.0f; // d/s
 
     RenderTexture renderTexture;
     Quaternion currentDiceRot;
 
-	// Use this for initialization
-	void Start () {
+    public Color pipsColor
+    {
+        get { return _pipsColor; }
+        set
+        {
+            ChangePipColor(value);
+        }
+    }
+    Color _pipsColor;
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 
@@ -76,4 +87,10 @@ public class Die3D : MonoBehaviour
         float maxDelta = Time.deltaTime * MaxRotationSpeed;
         dieRoot.transform.localRotation = Quaternion.RotateTowards(dieRoot.transform.localRotation, currentDiceRot, maxDelta);
 	}
+
+    void ChangePipColor(Color newColor)
+    {
+        dieMeshRenderer.materials[1].color = newColor;
+        _pipsColor = newColor;
+    }
 }

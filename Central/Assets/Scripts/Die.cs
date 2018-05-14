@@ -450,14 +450,17 @@ public class Die
         PostMessage(new DieMessageRequestTelemetry() { telemetry = on ? (byte)1 : (byte)0 });
     }
 
-    public void SetNewColor()
+    public Color SetNewColor()
     {
-        StartCoroutine(SetNewColorCr());
+        float hue = Random.Range(0.0f, 1.0f);
+        Color newDisplayColor = Color.HSVToRGB(hue, 1.0f, 1.0f);
+        Color newColor = Color.HSVToRGB(hue, 1.0f, 0.5f);
+        StartCoroutine(SetNewColorCr(newColor));
+        return newDisplayColor;
     }
 
-    IEnumerator SetNewColorCr()
+    IEnumerator SetNewColorCr(Color newColor)
     {
-        Color newColor = Color.HSVToRGB(Random.Range(0.0f, 1.0f), 1.0f, 0.5f);
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
