@@ -21,7 +21,6 @@ public class LedSelector : MonoBehaviour
 
 	public void PickLed(System.Action<Sprite> doneCB)
 	{
-		Debug.LogError("TODO: not working first time!!");
 		_doneCb = doneCB;
 		gameObject.SetActive(true);
 	}

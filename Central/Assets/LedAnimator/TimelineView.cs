@@ -13,7 +13,9 @@ public class TimelineView : MonoBehaviour
 	[SerializeField]
 	int _maxZoom = 10;
 	[SerializeField]
-	float _unitWidth = 500; // Width for 1 second
+	float _unitWidth = 200; // Width for 1 second
+	[SerializeField]
+	float _ticksLength = 0.5f;
 	[SerializeField]
 	RectTransform _ticksRoot = null;
 	[SerializeField]
@@ -188,12 +190,14 @@ public class TimelineView : MonoBehaviour
 
 		// Update vertical lines
 		int numExistingLines = _ticksRoot.childCount;
-		for (int t = 0; t <= Duration; ++t)
+		int numLines = Mathf.RoundToInt(Duration / _ticksLength);
+		float time = 0;
+		for (int i = 0; i <= numLines; ++i)
 		{
 			RectTransform lineTransf;
-			if (t < numExistingLines)
+			if (i < numExistingLines)
 			{
-				lineTransf = _ticksRoot.GetChild(t) as RectTransform;
+				lineTransf = _ticksRoot.GetChild(i) as RectTransform;
 			}
 			else
 			{
@@ -202,14 +206,18 @@ public class TimelineView : MonoBehaviour
 			}
 
 			// Update text
-			lineTransf.GetComponentInChildren<Text>().text = t + "s";
+			var text = lineTransf.GetComponentInChildren<Text>();
+			text.text = time + "s";
+			text.fontStyle = (int)time == time ? FontStyle.Bold : FontStyle.Normal;
 
 			// And position
 			Vector2 pos = lineTransf.anchoredPosition;
-			pos.x = Unit * t;
+			pos.x = Unit * time;
 			lineTransf.anchoredPosition = pos;
+
+			time += _ticksLength;
 		}
-		for (int t = (int)Duration + 1; t < numExistingLines; ++t)
+		for (int t = numLines + 1; t < numExistingLines; ++t)
 		{
 			GameObject.Destroy(_ticksRoot.GetChild(t).gameObject);
 		}

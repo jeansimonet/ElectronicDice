@@ -13,6 +13,8 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 	[SerializeField]
 	RectTransform _selectedOvr = null;
 
+	Canvas _canvas = null;
+
 	Image _image;
 	MultiSlider _slider;
 	Vector2 _dragOffset;
@@ -103,6 +105,10 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 		{
 			_selectedOvr.gameObject.SetActive(Selected);
 		}
+		if (_canvas != null)
+		{
+			_canvas.overrideSorting = Selected;
+		}
 	}
 
 	void OnEnable()
@@ -121,6 +127,7 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 
 	void Awake()
 	{
+		_canvas = GetComponent<Canvas>();
 		_image = GetComponent<Image>();
 		_selectedOvr.gameObject.SetActive(false);
 	}
