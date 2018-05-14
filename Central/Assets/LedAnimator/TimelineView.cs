@@ -29,6 +29,7 @@ public class TimelineView : MonoBehaviour
 	public int Zoom { get; private set; }
 	public float Unit { get { return _unitWidth * Zoom; } }
 	public float StartOffset { get { return transform.InverseTransformPoint(_ticksRoot.transform.TransformPoint(_ticksRoot.rect.xMin, 0, 0)).x; } }
+	public int AnimationCount { get { return _colorAnimsRoot.childCount - 1; } }
 
 	public ColorAnimator ActiveColorAnimator { get; private set; }
 

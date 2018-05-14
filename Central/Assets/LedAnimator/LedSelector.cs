@@ -50,7 +50,6 @@ public class LedSelector : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		gameObject.SetActive(false);
 		foreach (var btn in _ledsRoot.GetComponentsInChildren<Button>())
 		{
 			btn.onClick.AddListener(() => OnLedButtonClick(btn));

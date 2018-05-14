@@ -41,6 +41,7 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 
 	public void ConfirmRemoveSelf()
 	{
+		ColorSlider.SelectHandle(null);
 		ShowConfirmRemove();
 	}
 

@@ -15,6 +15,7 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 
 	Image _image;
 	MultiSlider _slider;
+	Vector2 _dragOffset;
 
 	//public bool IsSelected { get { return EventSystem.current.currentSelectedGameObject == gameObject; } }
 	public bool Selected { get { return _slider.ActiveHandle == this; } }
@@ -56,30 +57,28 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 
 	void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
 	{
-		//Debug.Log("OnPointerDown " + name);
+		_dragOffset = transform.position - Input.mousePosition;
 
-		//EventSystem.current.SetSelectedGameObject(gameObject);
+		EventSystem.current.SetSelectedGameObject(gameObject);
 		_slider.SelectHandle(this);
 	}
 
 	void IDragHandler.OnDrag(PointerEventData eventData)
 	{
-		//Debug.Log("OnDrag " + name);
-
 		var rect = (_slider.transform as RectTransform).rect;
 		Vector2 min = _slider.transform.TransformPoint(rect.xMin, rect.yMin, 0);
 		Vector2 max = _slider.transform.TransformPoint(rect.xMax, rect.yMax, 0);
 
 		if (_slider.Direction == SliderDirection.Horizontal)
 		{
-			float x = Mathf.Clamp(Input.mousePosition.x, min.x, max.x);
+			float x = Mathf.Clamp(Input.mousePosition.x + _dragOffset.x, min.x, max.x);
 			float y = Mathf.Lerp(min.y, max.y, _slider.HandlePosition);
 			transform.position = new Vector2(x, y);
 		}
 		else
 		{
-			float y = Mathf.Clamp(Input.mousePosition.y, min.y, max.y);
 			float x = Mathf.Lerp(min.x, max.x, _slider.HandlePosition);
+			float y = Mathf.Clamp(Input.mousePosition.y + _dragOffset.y, min.y, max.y);
 			transform.position = new Vector2(x, y);
 		}
 
@@ -88,7 +87,6 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 
 	void OnHandleSelected(MultiSliderHandle handle)
 	{
-		//Debug.Log("OnHandleSelected " + name);
 		Repaint();
 
 		Palette.Instance.ColorSelected -= ChangeColor;
@@ -100,7 +98,6 @@ public class MultiSliderHandle : MonoBehaviour, IPointerDownHandler, IDragHandle
 
 	void Repaint()
 	{
-		//Debug.Log("Repaint " + name);
 		transform.localScale = Vector2.one * (Selected ? 1.2f : 1f);
 		if (_selectedOvr != null)
 		{

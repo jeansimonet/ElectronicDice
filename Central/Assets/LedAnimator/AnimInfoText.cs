@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Text))]
-public class DiceAnimInfoText : MonoBehaviour
+public class AnimInfoText : MonoBehaviour
 {
 	[SerializeField]
 	TimelineView _timeline = null;
@@ -19,6 +19,7 @@ public class DiceAnimInfoText : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		_text.text = "Duration: " + _timeline.Duration;
+		_text.text = _timeline.Duration + " second(s)\n"
+			+ _timeline.AnimationCount + " animation(s)";
 	}
 }
