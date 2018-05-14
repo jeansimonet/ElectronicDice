@@ -21,10 +21,10 @@ public class MovableArea : MonoBehaviour
 		var pos = _rightHandle.transform.localPosition;
 		pos.x = (transform as RectTransform).rect.width;
 		_rightHandle.transform.localPosition = pos;
-		Refresh();
+		FitToHandles();
 	}
 
-	void Refresh()
+	void FitToHandles()
 	{
 		OnLeftHandleMoved();
 		OnRightHandleMoved();
@@ -59,7 +59,7 @@ public class MovableArea : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		Refresh();
+		FitToHandles();
 	}
 
 	// Update is called once per frame

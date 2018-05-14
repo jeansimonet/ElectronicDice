@@ -22,6 +22,8 @@ public class BorderHandle : MonoBehaviour, IFocusable, IPointerDownHandler, IDra
 	{
 		HasFocus = true;
 		GetComponentsInParent<IFocusable>().First(f => (object)f != this).GiveFocus();
+		var anim = GetComponentInParent<TimelineView>().ActiveColorAnimator;
+		if (anim != null) anim.ColorSlider.SelectHandle(null); //TODO 
 	}
 
 	public void RemoveFocus()
