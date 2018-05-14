@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,11 @@ public class LedSelector : MonoBehaviour
 		DoClose();
 	}
 
+	public Sprite GetLedSprite(string spriteName)
+	{
+		return _ledsRoot.GetComponentsInChildren<Image>().Select(s => s.sprite).FirstOrDefault(s => s.name == spriteName);
+	}
+
 	void DoClose(Sprite sprite = null)
 	{
 		gameObject.SetActive(false);
@@ -44,7 +50,6 @@ public class LedSelector : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		gameObject.SetActive(false);
 		foreach (var btn in _ledsRoot.GetComponentsInChildren<Button>())
 		{
 			btn.onClick.AddListener(() => OnLedButtonClick(btn));

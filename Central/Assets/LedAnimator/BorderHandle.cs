@@ -11,10 +11,12 @@ public class BorderHandle : MonoBehaviour, IFocusable, IPointerDownHandler, IDra
 	[SerializeField]
 	BorderSide _side = default(BorderSide);
 
-	public event System.Action<BorderHandle> Moved;
+	public event System.Action Moved;
 
 	public BorderSide Side { get { return _side; } }
 	public bool HasFocus { get; private set; }
+
+	Vector2 _dragOffset;
 
 	public void GiveFocus()
 	{
@@ -29,6 +31,7 @@ public class BorderHandle : MonoBehaviour, IFocusable, IPointerDownHandler, IDra
 
 	void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
 	{
+		_dragOffset = transform.position - Input.mousePosition;
 		GiveFocus();
 	}
 
@@ -38,10 +41,10 @@ public class BorderHandle : MonoBehaviour, IFocusable, IPointerDownHandler, IDra
 		float xMin = transform.parent.TransformPoint(parentRect.xMin, 0, 0).x;
 		float xMax = transform.parent.TransformPoint(parentRect.xMax, 0, 0).x;
 
-		float x = Mathf.Clamp(Input.mousePosition.x, xMin, xMax);
+		float x = Mathf.Clamp(Input.mousePosition.x + _dragOffset.x, xMin, xMax);
 		transform.position = new Vector2(x, transform.position.y);
 
-		if (Moved != null) Moved(this);
+		if (Moved != null) Moved();
 	}
 
 	// Use this for initialization

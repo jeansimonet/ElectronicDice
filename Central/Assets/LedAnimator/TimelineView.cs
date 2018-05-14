@@ -28,6 +28,8 @@ public class TimelineView : MonoBehaviour
 	public float Duration { get; private set; }
 	public int Zoom { get; private set; }
 	public float Unit { get { return _unitWidth * Zoom; } }
+	public float StartOffset { get { return transform.InverseTransformPoint(_ticksRoot.transform.TransformPoint(_ticksRoot.rect.xMin, 0, 0)).x; } }
+	public int AnimationCount { get { return _colorAnimsRoot.childCount - 1; } }
 
 	public ColorAnimator ActiveColorAnimator { get; private set; }
 
@@ -49,10 +51,8 @@ public class TimelineView : MonoBehaviour
 		{
 			if (sprite != null)
 			{
-				var colorAnim = GameObject.Instantiate<ColorAnimator>(_colorAnimPrefab, _colorAnimsRoot);
-				_controls.SetAsLastSibling(); // Keep controls at the bottom
-				colorAnim.SetLedSprite(sprite);
-				colorAnim.GotFocus += OnColorAnimatorGotFocus;
+				var colorAnim = CreateAnimation(sprite);
+				StartCoroutine(TestCr(colorAnim)); //TODO
 				colorAnim.GiveFocus();
 				colorAnim.ColorSlider.SelectHandle(colorAnim.ColorSlider.AllHandles[0]);
 				Repaint();
@@ -60,31 +60,32 @@ public class TimelineView : MonoBehaviour
 		});
 	}
 
-	public void RemoveCurrentAnim()
+	ColorAnimator CreateAnimation(Sprite sprite = null)
 	{
-		if (ActiveColorAnimator != null)
+		var colorAnim = GameObject.Instantiate<ColorAnimator>(_colorAnimPrefab, _colorAnimsRoot);
+		_controls.SetAsLastSibling(); // Keep controls at the bottom
+		if (sprite != null)
 		{
-			GameObject.Destroy(ActiveColorAnimator.gameObject);
-			ActiveColorAnimator = null;
+			colorAnim.SetLedSprite(sprite);
 		}
+		colorAnim.GotFocus += OnColorAnimatorGotFocus;
+		return colorAnim;
 	}
 
-	public void DuplicateCurrentAnimHandle()
+	IEnumerator TestCr(ColorAnimator colorAnim)
 	{
-		if ((ActiveColorAnimator != null) && (ActiveColorAnimator.ColorSlider != null))
-		{
-			var handle = ActiveColorAnimator.ColorSlider.ActiveHandle.DuplicateSelf();
-			handle.ChangeColor(Palette.Instance.ActiveColor);
-			ActiveColorAnimator.ColorSlider.SelectHandle(handle);
-		}
+		yield return null;
+		colorAnim.Maximize();
 	}
+
+	Animations.RGBAnimation _serializeDataTest;
 
 	public void TestSerialize()
 	{
-		var a = Serialize();
+		_serializeDataTest  = Serialize();
 		var str = new System.Text.StringBuilder();
-		str.AppendLine(a.duration.ToString());
-		foreach (var t in a.tracks)
+		str.AppendLine(_serializeDataTest.duration.ToString());
+		foreach (var t in _serializeDataTest.tracks)
 		{
 			str.Append(" * ");
 			str.Append(t.startTime);
@@ -111,13 +112,36 @@ public class TimelineView : MonoBehaviour
 		Debug.Log(str.ToString());
 	}
 
+	public void TestDeserialize()
+	{
+		if (_serializeDataTest != null)
+		{
+			Deserialize(_serializeDataTest);
+		}
+	}
+
 	public Animations.RGBAnimation Serialize()
 	{
 		return new Animations.RGBAnimation()
 		{
 			duration = (short)Mathf.RoundToInt(1000 * Duration),
-			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(Unit)).ToArray()
+			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(StartOffset, Unit)).ToArray()
 		};
+	}
+
+	public void Deserialize(Animations.RGBAnimation data)
+	{
+		Debug.LogFormat("Deserializing {0} color animations", data.tracks.Length);
+
+		Clear();
+		Duration = data.duration / 1000f;
+		Repaint();
+
+		foreach (var track in data.tracks)
+		{
+			var colorAnim = CreateAnimation();
+			colorAnim.Deserialize(track, Unit);
+		}
 	}
 
 	void OnColorAnimatorGotFocus(ColorAnimator colorAnim)
@@ -129,6 +153,26 @@ public class TimelineView : MonoBehaviour
 				ActiveColorAnimator.RemoveFocus();
 			}
 			ActiveColorAnimator = colorAnim;
+		}
+	}
+
+	void Clear()
+	{
+		ActiveColorAnimator = null;
+		for (int i = _colorAnimsRoot.childCount - 1; i >= 0; --i)
+		{
+			var child = _colorAnimsRoot.GetChild(i);
+			if (child != _controls)
+			{
+				child.SetParent(null);
+				GameObject.Destroy(child.gameObject);
+			}
+		}
+		for (int i = _ticksRoot.childCount - 1; i > 0; --i)
+		{
+			var child = _ticksRoot.GetChild(i);
+			child.SetParent(null);
+			GameObject.Destroy(child.gameObject);
 		}
 	}
 
@@ -171,21 +215,17 @@ public class TimelineView : MonoBehaviour
 		}
 	}
 
-	// Use this for initialization
-	void Start()
+	void Awake()
 	{
-		foreach (Transform child in _colorAnimsRoot)
-		{
-			if (child != _controls)
-			{
-				child.SetParent(null);
-				GameObject.Destroy(child.gameObject);
-			}
-		}
-
+		Clear();
 		_widthPadding = (transform as RectTransform).rect.width - _ticksRoot.rect.width;
 		Duration = _minDuration;
 		Zoom = _minZoom;
+	}
+
+	// Use this for initialization
+	void Start()
+	{
 		Repaint();
 	}
 
