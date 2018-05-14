@@ -17,6 +17,8 @@ using namespace Systems;
 #define BATTERY_ANALOG_PIN 2
 #define DATAPIN		30
 #define CLOCKPIN	29
+#define CHARGING_PIN (22)
+#define MAGNET_PIN 6
 
 /// <summary>
 /// Writes to the serial port
@@ -171,45 +173,81 @@ void Tests::TestLED()
 	}
 }
 
+#define accelPin 20
+
 /// <summary>
 /// Drive the LEDs Repeatedly
 /// </summary>
 void Tests::TestLEDSlow()
 {
 	Serial.begin(9600);
-	Serial.println("Trying to Control APA102 LEDs.");
-	Serial.end();
+	Serial.println("Trying to Control APA102 LEDs every 10s");
+	//Serial.end();
 
 	randomSeed(analogRead(4));
-	pinMode(POWERPIN, OUTPUT);
-	digitalWrite(POWERPIN, 0);
+
+	Serial.print("Initializing I2C...");
+	Systems::wire.begin();
+	Serial.println("Ok");
+
+	Serial.print("Initializing accelerometer...");
+	accelerometer.init();
+	Serial.println("Ok");
+
+	// Set accelerometer interrupt pin as an input!
+	pinMode(accelPin, INPUT_PULLUP);
+	pinMode(CHARGING_PIN, INPUT_PULLUP);
 
 	strip.begin();
 	while (true)
 	{
+		// Setup interrupt on accelerometer
+		Serial.print("Setting up accelerometer, and ");
+		accelerometer.enableTransientInterrupt();
+
+		// Prepare to wakeup on matching interrupt pin
+		Simblee_pinWake(accelPin, LOW);
+
+		// Sleep forever
+		Serial.println("going to sleep for 10s...");
+		SimbleeBLE_ULPDelay(SECONDS(30));
+
+		// If we get here, we either got an accelerometer interrupt, or bluetooth message
+
+		// Reset both pinwake flags
+		bool accWoke = Simblee_pinWoke(accelPin);
+		if (accWoke)
+		{
+			Simblee_resetPinWake(accelPin);
+			Serial.println("Woken up by acc");
+		}
+		else
+		{
+			Serial.println("Time out!");
+		}
+
+		// Disable accelerometer interrupts
+		accelerometer.clearTransientInterrupt();
+		accelerometer.disableTransientInterrupt();
+
+		// Disable pinWake
+		Simblee_pinWake(accelPin, DISABLE);
+
+		pinMode(POWERPIN, OUTPUT);
+		digitalWrite(POWERPIN, LOW);
+
 		// Output a random color on all leds
-		uint32_t color = Rainbow::Wheel(random(0xFF), 32);
-		for (int i = 0; i < 21; ++i)
-			strip.setPixelColor(i, color);
-
-		// Do it twice, just to be sure
-		strip.show();
-		delay(10);
-		strip.show();
-		delay(10);
-
-		// Turn all leds off
-		for (int i = 0; i < 21; ++i)
-			strip.setPixelColor(i, 0);
-		strip.show();
+		Rainbow::rainbowCycle(1, 32);
 
 		// Go to sleep
 		digitalWrite(POWERPIN, 1);
 		digitalWrite(DATAPIN, 0);
 		digitalWrite(CLOCKPIN, 0);
-		SimbleeBLE_ULPDelay(SECONDS(10));
 
-		digitalWrite(POWERPIN, 0);
+		if (accWoke)
+		{
+			SimbleeBLE_ULPDelay(SECONDS(1));
+		}
 	}
 }
 
@@ -279,7 +317,6 @@ void Tests::TestSleepForever()
 }
 
 #define radioPin 31
-#define accelPin 20
 
 
 void Tests::TestSleepAwakeAcc()
@@ -804,38 +841,100 @@ void Tests::TestAllHardwareConnections()
 	else
 		Serial.println("Not charging");
 
-	for (int i = 0; i < 2; ++i)
+	Serial.println("Place on charger");
+	while (!currentlyCharging)
 	{
-		Serial.println("Place on charger");
-		while (!currentlyCharging)
+		bool newCharging = digitalRead(CHARGING_PIN) == LOW;
+		if (newCharging != currentlyCharging)
 		{
-			bool newCharging = digitalRead(CHARGING_PIN) == LOW;
-			if (newCharging != currentlyCharging)
-			{
-				currentlyCharging = newCharging;
-				if (currentlyCharging)
-					Serial.println("Charging");
-				else
-					Serial.println("Not charging");
-			}
-			delay(100);
+			currentlyCharging = newCharging;
+			if (currentlyCharging)
+				Serial.println("Charging");
+			else
+				Serial.println("Not charging");
 		}
-		Serial.println("Remove from charger");
-		while (currentlyCharging)
+		delay(100);
+	}
+	Serial.println("Remove from charger");
+	while (currentlyCharging)
+	{
+		bool newCharging = digitalRead(CHARGING_PIN) == LOW;
+		if (newCharging != currentlyCharging)
 		{
-			bool newCharging = digitalRead(CHARGING_PIN) == LOW;
-			if (newCharging != currentlyCharging)
-			{
-				currentlyCharging = newCharging;
-				if (currentlyCharging)
-					Serial.println("Charging");
-				else
-					Serial.println("Not charging");
-			}
-			delay(100);
+			currentlyCharging = newCharging;
+			if (currentlyCharging)
+				Serial.println("Charging");
+			else
+				Serial.println("Not charging");
 		}
+		delay(100);
+	}
+
+
+	Serial.println("Checking magnet state...");
+
+	pinMode(MAGNET_PIN, INPUT_PULLUP);
+
+	bool currentMagnet = digitalRead(MAGNET_PIN) == LOW;
+	if (currentMagnet)
+		Serial.println("MAGNET");
+	else
+		Serial.println("NO MAGNET");
+
+	Serial.println("Place Magnet");
+	while (!currentMagnet)
+	{
+		bool newMagnet = digitalRead(MAGNET_PIN) == LOW;
+		if (newMagnet != currentMagnet)
+		{
+			currentMagnet = newMagnet;
+			if (currentMagnet)
+				Serial.println("MAGNET");
+			else
+				Serial.println("NO MAGNET");
+		}
+		delay(100);
+	}
+	Serial.println("Remove Magnet");
+	while (currentMagnet)
+	{
+		bool newMagnet = digitalRead(MAGNET_PIN) == LOW;
+		if (newMagnet != currentMagnet)
+		{
+			currentMagnet = newMagnet;
+			if (currentMagnet)
+				Serial.println("MAGNET");
+			else
+				Serial.println("NO MAGNET");
+		}
+		delay(100);
 	}
 
 	Serial.println("All Tests Passed!");
+
+}
+
+#define MAGNET_PIN 6
+
+void Tests::TestMagnet()
+{
+	Serial.begin(9600);
+	Serial.println("Trying to Control APA102 LEDs.");
+
+	pinMode(MAGNET_PIN, INPUT);
+
+	bool currentlyCharging = digitalRead(MAGNET_PIN) == LOW;
+	while(true)
+	{
+		bool newCharging = digitalRead(MAGNET_PIN) == LOW;
+		if (newCharging != currentlyCharging)
+		{
+			currentlyCharging = newCharging;
+			if (currentlyCharging)
+				Serial.println("Magnet present");
+			else
+				Serial.println("Magnet not preset");
+		}
+	}
 
 }

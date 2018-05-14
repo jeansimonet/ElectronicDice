@@ -7,8 +7,18 @@
 #include "Animation.h"
 #include "BulkDataTransfer.h"
 
+// Per readme file here: https://github.com/blieber/arduino-flash-queue
+// Many examples in Simblee docs say up to 251 is available, but CAUTION - if use OTA 
+// unfortunately this also uses some address space. According to 
+// http://forum.rfduino.com/index.php?topic=1347.0 240-251 are used by the OTA bootloader. 
+// Hence to be safe even in this example we only write up to 239.
+#define HIGHEST_FLASH_PAGE (235)
+
+// Defined after linking - lowest page after all program memory.
+const int LowestFlashPageAvailable = PAGE_FROM_ADDRESS(&_etextrelocate) + 1;
+
 #define MAX_ANIMATIONS (64)
-#define ANIMATION_SET_START_PAGE (250)
+#define ANIMATION_SET_START_PAGE (HIGHEST_FLASH_PAGE - 1)
 #define PAGE_SIZE (1024) // bytes
 #define ANIMATION_SET_VALID_KEY (0x600DF00D) // Good Food ;)
 // We place animation set and animations in descending addresses
@@ -32,6 +42,7 @@ public:
 	int ComputeAnimationTotalSize() const;
 	uint32_t Count() const;
 	const Animation* GetAnimation(int index) const;
+	void DebugPrint() const;
 
 	struct ProgrammingToken
 	{

@@ -3,6 +3,7 @@
 //----------------
 // Make sure to include ota_bootloader.h so it 
 // includes the bootloader hex in the image.
+#include "Watchdog.h"
 #include "Rainbow.h"
 #include <ota_bootloader.h>
 #include "BLEConsole.h"
@@ -37,9 +38,15 @@ Die die;
 #define TEST_CHARGING		16
 #define TEST_BATT_DISCHARGE 18
 #define TEST_ALL_CONNECTIONS 19
+#define TEST_MAGNET			20
 
-//#define TEST TEST_LED_SLOW
 //#define TEST TEST_LED
+//#define TEST TEST_SLEEP
+#define TEST TEST_LED_SLOW
+//#define TEST TEST_ALL_CONNECTIONS
+//#define TEST TEST_SLEEP_ACC
+//#define TEST TEST_MAGNET
+//#define TEST TEST_ACC_DICE
 
 #define POWERPIN	4
 #define NUMPIXELS	21
@@ -49,6 +56,9 @@ Die die;
 
 void setup()
 {
+	Serial.begin(9600);
+	Serial.println("Boot");
+
 	// Turn off LED power
 	pinMode(DATAPIN, OUTPUT);
 	pinMode(CLOCKPIN, OUTPUT);
@@ -167,6 +177,9 @@ void SetupTest(int testIndex)
 		break;
 	case TEST_ALL_CONNECTIONS:
 		Tests::TestAllHardwareConnections();
+		break;
+	case TEST_MAGNET:
+		Tests::TestMagnet();
 		break;
 	default:
 		break;

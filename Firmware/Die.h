@@ -85,6 +85,8 @@ private:
 	void OnProgramDefaultAnimSet(DieMessage* msg);
 	void OnRenameDie(DieMessage* msg);
 	void OnFlash(DieMessage* msg);
+
+	void RenameDie(const char* newName);
 };
 
 // The global die!

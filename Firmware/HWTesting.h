@@ -27,6 +27,7 @@ namespace Tests
 	void TestAnimationsUpdate();
 
 	void TestAllHardwareConnections();
+	void TestMagnet();
 }
 
 #endif

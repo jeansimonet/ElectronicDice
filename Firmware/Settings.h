@@ -6,7 +6,14 @@
 #include "Arduino.h"
 #include "BulkDataTransfer.h"
 
-#define SETTINGS_PAGE (251)
+// Per readme file here: https://github.com/blieber/arduino-flash-queue
+// Many examples in Simblee docs say up to 251 is available, but CAUTION - if use OTA 
+// unfortunately this also uses some address space. According to 
+// http://forum.rfduino.com/index.php?topic=1347.0 240-251 are used by the OTA bootloader. 
+// Hence to be safe even in this example we only write up to 239.
+#define HIGHEST_FLASH_PAGE (235)
+
+#define SETTINGS_PAGE HIGHEST_FLASH_PAGE
 #define SETTINGS_VALID_KEY (0x05E77165) // 0SETTINGS in leet speak ;)
 #define SETTINGS_ADDRESS (SETTINGS_PAGE * 1024)
 

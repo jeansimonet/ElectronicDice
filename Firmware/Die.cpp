@@ -23,6 +23,8 @@
 #include "EstimatorOnFace.h"
 #include "Rainbow.h"
 
+#include "Watchdog.h"
+
 using namespace Core;
 using namespace Systems;
 using namespace Devices;
@@ -40,6 +42,14 @@ void Die::init()
 #if defined(_CONSOLE)
 	console.begin();
 #endif
+
+	// Setup Watchdog first
+	watchdog.init();
+
+	// For info, print out the highest page number
+	debugPrint("Lowest page available: ");
+	debugPrintln(LowestFlashPageAvailable);
+
 	// put your setup code here, to run once:
 	//setup I2C on the pins of your choice
 	debugPrint("LED init...");
@@ -70,14 +80,21 @@ void Die::init()
 	if (settings->CheckValid())
 		debugPrintln("ok");
 	else
+	{
 		debugPrintln("invalid");
+		//RenameDie("Die 2");
+	}
 	debugPrint("Checking AnimationSet...");
 	if (animationSet->CheckValid())
 		debugPrintln("ok");
 	else
 	{
-		debugPrintln("invalid");
+		debugPrint("invalid, setting default anims...");
 		AnimationSet::ProgramDefaultAnimationSet(0x808000);
+		if (animationSet->CheckValid())
+			debugPrintln("ok");
+		else
+			debugPrintln("failed");
 	}
 	leds.setLED(5, 2, 0x00FF00);
 
@@ -101,7 +118,6 @@ void Die::init()
 	const char* name = settings->CheckValid() ? settings->name : "ElectronicDie";
 	SimbleeBLE.advertisementData = name;
 	SimbleeBLE.deviceName = name;
-
 	SimbleeBLE.txPowerLevel = 4;
 	SimbleeBLE.begin();
 	debugPrintln("ok");
@@ -118,7 +134,6 @@ void Die::init()
 
 	leds.setLED(5, 5, 0xFFFF00);
 	//estimatorOnFace.begin();
-
 	//stateEstimators[DieState_OnFace] = &estimatorOnFace;
 
 	leds.setLED(5, 5, 0x00FF00);
@@ -224,16 +239,15 @@ void Die::updateFaceAnimation()
 	int newFace = accelController.currentFace();
 	if (newFace != currentFace)
 	{
+		currentFace = newFace;
+		debugPrint("Detected face number ");
+		debugPrintln(currentFace);
+
 		if (!SimbleeBLE_radioActive)
 		{
-			currentFace = newFace;
-
 			// Toggle leds
 			animController.stopAll();
 			playAnimation(currentFace);
-
-			debugPrint("sending face number ");
-			debugPrintln(currentFace);
 
 			// Send face message
 			DieMessageState faceMessage;
@@ -387,6 +401,10 @@ void Die::playAnimation(int animIndex)
 	{
 		animController.play(animationSet->GetAnimation(animIndex));
 	}
+	else
+	{
+		debugPrintln("Not playing animation because animation set is invalid");
+	}
 }
 
 void Die::OnProgramDefaultAnimSet(DieMessage* msg)
@@ -425,8 +443,19 @@ void Die::OnRenameDie(DieMessage* msg)
 	debugPrint(animSetMsg->newName);
 	debugPrint("...");
 
+	RenameDie(animSetMsg->newName);
+
+	if (!sleep)
+	{
+		// Resume 
+		ResumeModules();
+	}
+}
+
+void Die::RenameDie(const char* newName)
+{
 	Settings settingsToWrite;
-	strncpy(settingsToWrite.name, animSetMsg->newName, 16);
+	strncpy(settingsToWrite.name, newName, 16);
 	if (Settings::EraseSettings())
 	{
 		if (Settings::TransferSettings(&settingsToWrite))
@@ -441,12 +470,6 @@ void Die::OnRenameDie(DieMessage* msg)
 	else
 	{
 		debugPrintln("Error erasing flash to rename die");
-	}
-
-	if (!sleep)
-	{
-		// Resume 
-		ResumeModules();
 	}
 }
 

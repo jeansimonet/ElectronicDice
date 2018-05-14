@@ -14,6 +14,14 @@ const AnimationSet* animationSet = (const AnimationSet*)ANIMATION_SET_ADDRESS;
 /// </summary>
 bool AnimationSet::CheckValid() const
 {
+	//Serial.print("Head key = ");
+	//Serial.print(headMarker, HEX);
+	//Serial.println(" (should be 0x600DF00D)");
+
+	//Serial.print("Tail key = ");
+	//Serial.print(tailMarker, HEX);
+	//Serial.println(" (should be 0x600DF00D)");
+
 	return headMarker == ANIMATION_SET_VALID_KEY && tailMarker == ANIMATION_SET_VALID_KEY;
 }
 
@@ -146,14 +154,15 @@ bool AnimationSet::TransferAnimationSet(const Animation ** sourceAnims, uint32_t
 bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 {
 	// We're going to program a few animations!
-
 	int totalAnimSize = 0;
 	Animation* faceAnims[6];
 	for (int i = 0; i < 6; ++i)
 	{
-		Animation* anim = Animation::AllocateAnimation(i+1); // face i has i+1 led
+		Animation* anim = Animation::AllocateAnimation(i + 1); // face i has i+1 led
+		//Animation* anim = Animation::AllocateAnimation(1);
 
 		for (int j = 0; j <= i; ++j)
+		//int j = 0;
 		{
 			AnimationTrack updown;
 			updown.count = 0;
@@ -214,6 +223,64 @@ void AnimationSet::PrintError(int error)
 	}
 }
 
+void AnimationSet::DebugPrint() const
+{
+	Serial.print("AnimationSet address; ");
+	Serial.println((uint32_t)animationSet, HEX);
+	Serial.print("Head key = ");
+	Serial.print(animationSet->headMarker, HEX);
+	Serial.println(" (should be 0x600DF00D)");
+	Serial.print("Set contains ");
+	Serial.print(animationSet->Count());
+	Serial.println(" animations");
+
+	for (int i = 0; i < animationSet->Count(); ++i)
+	{
+		auto anim = animationSet->GetAnimation(i);
+		Serial.print("Anim ");
+		Serial.print(i);
+		Serial.print(" contains ");
+		Serial.print(anim->TrackCount());
+		Serial.println(" tracks");
+
+		for (int j = 0; j < anim->TrackCount(); ++j)
+		{
+			auto& track = anim->GetTrack(j);
+			Serial.print("Anim ");
+			Serial.print(i);
+			Serial.print(", track ");
+			Serial.print(j);
+			Serial.print(" has ");
+			Serial.print(track.count);
+			Serial.print(" keyframes, starts at ");
+			Serial.print(track.startTime);
+			Serial.print(" ms, lasts ");
+			Serial.print(track.duration);
+			Serial.print(" ms and controls LED ");
+			Serial.println(track.ledIndex);
+
+			for (int k = 0; k < track.count; ++k)
+			{
+				auto& keyframe = track.keyframes[k];
+				Serial.print("(");
+				Serial.print(keyframe.time);
+				Serial.print("ms = ");
+				Serial.print(keyframe.red);
+				Serial.print(", ");
+				Serial.print(keyframe.green);
+				Serial.print(", ");
+				Serial.print(keyframe.blue);
+				Serial.print(") ");
+			}
+			Serial.println();
+		}
+	}
+
+	Serial.print("Tail key = ");
+	Serial.print(animationSet->tailMarker, HEX);
+	Serial.println(" (should be 0x600DF00D)");
+
+};
 
 //-----------------------------------------------------------------------------
 

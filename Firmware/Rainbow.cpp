@@ -28,7 +28,7 @@ uint32_t Rainbow::Wheel(byte WheelPos, byte intensity)
 }
 
 // Slightly different, this makes the rainbow equally distributed throughout
-void Rainbow::rainbowCycle(uint8_t wait)
+void Rainbow::rainbowCycle(uint8_t wait, byte intensity)
 {
 	uint16_t i, j;
 
@@ -36,7 +36,7 @@ void Rainbow::rainbowCycle(uint8_t wait)
 	{
 		for (i = 0; i< NUMPIXELS; i++)
 		{
-			strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+			strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255, intensity));
 		}
 		strip.show();
 		delay(wait);
