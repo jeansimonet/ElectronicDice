@@ -28,7 +28,10 @@ public class TelemetryDemoDie : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        faceNumberText.text = die.face.ToString();
+        if (die.face != -1)
+            faceNumberText.text = (die.face+1).ToString();
+        else
+            faceNumberText.text = "";
     }
 
     public void Setup(Die die)
