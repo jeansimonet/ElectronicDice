@@ -209,12 +209,13 @@ public class TimelineView : MonoBehaviour
 			var text = lineTransf.GetComponentInChildren<Text>();
 			text.text = time + "s";
 			text.fontStyle = (int)time == time ? FontStyle.Bold : FontStyle.Normal;
-			time += _ticksLength;
 
 			// And position
 			Vector2 pos = lineTransf.anchoredPosition;
-			pos.x = Unit * i;
+			pos.x = Unit * time;
 			lineTransf.anchoredPosition = pos;
+
+			time += _ticksLength;
 		}
 		for (int t = numLines + 1; t < numExistingLines; ++t)
 		{
