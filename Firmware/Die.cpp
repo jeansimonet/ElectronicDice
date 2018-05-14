@@ -239,12 +239,14 @@ void Die::updateFaceAnimation()
 	int newFace = accelController.currentFace();
 	if (newFace != currentFace)
 	{
-		currentFace = newFace;
-		debugPrint("Detected face number ");
-		debugPrintln(currentFace);
-
+		// Don't update any internal value unless we can send the data to the central
+		// otherwise things get out of sync
 		if (!SimbleeBLE_radioActive)
 		{
+			currentFace = newFace;
+			debugPrint("Detected face number ");
+			debugPrintln(currentFace);
+
 			// Toggle leds
 			animController.stopAll();
 			playAnimation(currentFace);
