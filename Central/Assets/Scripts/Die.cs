@@ -308,10 +308,13 @@ public class Die
     {
         short remainingSize = (short)bytes.Length;
 
+        Debug.Log("Sending " + remainingSize + " bulk data");
         // Send setup message
         var setup = new DieMessageBulkSetup();
         setup.size = remainingSize;
         yield return StartCoroutine(SendMessageWithAck(setup, DieMessageType.BulkSetupAck));
+
+        Debug.Log("Die is ready, sending data");
 
         // Then transfer data
         short offset = 0;
@@ -323,6 +326,8 @@ public class Die
             System.Array.Copy(bytes, offset, data.data, 0, data.size);
             yield return StartCoroutine(SendMessageWithAck(data, DieMessageType.BulkDataAck));
         }
+
+        Debug.Log("Finished sending bulk data");
     }
 
     public IEnumerator DownloadBulkData(System.Action<byte[]> onBufferReady)
@@ -368,16 +373,21 @@ public class Die
         var prepareDie = new DieMessageTransferAnimSet();
         prepareDie.count = (byte)set.animations.Length;
         prepareDie.totalAnimationByteSize = (short)set.GetTotalByteSize();
+        Debug.Log("sending animation set setup");
         yield return StartCoroutine(SendMessageWithAck(prepareDie, DieMessageType.TransferAnimSetAck));
 
+        Debug.Log("die is ready, sending animations");
         // Die is ready, perform bulk transfer for each of the animations
         foreach (var anim in set.animations)
         {
+            Debug.Log("sending bulk data");
             byte[] animBytes = RGBAnimation.ToByteArray(anim);
             yield return StartCoroutine(UploadBulkData(animBytes));
 
+            Debug.Log("finished sending build data, waiting");
             // Then wait until the die is ready for the next anim bulk transfer
             yield return StartCoroutine(WaitForMessage(DieMessageType.TransferAnimReadyForNextAnim, null));
+            Debug.Log("die is ready for next anim");
         }
 
         // We're done!

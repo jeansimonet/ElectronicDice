@@ -52,4 +52,26 @@ public class DiceAnimProgrammer
     void Update () {
 		
 	}
+
+    public void UploadCurrentAnim()
+    {
+        // Try to send the anim down!
+        Animations.AnimationSet animSet = new Animations.AnimationSet();
+        animSet.animations = new Animations.RGBAnimation[1];
+        animSet.animations[0] = timeline.Serialize();
+
+        foreach (var die in dice)
+        {
+            die.UploadAnimationSet(animSet);
+        }
+
+    }
+
+    public void PlayAnim()
+    {
+        foreach (var die in dice)
+        {
+            die.PlayAnimation(0);
+        }
+    }
 }

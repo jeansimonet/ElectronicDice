@@ -301,6 +301,12 @@ ReceiveAnimSetSM::ReceiveAnimSetSM()
 /// </summary>
 void ReceiveAnimSetSM::Setup(short animCount, short totalAnimByteSize, void* token, FinishedCallback handler)
 {
+	debugPrint("Receiving animation set ");
+	debugPrint(animCount);
+	debugPrint(" animations for a total of ");
+	debugPrint(totalAnimByteSize);
+	debugPrintln(" bytes");
+
 	count = animCount;
 	currentState = State_ErasingFlash;
 

@@ -29,7 +29,7 @@ public class TelemetryDemoDie : MonoBehaviour
     void Update()
     {
         if (die.face != -1)
-            faceNumberText.text = (die.face+1).ToString();
+            faceNumberText.text = (die.face).ToString();
         else
             faceNumberText.text = "";
     }

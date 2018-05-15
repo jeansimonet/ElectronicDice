@@ -84,7 +84,7 @@ public class TimelineView : MonoBehaviour
 
 	public void TestSerialize()
 	{
-		_serializeDataTest  = Serialize();
+        _serializeDataTest  = Serialize();
 		var str = new System.Text.StringBuilder();
 		str.AppendLine(_serializeDataTest.duration.ToString());
 		foreach (var t in _serializeDataTest.tracks)

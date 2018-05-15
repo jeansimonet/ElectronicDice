@@ -253,7 +253,7 @@ void Die::updateFaceAnimation()
 
 			// Send face message
 			DieMessageState faceMessage;
-			faceMessage.state = currentFace;
+			faceMessage.state = currentFace + 1;
 			SimbleeBLE.send(reinterpret_cast<const char*>(&faceMessage), sizeof(DieMessageState));
 		}
 	}

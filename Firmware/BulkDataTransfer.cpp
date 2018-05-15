@@ -162,6 +162,12 @@ void ReceiveBulkDataSM::Setup()
 			debugPrint(bulkSetupMsg->size);
 			debugPrintln(" bytes");
 		}
+		else
+		{
+			debugPrint("Receiving bulk data of ");
+			debugPrint(me->mallocSize);
+			debugPrintln(" bytes");
+		}
 	});
 
 	die.RegisterUpdate(this, [](void* token)
