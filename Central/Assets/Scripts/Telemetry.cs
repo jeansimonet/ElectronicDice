@@ -154,14 +154,14 @@ public class Telemetry : MonoBehaviour
             d.Value.Clear();
         }
 
-#if UNITY_IOS
-        var vr = GetComponent<iVidCapPro>();
-		vr.BeginRecordingSession ("DiceCapture",
-			512, 512,
-			30,
-			iVidCapPro.CaptureAudio.Audio_Plus_Mic,
-			iVidCapPro.CaptureFramerateLock.Unlocked);
-#endif
+// #if UNITY_IOS
+//         var vr = GetComponent<iVidCapPro>();
+// 		vr.BeginRecordingSession ("DiceCapture",
+// 			512, 512,
+// 			30,
+// 			iVidCapPro.CaptureAudio.Audio_Plus_Mic,
+// 			iVidCapPro.CaptureFramerateLock.Unlocked);
+// #endif
     }
 
     public void SaveToFile()
@@ -171,11 +171,11 @@ public class Telemetry : MonoBehaviour
             die.Value.SaveToFile(die.Key.name);
         }
 
-#if UNITY_IOS
-		var vr = GetComponent<iVidCapPro>();
-		int ignore;
-		vr.EndRecordingSession (iVidCapPro.VideoDisposition.Save_Video_To_Album, out ignore);
-#endif
+// #if UNITY_IOS
+// 		var vr = GetComponent<iVidCapPro>();
+// 		int ignore;
+// 		vr.EndRecordingSession (iVidCapPro.VideoDisposition.Save_Video_To_Album, out ignore);
+// #endif
         StartIdle();
     }
 }
