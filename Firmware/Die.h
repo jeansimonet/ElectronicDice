@@ -83,6 +83,7 @@ private:
 	void OnUpdateSettings(DieMessage* msg);
 	void OnRequestTelemetry(DieMessage* msg);
 	void OnProgramDefaultAnimSet(DieMessage* msg);
+	void OnRequestDefaultAnimSetColor(DieMessage* msg);
 	void OnRenameDie(DieMessage* msg);
 	void OnFlash(DieMessage* msg);
 

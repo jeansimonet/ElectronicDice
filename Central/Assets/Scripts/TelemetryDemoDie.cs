@@ -58,6 +58,9 @@ public class TelemetryDemoDie : MonoBehaviour
 
         showOff2Button.onClick.RemoveAllListeners();
         showOff2Button.onClick.AddListener(() => ShowOff(0));
+
+        // Update the ui color
+        die.GetDefaultAnimSetColor((col) => UpdateUIColor(col));
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)
@@ -86,12 +89,17 @@ public class TelemetryDemoDie : MonoBehaviour
 
         Color color = Color.white;
         yield return die.SetNewColor((col) => color = col);
-        die3D.pipsColor = color;
-        faceNumberText.color = color;
+        UpdateUIColor(color);
 
         changeColorButton.interactable = true;
         showOffButton.interactable = true;
         showOff2Button.interactable = true;
+    }
+
+    void UpdateUIColor(Color uiColor)
+    {
+        die3D.pipsColor = uiColor;
+        faceNumberText.color = uiColor;
     }
 
     void ShowOff(int index)

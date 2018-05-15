@@ -34,8 +34,13 @@ struct DieMessage
 		MessageType_RequestSettings,
 		MessageType_RequestTelemetry,
 		MessateType_ProgramDefaultAnimSet,
+		MessateType_ProgramDefaultAnimSetFinished,
 		MessageType_Rename,
+		MessageType_RenameFinished,
 		MessageType_Flash,
+		MessageType_FlashFinished,
+		MessageType_RequestDefaultAnimSetColor,
+		MessageType_DefaultAnimSetColor,
 		MessageType_Count
 	};
 
@@ -154,6 +159,12 @@ struct DieMessageFlash
 	inline DieMessageFlash() : DieMessage(DieMessage::MessageType_Flash) {}
 };
 
+struct DieMessageDefaultAnimSetColor
+	: public DieMessage
+{
+	uint32_t color;
+	inline DieMessageDefaultAnimSetColor() : DieMessage(DieMessage::MessageType_DefaultAnimSetColor) {}
+};
 #pragma pack(pop)
 
 #endif

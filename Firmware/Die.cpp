@@ -112,6 +112,7 @@ void Die::init()
 	RegisterMessageHandler(DieMessage::MessateType_ProgramDefaultAnimSet, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnProgramDefaultAnimSet(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_Rename, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRenameDie(msg); });
 	RegisterMessageHandler(DieMessage::MessageType_Flash, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnFlash(msg); });
+	RegisterMessageHandler(DieMessage::MessageType_RequestDefaultAnimSetColor, this, [](void* tok, DieMessage* msg) {((Die*)tok)->OnRequestDefaultAnimSetColor(msg); });
 
 	// start the BLE stack
 	SimbleeBLE.end();
@@ -421,10 +422,26 @@ void Die::OnProgramDefaultAnimSet(DieMessage* msg)
 	auto animSetMsg = (DieMessageProgramDefaultAnimSet*)msg;
 	AnimationSet::ProgramDefaultAnimationSet(animSetMsg->color);
 
+	while (!SendMessage(DieMessage::MessateType_ProgramDefaultAnimSetFinished))
+		delay(10);
+
 	if (!sleep)
 	{
 		// Resume 
 		ResumeModules();
+	}
+}
+
+void Die::OnRequestDefaultAnimSetColor(DieMessage* msg)
+{
+	// A bit of a hack, go fetch the color of the first anim's first track
+	if (animationSet->CheckValid())
+	{
+		auto keyframe = animationSet->GetAnimation(0)->GetTrack(0).keyframes[1];
+		DieMessageDefaultAnimSetColor response;
+		response.color = Core::toColor(keyframe.red, keyframe.green, keyframe.blue);
+		while (!SendMessage(&response, sizeof(DieMessageDefaultAnimSetColor)))
+			delay(10);
 	}
 }
 
@@ -473,6 +490,10 @@ void Die::RenameDie(const char* newName)
 	{
 		debugPrintln("Error erasing flash to rename die");
 	}
+
+	// Acknowledge the anim
+	while (!SendMessage(DieMessage::MessageType_RenameFinished))
+		delay(10);
 }
 
 void Die::OnFlash(DieMessage* msg)
@@ -495,6 +516,10 @@ void Die::OnFlash(DieMessage* msg)
 	}
 
 	leds.stop();
+
+	// Acknowledge the anim
+	while (!SendMessage(DieMessage::MessageType_FlashFinished))
+		delay(10);
 
 	// Resume everything
 	ResumeModules();

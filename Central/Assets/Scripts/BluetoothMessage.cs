@@ -30,12 +30,14 @@ public enum DieMessageType : byte
     RequestAnimSet,
     RequestSettings,
     RequestTelemetry,
-    MessageType_ProgramDefaultAnimSet,
-    MessageType_ProgramDefaultAnimSetFinished,
-    MessageType_Rename,
-    MessageType_RenameFinished,
-    MessageType_Flash,
-    MessageType_FlashFinished
+    ProgramDefaultAnimSet,
+    ProgramDefaultAnimSetFinished,
+    Rename,
+    RenameFinished,
+    Flash,
+    FlashFinished,
+    RequestDefaultAnimSetColor,
+    DefaultAnimSetColor,
 }
 
 public interface DieMessage
@@ -98,14 +100,17 @@ public static class DieMessages
                 case DieMessageType.RequestTelemetry:
                     ret = FromByteArray<DieMessageRequestTelemetry>(data);
                     break;
-                case DieMessageType.MessageType_RenameFinished:
+                case DieMessageType.RenameFinished:
                     ret = FromByteArray<DieMessageRenameFinished>(data);
                     break;
-                case DieMessageType.MessageType_FlashFinished:
+                case DieMessageType.FlashFinished:
                     ret = FromByteArray<DieMessageFlashFinished>(data);
                     break;
-                case DieMessageType.MessageType_ProgramDefaultAnimSetFinished:
+                case DieMessageType.ProgramDefaultAnimSetFinished:
                     ret = FromByteArray<DieMessageProgramDefaultAnimSetFinished>(data);
+                    break;
+                case DieMessageType.DefaultAnimSetColor:
+                    ret = FromByteArray<DieMessageDefaultAnimSetColor>(data);
                     break;
                 default:
                     break;
@@ -281,7 +286,7 @@ public class DieMessageRequestState
 public class DieMessageProgramDefaultAnimSet
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_ProgramDefaultAnimSet;
+    public DieMessageType type { get; set; } = DieMessageType.ProgramDefaultAnimSet;
     public uint color;
 }
 
@@ -289,14 +294,14 @@ public class DieMessageProgramDefaultAnimSet
 public class DieMessageProgramDefaultAnimSetFinished
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_ProgramDefaultAnimSetFinished;
+    public DieMessageType type { get; set; } = DieMessageType.ProgramDefaultAnimSetFinished;
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRename
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_Rename;
+    public DieMessageType type { get; set; } = DieMessageType.Rename;
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
     public string newName;
 }
@@ -305,7 +310,7 @@ public class DieMessageRename
 public class DieMessageRenameFinished
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_RenameFinished;
+    public DieMessageType type { get; set; } = DieMessageType.RenameFinished;
 }
 
 
@@ -313,7 +318,7 @@ public class DieMessageRenameFinished
 public class DieMessageFlash
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_Flash;
+    public DieMessageType type { get; set; } = DieMessageType.Flash;
     public byte animIndex;
 }
 
@@ -322,6 +327,21 @@ public class DieMessageFlash
 public class DieMessageFlashFinished
     : DieMessage
 {
-    public DieMessageType type { get; set; } = DieMessageType.MessageType_FlashFinished;
+    public DieMessageType type { get; set; } = DieMessageType.FlashFinished;
 }
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageRequestDefaultAnimSetColor
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.RequestDefaultAnimSetColor;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageDefaultAnimSetColor
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.DefaultAnimSetColor;
+    public uint color;
+}

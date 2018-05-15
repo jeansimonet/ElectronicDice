@@ -474,7 +474,7 @@ public class Die
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
-        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.MessageType_ProgramDefaultAnimSetFinished));
+        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.ProgramDefaultAnimSetFinished));
 
         if (OnSettingsChanged != null)
         {
@@ -489,7 +489,7 @@ public class Die
 
     public Coroutine Flash(int index)
     {
-        return StartCoroutine(SendMessageWithAck(new DieMessageFlash() { animIndex = (byte)index }, DieMessageType.MessageType_FlashFinished));
+        return StartCoroutine(SendMessageWithAck(new DieMessageFlash() { animIndex = (byte)index }, DieMessageType.FlashFinished));
     }
 
     public Coroutine Rename(string newName)
@@ -501,10 +501,38 @@ public class Die
     {
         gameObject.name = newName;
         name = newName;
-        yield return StartCoroutine(SendMessageWithAck(new DieMessageRename() { newName = newName }, DieMessageType.MessageType_RenameFinished));
+        yield return StartCoroutine(SendMessageWithAck(new DieMessageRename() { newName = newName }, DieMessageType.RenameFinished));
         if (OnSettingsChanged != null)
         {
             OnSettingsChanged(this);
         }
+    }
+
+    public Coroutine GetDefaultAnimSetColor(System.Action<Color> retColor)
+    {
+        return StartCoroutine(GetDefaultAnimSetColorCr(retColor));
+    }
+
+    IEnumerator GetDefaultAnimSetColorCr(System.Action<Color> retColor)
+    {
+        // Setup bulk receive handler
+        MessageReceivedDelegate defaultAnimSetColorHandler = (msg) =>
+        {
+            var bulkMsg = (DieMessageDefaultAnimSetColor)msg;
+            Color32 msgColor = new Color32(
+                (byte)((bulkMsg.color >> 16) & 0xFF),
+                (byte)((bulkMsg.color >> 8) & 0xFF),
+                (byte)((bulkMsg.color >> 0) & 0xFF),
+                0xFF);
+            float h, s, v;
+            Color.RGBToHSV(msgColor, out h, out s, out v);
+            retColor(Color.HSVToRGB(h, 1, 1));
+        };
+        AddMessageHandler(DieMessageType.BulkData, defaultAnimSetColorHandler);
+
+        yield return StartCoroutine(SendMessage(new DieMessageRequestDefaultAnimSetColor()));
+
+        // We're done
+        RemoveMessageHandler(DieMessageType.BulkData, defaultAnimSetColorHandler);
     }
 }

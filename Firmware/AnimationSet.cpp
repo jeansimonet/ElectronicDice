@@ -161,7 +161,7 @@ bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 		Animation* anim = Animation::AllocateAnimation(i + 1); // face i has i+1 led
 		//Animation* anim = Animation::AllocateAnimation(1);
 
-		int totalTime = 500;
+		int totalTime = 400;
 		int ledTime = totalTime / (i + 1);
 		for (int j = 0; j <= i; ++j)
 		//int j = 0;
