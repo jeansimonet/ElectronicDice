@@ -113,7 +113,7 @@ public class CurrentDicePoolDice
     void FlashDie()
     {
         HideCommands();
-        die.Flash();
+        die.Flash(0);
     }
 
     void SetNewDieColor()

@@ -287,5 +287,6 @@ public class DieMessageFlash
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.MessageType_Flash;
+    public byte animIndex;
 }
 
