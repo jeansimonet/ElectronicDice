@@ -31,8 +31,11 @@ public enum DieMessageType : byte
     RequestSettings,
     RequestTelemetry,
     MessateType_ProgramDefaultAnimSet,
+    MessateType_ProgramDefaultAnimSetFinished,
     MessageType_Rename,
+    MessageType_RenameFinished,
     MessageType_Flash,
+    MessageType_FlashFinished
 }
 
 public interface DieMessage
@@ -274,6 +277,13 @@ public class DieMessageProgramDefaultAnimSet
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageProgramDefaultAnimSetFinished
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.MessateType_ProgramDefaultAnimSetFinished;
+}
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageRename
     : DieMessage
 {
@@ -283,10 +293,26 @@ public class DieMessageRename
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageRenameFinished
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.MessageType_RenameFinished;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public class DieMessageFlash
     : DieMessage
 {
     public DieMessageType type { get; set; } = DieMessageType.MessageType_Flash;
     public byte animIndex;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public class DieMessageFlashFinished
+    : DieMessage
+{
+    public DieMessageType type { get; set; } = DieMessageType.MessageType_FlashFinished;
 }
 

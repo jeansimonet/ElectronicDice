@@ -119,7 +119,7 @@ public class CurrentDicePoolDice
     void SetNewDieColor()
     {
         HideCommands();
-        die.SetNewColor();
+        die.SetNewColor(null);
     }
 
     void UpdateDieName()

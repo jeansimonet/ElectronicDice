@@ -460,43 +460,48 @@ public class Die
         PostMessage(new DieMessageRequestTelemetry() { telemetry = on ? (byte)1 : (byte)0 });
     }
 
-    public Color SetNewColor()
+    public Coroutine SetNewColor(System.Action<Color> displayColor)
+    {
+        return StartCoroutine(SetNewColorCr(displayColor));
+    }
+
+    IEnumerator SetNewColorCr(System.Action<Color> displayColor)
     {
         float hue = Random.Range(0.0f, 1.0f);
         Color newDisplayColor = Color.HSVToRGB(hue, 1.0f, 1.0f);
         Color newColor = Color.HSVToRGB(hue, 1.0f, 0.5f);
-        StartCoroutine(SetNewColorCr(newColor));
-        return newDisplayColor;
-    }
 
-    IEnumerator SetNewColorCr(Color newColor)
-    {
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
-        yield return StartCoroutine(SendMessage(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }));
+        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.MessateType_ProgramDefaultAnimSetFinished));
 
         if (OnSettingsChanged != null)
         {
             OnSettingsChanged(this);
         }
+
+        if (displayColor != null)
+        {
+            displayColor(newDisplayColor);
+        }
     }
 
-    public void Flash(int index)
+    public Coroutine Flash(int index)
     {
-        PostMessage(new DieMessageFlash() { animIndex = (byte)index });
+        return StartCoroutine(SendMessageWithAck(new DieMessageFlash() { animIndex = (byte)index }, DieMessageType.MessageType_FlashFinished));
     }
 
-    public void Rename(string newName)
+    public Coroutine Rename(string newName)
     {
-        StartCoroutine(RenameCr(newName));
+        return StartCoroutine(RenameCr(newName));
     }
 
     IEnumerator RenameCr(string newName)
     {
         gameObject.name = newName;
         name = newName;
-        yield return StartCoroutine(SendMessage(new DieMessageRename() { newName = newName }));
+        yield return StartCoroutine(SendMessageWithAck(new DieMessageRename() { newName = newName }, DieMessageType.MessageType_RenameFinished));
         if (OnSettingsChanged != null)
         {
             OnSettingsChanged(this);

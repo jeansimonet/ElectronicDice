@@ -74,13 +74,42 @@ public class TelemetryDemoDie : MonoBehaviour
 
     void ChangeColor()
     {
-        var color = die.SetNewColor();
+        StartCoroutine(ChangeColorCr());
+    }
+
+    IEnumerator ChangeColorCr()
+    {
+        // Disable buttons
+        changeColorButton.interactable = false;
+        showOffButton.interactable = false;
+        showOff2Button.interactable = false;
+
+        Color color = Color.white;
+        yield return die.SetNewColor((col) => color = col);
         die3D.pipsColor = color;
         faceNumberText.color = color;
+
+        changeColorButton.interactable = true;
+        showOffButton.interactable = true;
+        showOff2Button.interactable = true;
     }
 
     void ShowOff(int index)
     {
-        die.Flash(index);
+        StartCoroutine(FlashCr(index));
+    }
+
+    IEnumerator FlashCr(int index)
+    {
+        // Disable buttons
+        changeColorButton.interactable = false;
+        showOffButton.interactable = false;
+        showOff2Button.interactable = false;
+
+        yield return die.Flash(index);
+
+        changeColorButton.interactable = true;
+        showOffButton.interactable = true;
+        showOff2Button.interactable = true;
     }
 }
