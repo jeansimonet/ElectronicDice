@@ -11,6 +11,7 @@ public class TelemetryDemoDie : MonoBehaviour
     public Die3D die3D;
     public Button changeColorButton;
     public Button showOffButton;
+    public Button showOff2Button;
     public Text faceNumberText;
 
     Die die;
@@ -53,7 +54,10 @@ public class TelemetryDemoDie : MonoBehaviour
         changeColorButton.onClick.AddListener(ChangeColor);
 
         showOffButton.onClick.RemoveAllListeners();
-        showOffButton.onClick.AddListener(ShowOff);
+        showOffButton.onClick.AddListener(() => ShowOff(1));
+
+        showOff2Button.onClick.RemoveAllListeners();
+        showOff2Button.onClick.AddListener(() => ShowOff(0));
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)
@@ -75,8 +79,8 @@ public class TelemetryDemoDie : MonoBehaviour
         faceNumberText.color = color;
     }
 
-    void ShowOff()
+    void ShowOff(int index)
     {
-        die.Flash();
+        die.Flash(index);
     }
 }

@@ -482,9 +482,9 @@ public class Die
         }
     }
 
-    public void Flash()
+    public void Flash(int index)
     {
-        PostMessage(new DieMessageFlash());
+        PostMessage(new DieMessageFlash() { animIndex = (byte)index });
     }
 
     public void Rename(string newName)

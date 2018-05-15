@@ -43,7 +43,7 @@ public class DiceAnimProgrammer
 
         //var cmp = go.GetComponent<TelemetryDemoDie>();
         //cmp.Setup(die);
-
+        Debug.Log("Led animator connected to " + die.name);
         dice.Add(die);
     }
 
@@ -62,7 +62,8 @@ public class DiceAnimProgrammer
 
         foreach (var die in dice)
         {
-            die.UploadAnimationSet(animSet);
+            Debug.Log("Uploading anim on die " + die.name);
+            StartCoroutine(die.UploadAnimationSet(animSet));
         }
 
     }
@@ -71,6 +72,7 @@ public class DiceAnimProgrammer
     {
         foreach (var die in dice)
         {
+            Debug.Log("Playing anim on die " + die.name);
             die.PlayAnimation(0);
         }
     }
