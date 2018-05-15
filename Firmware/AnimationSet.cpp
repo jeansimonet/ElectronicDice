@@ -161,13 +161,15 @@ bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 		Animation* anim = Animation::AllocateAnimation(i + 1); // face i has i+1 led
 		//Animation* anim = Animation::AllocateAnimation(1);
 
+		int totalTime = 500;
+		int ledTime = totalTime / (i + 1);
 		for (int j = 0; j <= i; ++j)
 		//int j = 0;
 		{
 			AnimationTrack updown;
 			updown.count = 0;
-			updown.startTime = 0;	// ms
-			updown.duration = 1000;	// ms
+			updown.startTime = ledTime * j;	// ms
+			updown.duration = totalTime;	// ms
 			updown.ledIndex = LEDs::ledIndex(i,j);
 			updown.AddKeyframe(0, 0, 0, 0);
 			updown.AddKeyframe(128, Core::getRed(color), Core::getGreen(color), Core::getBlue(color));
@@ -342,6 +344,7 @@ void ReceiveAnimSetSM::Update()
 	{
 	case State_SendingAck:
 		{
+			debugPrintln("sending Ack");
 			if (die.SendMessage(DieMessage::MessageType_TransferAnimSetAck))
 			{
 				// Prepare to receive animation bulk data
@@ -353,9 +356,11 @@ void ReceiveAnimSetSM::Update()
 		break;
 	case State_TransferAnim:
 		{
+			debugPrint("Is bulk transfer done?");
 			// Is it done?
 			if (receiveBulkDataSM.TransferComplete())
 			{
+				debugPrint("yes, copy to flash");
 				// The anim data is ready, copy it to flash!
 				if (!AnimationSet::TransferAnimationRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize, progToken))
 				{
@@ -369,6 +374,7 @@ void ReceiveAnimSetSM::Update()
 
 					if (progToken.currentCount == count)
 					{
+						debugPrint("no more anims, programming animation set");
 						// No more anims to receive, program AnimationSet in flash
 						AnimationSet::TransferAnimationSet(progToken.animationPtrInFlash, count);
 
@@ -386,7 +392,8 @@ void ReceiveAnimSetSM::Update()
 		break;
 	case State_SendingReadyForNextAnim:
 		{
-			if (die.SendMessage(DieMessage::MessageType_TransferAnimReadyForNextAnim))
+		debugPrint("Indicating we are ready for next anim.");
+		if (die.SendMessage(DieMessage::MessageType_TransferAnimReadyForNextAnim))
 			{
 				// Prepare to receive next animation bulk data
 				currentState = State_TransferAnim;

@@ -244,10 +244,10 @@ void Tests::TestLEDSlow()
 		digitalWrite(DATAPIN, 0);
 		digitalWrite(CLOCKPIN, 0);
 
-		if (accWoke)
-		{
-			SimbleeBLE_ULPDelay(SECONDS(1));
-		}
+		//if (accWoke)
+		//{
+		//	SimbleeBLE_ULPDelay(SECONDS(1));
+		//}
 	}
 }
 

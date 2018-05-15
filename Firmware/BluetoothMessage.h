@@ -145,6 +145,15 @@ struct DieMessageRename
 	inline DieMessageRename() : DieMessage(DieMessage::MessageType_Rename) {}
 };
 
+
+struct DieMessageFlash
+	: public DieMessage
+{
+	byte animIndex;
+
+	inline DieMessageFlash() : DieMessage(DieMessage::MessageType_Flash) {}
+};
+
 #pragma pack(pop)
 
 #endif

@@ -43,3 +43,23 @@ void Rainbow::rainbowCycle(uint8_t wait, byte intensity)
 	}
 }
 
+// Slightly different, this makes the rainbow equally distributed throughout
+void Rainbow::rainbowAll(int repeat, uint8_t wait, byte intensity)
+{
+	uint16_t i, j;
+
+	for (int k = 0; k < repeat; ++k)
+	{
+		for (j = 0; j<256; j++)
+		{
+			uint32_t color = Wheel(j, intensity);
+			for (i = 0; i< NUMPIXELS; i++)
+			{
+				strip.setPixelColor(i, color);
+			}
+			strip.show();
+			delay(wait);
+		}
+	}
+}
+

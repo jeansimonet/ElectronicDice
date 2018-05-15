@@ -11,7 +11,7 @@ using namespace Systems;
 Watchdog Systems::watchdog;
 
 #define MAGNET_PIN 6
-#define WATCHDOG_TIMEOUT 10 // seconds
+#define WATCHDOG_TIMEOUT 30 // seconds
 
 Watchdog::Watchdog()
 {

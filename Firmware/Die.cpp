@@ -248,7 +248,7 @@ void Die::updateFaceAnimation()
 			debugPrintln(currentFace);
 
 			// Toggle leds
-			animController.stopAll();
+			//animController.stopAll();
 			playAnimation(currentFace);
 
 			// Send face message
@@ -483,12 +483,22 @@ void Die::OnFlash(DieMessage* msg)
 	// Rainbow!
 	leds.init();
 
-	Rainbow::rainbowCycle(5);
+	auto flashMsg = static_cast<DieMessageFlash*>(msg);
+	switch (flashMsg->animIndex)
+	{
+	case 1:
+		Rainbow::rainbowAll(2, 1);
+		break;
+	default:
+		Rainbow::rainbowCycle(5);
+		break;
+	}
 
 	leds.stop();
 
 	// Resume everything
 	ResumeModules();
 }
+
 
 
