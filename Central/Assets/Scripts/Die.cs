@@ -248,15 +248,15 @@ public class Die
         where T : DieMessage
     {
         bool msgReceived = false;
-        byte[] msgBytes = DieMessages.ToByteArray(message);
-        _sendBytes.SendBytes(this, msgBytes, msgBytes.Length, null);
-
         MessageReceivedDelegate callback = (ackMsg) =>
         {
             msgReceived = true;
         };
 
         AddMessageHandler(ackType, callback);
+        byte[] msgBytes = DieMessages.ToByteArray(message);
+        _sendBytes.SendBytes(this, msgBytes, msgBytes.Length, null);
+
         yield return new WaitUntil(() => msgReceived);
         RemoveMessageHandler(ackType, callback);
     }
@@ -474,7 +474,7 @@ public class Die
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
-        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.MessateType_ProgramDefaultAnimSetFinished));
+        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.MessageType_ProgramDefaultAnimSetFinished));
 
         if (OnSettingsChanged != null)
         {
