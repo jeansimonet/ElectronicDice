@@ -14,11 +14,19 @@
 using namespace Devices;
 using namespace Systems;
 
+extern Adafruit_DotStar strip;
+#define NUMPIXELS	21
+#define POWERPIN	4
 #define BATTERY_ANALOG_PIN 2
 #define DATAPIN		30
 #define CLOCKPIN	29
-#define CHARGING_PIN (22)
+#define CHARGING_PIN 22
 #define MAGNET_PIN 6
+#define accelPin 20
+#define radioPin 31
+#define SCLpin 21
+#define SDApin 24
+
 
 /// <summary>
 /// Writes to the serial port
@@ -152,10 +160,6 @@ void Tests::TestAccDice()
 }
 
 
-extern Adafruit_DotStar strip;
-#define NUMPIXELS	21
-#define POWERPIN	4
-
 /// <summary>
 /// Drive the LEDs Repeatedly
 /// </summary>
@@ -172,8 +176,6 @@ void Tests::TestLED()
 		Rainbow::rainbowCycle(5);
 	}
 }
-
-#define accelPin 20
 
 /// <summary>
 /// Drive the LEDs Repeatedly
@@ -315,8 +317,6 @@ void Tests::TestSleepForever()
 	// Sleep forever
 	Simblee_ULPDelay(INFINITE);
 }
-
-#define radioPin 31
 
 
 void Tests::TestSleepAwakeAcc()
@@ -659,8 +659,6 @@ void Tests::TestBattery()
 	}
 }
 
-#define CHARGING_PIN (22)
-
 void Tests::TestCharging()
 {
 	Serial.begin(9600);
@@ -710,7 +708,7 @@ void Tests::TestBatteryDischarge()
 	}
 }
 
-void Tests::TestAllHardwareConnections()
+void Tests::TestAllSystems()
 {
 	Serial.begin(9600);
 	Serial.println("Trying to Control APA102 LEDs.");
@@ -914,7 +912,6 @@ void Tests::TestAllHardwareConnections()
 
 }
 
-#define MAGNET_PIN 6
 
 void Tests::TestMagnet()
 {
@@ -937,4 +934,41 @@ void Tests::TestMagnet()
 		}
 	}
 
+}
+
+void Tests::TestConnections()
+{
+	Serial.begin(9600);
+	Serial.println("Toggling all pins");
+
+	pinMode(POWERPIN, OUTPUT);
+	pinMode(DATAPIN, OUTPUT);
+	pinMode(CLOCKPIN, OUTPUT);
+	pinMode(CHARGING_PIN, OUTPUT);
+	pinMode(MAGNET_PIN, OUTPUT);
+	pinMode(accelPin, OUTPUT);
+	pinMode(SCLpin, OUTPUT);
+	pinMode(SDApin, OUTPUT);
+
+	while (true)
+	{
+		digitalWrite(POWERPIN, LOW);
+		digitalWrite(DATAPIN, LOW);
+		digitalWrite(CLOCKPIN, LOW);
+		digitalWrite(CHARGING_PIN, LOW);
+		digitalWrite(MAGNET_PIN, LOW);
+		digitalWrite(accelPin, LOW);
+		digitalWrite(SCLpin, LOW);
+		digitalWrite(SDApin, LOW);
+		delay(1);
+		digitalWrite(POWERPIN, HIGH);
+		digitalWrite(DATAPIN, HIGH);
+		digitalWrite(CLOCKPIN, HIGH);
+		digitalWrite(CHARGING_PIN, HIGH);
+		digitalWrite(MAGNET_PIN, HIGH);
+		digitalWrite(accelPin, HIGH);
+		digitalWrite(SCLpin, HIGH);
+		digitalWrite(SDApin, HIGH);
+		delay(1);
+	}
 }
