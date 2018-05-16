@@ -528,11 +528,11 @@ public class Die
             Color.RGBToHSV(msgColor, out h, out s, out v);
             retColor(Color.HSVToRGB(h, 1, 1));
         };
-        AddMessageHandler(DieMessageType.BulkData, defaultAnimSetColorHandler);
+        AddMessageHandler(DieMessageType.DefaultAnimSetColor, defaultAnimSetColorHandler);
 
         yield return StartCoroutine(SendMessage(new DieMessageRequestDefaultAnimSetColor()));
 
         // We're done
-        RemoveMessageHandler(DieMessageType.BulkData, defaultAnimSetColorHandler);
+        RemoveMessageHandler(DieMessageType.DefaultAnimSetColor, defaultAnimSetColorHandler);
     }
 }
