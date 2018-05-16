@@ -16,6 +16,9 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 	public event System.Action<ColorAnimator> GotFocus;
 	public bool HasFocus { get; private set; }
 
+	public float LeftBound { get { return _movableColorSlider.LeftBound; } set { _movableColorSlider.LeftBound = value; } }
+	public float RightBound { get { return _movableColorSlider.RightBound; } set { _movableColorSlider.RightBound = value; } }
+
 	public MultiSlider ColorSlider { get { return _movableColorSlider.Movable.GetComponentInChildren<MultiSlider>(); } }
 
 	public void ChangeLed()
@@ -69,16 +72,13 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 		}
 	}
 
-	public Animations.RGBAnimationTrack Serialize(float startOffset, float unitSize)
+	public Animations.RGBAnimationTrack Serialize(float unitSize)
 	{
-		//TODO remove startOffset, see Deserialize()
 		var rect = (ColorSlider.transform as RectTransform).rect;
-		float start = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMin, 0, 0)).x - startOffset;
-		float end = transform.InverseTransformPoint(ColorSlider.transform.TransformPoint(rect.xMax, 0, 0)).x - startOffset;
 		return new Animations.RGBAnimationTrack()
 		{
-			startTime = (short)Mathf.RoundToInt(1000 * start / unitSize),
-			duration = (short)Mathf.RoundToInt(1000 * (end - start) / unitSize),
+			startTime = (short)Mathf.RoundToInt(LeftBound * 1000 / unitSize),
+			duration = (short)Mathf.RoundToInt((RightBound - LeftBound) * 1000 / unitSize),
 			ledIndex = (byte)LedSpriteToIndex(_image.sprite.name),
 			count = 1,
 			keyframes = ColorSlider.Serialize(),
@@ -89,29 +89,8 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 	{
 		ShowConfirmRemove(false);
 		SetLedSprite(LedSelector.Instance.GetLedSprite(ColorAnimator.IndexToLedSprite(track.ledIndex)));
-
-		StartCoroutine(TestCr(track, unitSize)); //TODO
-	}
-
-	IEnumerator TestCr(Animations.RGBAnimationTrack track, float unitSize)
-	{
-		yield return null;
-
-		Maximize();
-		//var rectTransf = ColorSlider.transform as RectTransform;
-		//var min = rectTransf.offsetMin;
-		//min.x = track.startTime / 1000f * unitSize;
-		//Debug.Log(min.x);
-		//rectTransf.offsetMin = min;
-		//var max = rectTransf.offsetMax;
-		//max.x = track.duration / 1000f * unitSize;
-		//Debug.Log(max.x);
-		//max.x += min.x;
-		//rectTransf.offsetMax = max;
-
-		//_movableColorSlider.
-
-		yield return null;
+		LeftBound = track.startTime / 1000f * unitSize;
+		RightBound = LeftBound + track.duration / 1000f * unitSize;
 		ColorSlider.Deserialize(track.keyframes);
 	}
 

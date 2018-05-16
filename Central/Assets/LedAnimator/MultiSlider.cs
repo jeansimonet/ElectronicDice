@@ -29,6 +29,7 @@ public class MultiSlider : MonoBehaviour, IFocusable
 
 	Texture2D _texture;
 	Sprite _sprite;
+	bool _suspendRepaint;
 
 	public void GiveFocus()
 	{
@@ -84,40 +85,42 @@ public class MultiSlider : MonoBehaviour, IFocusable
 
 	public void Deserialize(Animations.RGBKeyframe[] keyframes)
 	{
-		Clear();
+		_suspendRepaint = true;
 
-		bool first = true;
-		foreach (var kf in keyframes)
+		try
 		{
-			var handle = AllHandles[0]; // Initially we should have only one handle
-			if (!first)
+			Clear();
+
+			bool first = true;
+			foreach (var kf in keyframes)
 			{
-				handle = handle.Duplicate();
+				var handle = AllHandles[0]; // Initially we should have only one handle
+				if (!first)
+				{
+					handle = handle.Duplicate();
+				}
+
+				handle.ChangeColor(new Color32(kf.red, kf.green, kf.blue, 255), noRepaint: true);
+
+				var rect = (transform as RectTransform).rect;
+				Vector2 pos = handle.transform.localPosition;
+				pos.x = kf.time / 255f * rect.width + rect.xMin;
+				handle.transform.localPosition = pos;
+
+				first = false;
 			}
-			handle.ChangeColor(new Color32(kf.red, kf.green, kf.blue, 255), noRepaint: true);
-			StartCoroutine(TempCr(handle, kf.time, first)); //TODO
 
-			first = false;
+			SelectHandle(null);
 		}
-
-		Repaint();
-	}
-
-	IEnumerator TempCr(MultiSliderHandle handle, float t, bool first)
-	{
-		yield return null;
-		yield return null;
-		var rect = (transform as RectTransform).rect;
-		Vector2 pos = handle.transform.localPosition;
-		pos.x = t / 255f * rect.width + rect.xMin;
-		handle.transform.localPosition = pos;
-		yield return null;
-		if (first) Repaint();
+		finally
+		{
+			_suspendRepaint = false;
+		}
 	}
 
 	public void Repaint()
 	{
-		//TODO check number of repaint Debug.Log("Repainting " + name);
+		if (_suspendRepaint) return;
 
 		var colorsAndPos = GetColorAndPos();
 		colorsAndPos.Insert(0, new ColorAndPos(colorsAndPos[0].Color, 0));
@@ -127,8 +130,6 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		int x = 0, lastMax = 0;
 		for (int i = 1; i < colorsAndPos.Count; ++i)
 		{
-			//cols[i] = Color.green;// Color.Lerp(cols[i], colors[mip], 0.33f);
-			//int max = i * pixels.Length / (colorsAndPos.Count - 1);
 			int max = Mathf.RoundToInt(colorsAndPos[i].Pos * pixels.Length);
 			for (; x < max; ++x)
 			{
@@ -137,8 +138,6 @@ public class MultiSlider : MonoBehaviour, IFocusable
 			lastMax = max;
 		}
 		_texture.SetPixels(pixels);
-
-		// actually apply all SetPixels, don't recalculate mip levels
 		_texture.Apply(false);
 	}
 

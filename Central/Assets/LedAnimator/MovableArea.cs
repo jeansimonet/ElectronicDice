@@ -11,6 +11,28 @@ public class MovableArea : MonoBehaviour
 	[SerializeField]
 	RectTransform _movable = null;
 
+	public float LeftBound
+	{
+		get { return _leftHandle.transform.localPosition.x; }
+		set
+		{
+			var pos = _leftHandle.transform.localPosition;
+			pos.x = value;
+			_leftHandle.transform.localPosition = pos;
+			OnLeftHandleMoved();
+		}
+	}
+	public float RightBound
+	{
+		get { return _rightHandle.transform.localPosition.x; }
+		set
+		{
+			var pos = _rightHandle.transform.localPosition;
+			pos.x = value;
+			_rightHandle.transform.localPosition = pos;
+			OnRightHandleMoved();
+		}
+	}
 	public float LeftWidth { get { return (_leftHandle.transform as RectTransform).rect.width; } }
 	public float RightWidth { get { return (_rightHandle.transform as RectTransform).rect.width; } }
 
@@ -21,11 +43,7 @@ public class MovableArea : MonoBehaviour
 		var pos = _rightHandle.transform.localPosition;
 		pos.x = (transform as RectTransform).rect.width;
 		_rightHandle.transform.localPosition = pos;
-		FitToHandles();
-	}
 
-	void FitToHandles()
-	{
 		OnLeftHandleMoved();
 		OnRightHandleMoved();
 	}
@@ -59,7 +77,8 @@ public class MovableArea : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		FitToHandles();
+		OnLeftHandleMoved();
+		OnRightHandleMoved();
 	}
 
 	// Update is called once per frame

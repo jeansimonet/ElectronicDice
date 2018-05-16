@@ -30,7 +30,6 @@ public class TimelineView : MonoBehaviour
 	public float Duration { get; private set; }
 	public int Zoom { get; private set; }
 	public float Unit { get { return _unitWidth * Zoom; } }
-	public float StartOffset { get { return transform.InverseTransformPoint(_ticksRoot.transform.TransformPoint(_ticksRoot.rect.xMin, 0, 0)).x; } }
 	public int AnimationCount { get { return _colorAnimsRoot.childCount - 1; } }
 
 	public ColorAnimator ActiveColorAnimator { get; private set; }
@@ -54,7 +53,8 @@ public class TimelineView : MonoBehaviour
 			if (sprite != null)
 			{
 				var colorAnim = CreateAnimation(sprite);
-				StartCoroutine(TestCr(colorAnim)); //TODO
+				colorAnim.LeftBound = 0;
+				colorAnim.RightBound = Unit * Duration;
 				colorAnim.GiveFocus();
 				colorAnim.ColorSlider.SelectHandle(colorAnim.ColorSlider.AllHandles[0]);
 				Repaint();
@@ -74,18 +74,15 @@ public class TimelineView : MonoBehaviour
 		return colorAnim;
 	}
 
-	IEnumerator TestCr(ColorAnimator colorAnim)
-	{
-		yield return null;
-		colorAnim.Maximize();
-	}
-
 	Animations.RGBAnimation _serializeDataTest;
 
 	public void TestSerialize()
 	{
-        _serializeDataTest  = Serialize();
+		_serializeDataTest = Serialize();
 		var str = new System.Text.StringBuilder();
+		str.Append("Serialized ");
+		str.Append(_serializeDataTest.tracks.Length);
+		str.AppendLine(" color animations");
 		str.AppendLine(_serializeDataTest.duration.ToString());
 		foreach (var t in _serializeDataTest.tracks)
 		{
@@ -127,7 +124,7 @@ public class TimelineView : MonoBehaviour
 		return new Animations.RGBAnimation()
 		{
 			duration = (short)Mathf.RoundToInt(1000 * Duration),
-			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(StartOffset, Unit)).ToArray()
+			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(Unit)).ToArray()
 		};
 	}
 
@@ -137,13 +134,14 @@ public class TimelineView : MonoBehaviour
 
 		Clear();
 		Duration = data.duration / 1000f;
-		Repaint();
 
 		foreach (var track in data.tracks)
 		{
 			var colorAnim = CreateAnimation();
 			colorAnim.Deserialize(track, Unit);
 		}
+
+		Repaint();
 	}
 
 	void OnColorAnimatorGotFocus(ColorAnimator colorAnim)
