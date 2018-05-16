@@ -42,10 +42,12 @@ const char* DieMessage::GetMessageTypeString(DieMessage::MessageType msgType)
 		return "RequestTelemetry";
 	case MessateType_ProgramDefaultAnimSet:
 		return "ProgramDefaultAnimSet";
-	case DieMessage::MessageType_Rename:
+	case MessageType_Rename:
 		return "Rename";
-	case DieMessage::MessageType_Flash:
+	case MessageType_Flash:
 		return "Flash";
+	case MessageType_RequestDefaultAnimSetColor:
+		return "RequestDefaultAnimSetColor";
 	default:
 		return "<missing>";
 	}

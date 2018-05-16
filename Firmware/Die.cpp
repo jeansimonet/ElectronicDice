@@ -437,6 +437,7 @@ void Die::OnRequestDefaultAnimSetColor(DieMessage* msg)
 	// A bit of a hack, go fetch the color of the first anim's first track
 	if (animationSet->CheckValid())
 	{
+		debugPrintln("Sending back default anim set color");
 		auto keyframe = animationSet->GetAnimation(0)->GetTrack(0).keyframes[1];
 		DieMessageDefaultAnimSetColor response;
 		response.color = Core::toColor(keyframe.red, keyframe.green, keyframe.blue);

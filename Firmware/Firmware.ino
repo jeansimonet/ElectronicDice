@@ -37,13 +37,15 @@ Die die;
 #define TEST_BATTERY		17
 #define TEST_CHARGING		16
 #define TEST_BATT_DISCHARGE 18
-#define TEST_ALL_CONNECTIONS 19
+#define TEST_ALL_SYSTEMS	19
 #define TEST_MAGNET			20
+#define TEST_CONNECTIONS	21
 
+//#define TEST TEST_CONNECTIONS
 //#define TEST TEST_LED
 //#define TEST TEST_SLEEP
 //#define TEST TEST_LED_SLOW
-//#define TEST TEST_ALL_CONNECTIONS
+#define TEST TEST_ALL_SYSTEMS
 //#define TEST TEST_SLEEP_ACC
 //#define TEST TEST_MAGNET
 //#define TEST TEST_ACC_DICE
@@ -175,11 +177,14 @@ void SetupTest(int testIndex)
 	case TEST_BATT_DISCHARGE:
 		Tests::TestBatteryDischarge();
 		break;
-	case TEST_ALL_CONNECTIONS:
-		Tests::TestAllHardwareConnections();
+	case TEST_ALL_SYSTEMS:
+		Tests::TestAllSystems();
 		break;
 	case TEST_MAGNET:
 		Tests::TestMagnet();
+		break;
+	case TEST_CONNECTIONS:
+		Tests::TestConnections();
 		break;
 	default:
 		break;

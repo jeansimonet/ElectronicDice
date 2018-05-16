@@ -18,8 +18,10 @@ namespace Systems
 		DieMessageAcc teleMessage;
 		AccelFrame lastAccelFrame;
 		bool lastAccelWasSent;
+		bool telemetryActive;
 
 	public:
+		Telemetry();
 		void begin();
 		void stop();
 		void onAccelFrame(const AccelFrame& frame);

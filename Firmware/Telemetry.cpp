@@ -7,8 +7,15 @@ using namespace Systems;
 
 Telemetry Systems::telemetry;
 
+Telemetry::Telemetry()
+	: telemetryActive(false)
+{
+}
+
 void Telemetry::begin()
 {
+	telemetryActive = true;
+
 	// Init our reuseable telemetry message
 	teleMessage.type = DieMessage::MessageType_Telemetry;
 	for (int i = 0; i < 1; ++i)
@@ -55,6 +62,7 @@ void Telemetry::stop()
 {
 	// Stop being notified!
 	accelController.unHookWithParam(this);
+	telemetryActive = false;
 }
 
 
