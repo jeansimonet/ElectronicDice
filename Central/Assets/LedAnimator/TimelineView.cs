@@ -17,20 +17,24 @@ public class TimelineView : MonoBehaviour
 	[SerializeField]
 	float _ticksLength = 0.5f;
 	[SerializeField]
+	RectTransform _animSetTogglesRoot = null;
+	[SerializeField]
 	RectTransform _ticksRoot = null;
 	[SerializeField]
 	RectTransform _colorAnimsRoot = null;
 	[SerializeField]
-	RectTransform _controls = null;
+	RectTransform _animBottomButtons = null;
 	[SerializeField]
 	ColorAnimator _colorAnimPrefab = null;
 
 	float _widthPadding;
+	Animations.AnimationSet _animSet;
 
 	public float Duration { get; private set; }
 	public int Zoom { get; private set; }
 	public float Unit { get { return _unitWidth * Zoom; } }
 	public int AnimationCount { get { return _colorAnimsRoot.childCount - 1; } }
+	public int CurrentFace { get; private set; }
 
 	public ColorAnimator ActiveColorAnimator { get; private set; }
 
@@ -65,7 +69,7 @@ public class TimelineView : MonoBehaviour
 	ColorAnimator CreateAnimation(Sprite sprite = null)
 	{
 		var colorAnim = GameObject.Instantiate<ColorAnimator>(_colorAnimPrefab, _colorAnimsRoot);
-		_controls.SetAsLastSibling(); // Keep controls at the bottom
+		_animBottomButtons.SetAsLastSibling(); // Keep controls at the bottom
 		if (sprite != null)
 		{
 			colorAnim.SetLedSprite(sprite);
@@ -74,62 +78,154 @@ public class TimelineView : MonoBehaviour
 		return colorAnim;
 	}
 
-	Animations.RGBAnimation _serializeDataTest;
-
-	public void TestSerialize()
+	public void ChangeCurrentFace(int index)
 	{
-		_serializeDataTest = Serialize();
-		var str = new System.Text.StringBuilder();
-		str.Append("Serialized ");
-		str.Append(_serializeDataTest.tracks.Length);
-		str.AppendLine(" color animations");
-		str.AppendLine(_serializeDataTest.duration.ToString());
-		foreach (var t in _serializeDataTest.tracks)
+		if (CurrentFace != index)
 		{
-			str.Append(" * ");
-			str.Append(t.startTime);
-			str.Append(", ");
-			str.Append(t.duration);
-			str.Append(", ");
-			str.Append(t.ledIndex);
-			str.AppendLine();
-			foreach (var k in t.keyframes)
+			// Save current anims
+			Serialize();
+
+			// And show
+			ShowFace(index);
+		}
+	}
+
+	public void SaveToFile()
+	{
+		Debug.Log("SaveToFile");
+		Serialize();
+		PrintData();
+
+		// ----> Save _animSet in file
+	}
+
+	public void LoadFromFile()
+	{
+		Debug.Log("LoadFromFile");
+		// Generate random anims
+		for (int i = 0; i < _animSet.animations.Length; ++i)
+		{
+			var data = new Animations.RGBAnimation();
+			data.duration = (short)Mathf.RoundToInt(1000 * Random.Range(1, 11));
+			data.tracks = new Animations.RGBAnimationTrack[Random.Range(1, 11)];
+			for (int j = 0; j < data.tracks.Length; ++j)
 			{
-				str.Append("    * ");
-				str.Append(k.time);
-				str.Append(", (");
-				str.Append(k.red);
-				str.Append(", ");
-				str.Append(k.green);
-				str.Append(", ");
-				str.Append(k.blue);
-				str.Append(")");
-				str.AppendLine();
+				Animations.RGBAnimationTrack track = new Animations.RGBAnimationTrack();
+				track.startTime = (short)Random.Range(0, data.duration - 100);
+				track.duration = (short)Random.Range(100, data.duration - track.startTime);
+				track.ledIndex = (byte)Random.Range(0, 21);
+				track.keyframes = new Animations.RGBKeyframe[Random.Range(1, 6)];
+				for (int k = 0; k < track.keyframes.Length; ++k)
+				{
+					track.keyframes[k].time = (byte)Random.Range(0, 256);
+					track.keyframes[k].red = (byte)Random.Range(0, 256);
+					track.keyframes[k].blue = (byte)Random.Range(0, 256);
+					track.keyframes[k].green = (byte)Random.Range(0, 256);
+				}
+				data.tracks[j] = track;
 			}
-
+			_animSet.animations[i] = data;
 		}
-		Debug.Log(str.ToString());
+
+		// ----> Update _animSet with data from dice
+
+		ShowFace(0);
+		_animSetTogglesRoot.GetComponentsInChildren<Toggle>().First().isOn = true;
 	}
 
-	public void TestDeserialize()
+	public void UploadToDice()
 	{
-		if (_serializeDataTest != null)
+		Debug.Log("UploadToDice");
+		Serialize();
+
+		// ----> Send _animSet to dice
+	}
+
+	public void DownloadFromDice()
+	{
+		Debug.Log("DownloadFromDice");
+
+		// ----> Update _animSet with data from dice
+
+		ShowFace(0);
+		_animSetTogglesRoot.GetComponentsInChildren<Toggle>().First().isOn = true;
+	}
+
+	public void PrintData()
+	{
+		int i = 0;
+		foreach (var data in _animSet.animations)
 		{
-			Deserialize(_serializeDataTest);
+			var str = new System.Text.StringBuilder();
+			str.Append("#");
+			str.Append(i);
+			str.Append(" -> ");
+			str.Append(data.tracks.Length);
+			str.Append(" color animations");
+			str.Append(", duration of ");
+			str.Append(data.duration);
+			str.AppendLine(" seconds");
+			foreach (var t in data.tracks)
+			{
+				str.Append(" * ");
+				str.Append(t.startTime);
+				str.Append(", ");
+				str.Append(t.duration);
+				str.Append(", ");
+				str.Append(t.ledIndex);
+				str.AppendLine();
+				foreach (var k in t.keyframes)
+				{
+					str.Append("    * ");
+					str.Append(k.time);
+					str.Append(", (");
+					str.Append(k.red);
+					str.Append(", ");
+					str.Append(k.green);
+					str.Append(", ");
+					str.Append(k.blue);
+					str.Append(")");
+					str.AppendLine();
+				}
+			}
+			Debug.Log(str.ToString());
+			++i;
 		}
 	}
 
-	public Animations.RGBAnimation Serialize()
+	void ShowFace(int index)
 	{
-		return new Animations.RGBAnimation()
+		// Select face to show
+		CurrentFace = index;
+
+		// Load data and display
+		Deserialize();
+		Repaint();
+	}
+
+	void Serialize()
+	{
+		var anims = GetComponentsInChildren<ColorAnimator>();
+
+		Debug.LogFormat("Serializing {0} color animations", anims.Length);
+
+		var anim = new Animations.RGBAnimation()
 		{
 			duration = (short)Mathf.RoundToInt(1000 * Duration),
-			tracks = GetComponentsInChildren<ColorAnimator>().Select(a => a.Serialize(Unit)).ToArray()
+			tracks = anims.Select(a => a.Serialize(Unit)).ToArray()
 		};
+		_animSet.animations[CurrentFace] = anim;
 	}
 
-	public void Deserialize(Animations.RGBAnimation data)
+	void Deserialize()
 	{
+		var data = _animSet.animations[CurrentFace];
+		if (data == null)
+		{
+			Debug.LogError("Null animation data at index " + CurrentFace);
+			return;
+		}
+
 		Debug.LogFormat("Deserializing {0} color animations", data.tracks.Length);
 
 		Clear();
@@ -162,7 +258,7 @@ public class TimelineView : MonoBehaviour
 		for (int i = _colorAnimsRoot.childCount - 1; i >= 0; --i)
 		{
 			var child = _colorAnimsRoot.GetChild(i);
-			if (child != _controls)
+			if (child != _animBottomButtons)
 			{
 				child.SetParent(null);
 				GameObject.Destroy(child.gameObject);
@@ -176,14 +272,14 @@ public class TimelineView : MonoBehaviour
 		}
 	}
 
-	void Repaint()
+	public void Repaint() //TODO public for temp code in ColorAnimator
 	{
 		var rectTransf = transform as RectTransform;
 
 		// Update width
 		var size = rectTransf.sizeDelta;
 		size.x = _widthPadding + Unit * Duration;
-		size.y = 49 + 10 + _colorAnimsRoot.childCount * 80 + (_colorAnimsRoot.childCount - 1) * 10; //TODO
+		size.y = 40 + _colorAnimsRoot.childCount * 80 + (_colorAnimsRoot.childCount - 1) * 10; //TODO
 		rectTransf.sizeDelta = size;
 
 		// Update vertical lines
@@ -203,10 +299,19 @@ public class TimelineView : MonoBehaviour
 				lineTransf = GameObject.Instantiate(_ticksRoot.GetChild(0).gameObject, _ticksRoot).transform as RectTransform;
 			}
 
+			bool intT = (int)time == time;
+
 			// Update text
 			var text = lineTransf.GetComponentInChildren<Text>();
 			text.text = time + "s";
-			text.fontStyle = (int)time == time ? FontStyle.Bold : FontStyle.Normal;
+			text.fontStyle = intT ? FontStyle.Bold : FontStyle.Normal;
+			text.fontSize = intT ? 24 : 20;
+
+			// Update image
+			var img = lineTransf.GetComponentInChildren<Image>();
+			var imgRectTransf = (img.transform as RectTransform);
+			imgRectTransf.offsetMin = new Vector2(intT ? -2 :  -1, imgRectTransf.offsetMin.y);
+			imgRectTransf.offsetMax = new Vector2(intT ? 2 : 1, imgRectTransf.offsetMax.y);
 
 			// And position
 			Vector2 pos = lineTransf.anchoredPosition;
@@ -223,10 +328,16 @@ public class TimelineView : MonoBehaviour
 
 	void Awake()
 	{
-		Clear();
+		_animSet = new Animations.AnimationSet
+		{
+			animations = Enumerable.Range(0, 6)
+				.Select(i => new Animations.RGBAnimation() { duration = 1000, tracks = new Animations.RGBAnimationTrack[0] })
+				.ToArray()
+		};
 		_widthPadding = (transform as RectTransform).rect.width - _ticksRoot.rect.width;
 		Duration = _minDuration;
 		Zoom = _minZoom;
+		Clear();
 	}
 
 	// Use this for initialization

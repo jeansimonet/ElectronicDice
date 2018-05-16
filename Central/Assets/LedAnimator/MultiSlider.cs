@@ -63,6 +63,7 @@ public class MultiSlider : MonoBehaviour, IFocusable
 		var all = AllHandles;
 		if ((all.Length > 1) && (all.Contains(handle)))
 		{
+			handle.transform.SetParent(null);
 			GameObject.Destroy(handle.gameObject);
 			if (ActiveHandle == handle)
 			{

@@ -53,13 +53,9 @@ public class DiceAnimProgrammer
 		
 	}
 
-    public void UploadCurrentAnim()
+    public void UploadCurrentAnim(Animations.AnimationSet animSet)
     {
         // Try to send the anim down!
-        Animations.AnimationSet animSet = new Animations.AnimationSet();
-        animSet.animations = new Animations.RGBAnimation[1];
-        animSet.animations[0] = timeline.Serialize();
-
         foreach (var die in dice)
         {
             Debug.Log("Uploading anim on die " + die.name);

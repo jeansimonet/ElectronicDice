@@ -50,8 +50,11 @@ public class ColorAnimator : MonoBehaviour, IFocusable
 
 	public void RemoveSelf()
 	{
+		var timeline = GetComponentInParent<TimelineView>();
+		gameObject.transform.SetParent(null);
 		GameObject.Destroy(gameObject);
 		//TODO ActiveColorAnimator = null;
+		timeline.Repaint(); //TODO
 	}
 
 	public void GiveFocus()
