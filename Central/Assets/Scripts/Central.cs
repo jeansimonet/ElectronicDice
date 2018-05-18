@@ -45,6 +45,7 @@ public class Central
 	public string subscribeCharacteristic = "2d30c082-f39f-4ce6-923f-3484ea480596";
 	public string writeCharacteristic = "2d30c083-f39f-4ce6-923f-3484ea480596";
     public string configFileName = "dicelist.json";
+    public float connectingTimeout = 8.0f;
 
     CentralState _state = CentralState.Uninitialized;
 
@@ -75,6 +76,8 @@ public class Central
         get { return _state; }
     }
 
+    float connectingStartTime;
+
     void Awake()
     {
         clients = new HashSet<IClient>();
@@ -100,6 +103,17 @@ public class Central
         _state = CentralState.Idle;
         #endif
 	}
+
+    void Update()
+    {
+        if (_state == CentralState.Connecting)
+        {
+            if (Time.time > connectingStartTime + connectingTimeout)
+            {
+                _state = CentralState.Idle;
+            }
+        }
+    }
 
     public void RegisterClient(IClient client)
     {
@@ -196,6 +210,7 @@ public class Central
         if (_state == CentralState.Idle)
         {
             _state = CentralState.Connecting;
+            connectingStartTime = Time.time;
             bool readCharacDiscovered = false;
             bool writeCharacDiscovered = false;
 
@@ -204,16 +219,20 @@ public class Central
                 // Do we have both read and write access? If so we're good to go!
                 if (readCharacDiscovered && writeCharacDiscovered)
                 {
-                    // We're ready to go
-                    die.Connect(this);
-                    _state = CentralState.Idle;
-                    if (dieConnectedCallback != null)
-                        dieConnectedCallback(die);
-                    if (onDieConnected != null)
-                        onDieConnected(die);
-                    foreach (var client in clients)
+                    // If somehow we've timed out, skip this.
+                    if (_state == CentralState.Connecting)
                     {
-                        client.OnNewDie(die);
+                        // We're ready to go
+                        die.Connect(this);
+                        _state = CentralState.Idle;
+                        if (dieConnectedCallback != null)
+                            dieConnectedCallback(die);
+                        if (onDieConnected != null)
+                            onDieConnected(die);
+                        foreach (var client in clients)
+                        {
+                            client.OnNewDie(die);
+                        }
                     }
                 }
             };
