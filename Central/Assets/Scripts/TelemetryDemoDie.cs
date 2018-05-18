@@ -92,7 +92,8 @@ public class TelemetryDemoDie : MonoBehaviour
         showOff2Button.interactable = false;
 
         Color color = Color.white;
-        yield return die.SetNewColor((col) => color = col);
+        die.SetNewColor((col) => color = col);
+        yield return new WaitForSeconds(2.0f);
         UpdateUIColor(color);
 
         changeColorButton.interactable = true;
@@ -118,7 +119,8 @@ public class TelemetryDemoDie : MonoBehaviour
         showOffButton.interactable = false;
         showOff2Button.interactable = false;
 
-        yield return die.Flash(index);
+        die.Flash(index);
+        yield return new WaitForSeconds(2.0f);
 
         changeColorButton.interactable = true;
         showOffButton.interactable = true;
