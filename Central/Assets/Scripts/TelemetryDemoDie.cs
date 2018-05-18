@@ -61,6 +61,10 @@ public class TelemetryDemoDie : MonoBehaviour
 
         // Update the ui color
         die.GetDefaultAnimSetColor((col) => UpdateUIColor(col));
+
+        changeColorButton.interactable = true;
+        showOffButton.interactable = true;
+        showOff2Button.interactable = true;
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)

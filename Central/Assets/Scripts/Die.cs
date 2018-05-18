@@ -261,6 +261,26 @@ public class Die
         RemoveMessageHandler(ackType, callback);
     }
 
+    IEnumerator SendMessageWithAckOrTimeout<T>(T message, DieMessageType ackType, float timeOut)
+        where T : DieMessage
+    {
+        bool msgReceived = false;
+        float startTime = Time.time;
+        MessageReceivedDelegate callback = (ackMsg) =>
+        {
+            msgReceived = true;
+        };
+
+        AddMessageHandler(ackType, callback);
+        byte[] msgBytes = DieMessages.ToByteArray(message);
+        _sendBytes.SendBytes(this, msgBytes, msgBytes.Length, null);
+        while (!msgReceived && Time.time < startTime + timeOut)
+        {
+            yield return null;
+        }
+        RemoveMessageHandler(ackType, callback);
+    }
+
     void OnStateMessage(DieMessage message)
     {
         // Handle the message
@@ -474,7 +494,7 @@ public class Die
         Color32 color32 = newColor;
         int colorRGB = color32.r << 16 | color32.g << 8 | color32.b;
 
-        yield return StartCoroutine(SendMessageWithAck(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.ProgramDefaultAnimSetFinished));
+        yield return StartCoroutine(SendMessageWithAckOrTimeout(new DieMessageProgramDefaultAnimSet() { color = (uint)colorRGB }, DieMessageType.ProgramDefaultAnimSetFinished, 5.0f));
 
         if (OnSettingsChanged != null)
         {
@@ -489,7 +509,7 @@ public class Die
 
     public Coroutine Flash(int index)
     {
-        return StartCoroutine(SendMessageWithAck(new DieMessageFlash() { animIndex = (byte)index }, DieMessageType.FlashFinished));
+        return StartCoroutine(SendMessageWithAckOrTimeout(new DieMessageFlash() { animIndex = (byte)index }, DieMessageType.FlashFinished, 5.0f));
     }
 
     public Coroutine Rename(string newName)
@@ -501,7 +521,7 @@ public class Die
     {
         gameObject.name = newName;
         name = newName;
-        yield return StartCoroutine(SendMessageWithAck(new DieMessageRename() { newName = newName }, DieMessageType.RenameFinished));
+        yield return StartCoroutine(SendMessageWithAckOrTimeout(new DieMessageRename() { newName = newName }, DieMessageType.RenameFinished, 5.0f));
         if (OnSettingsChanged != null)
         {
             OnSettingsChanged(this);
@@ -515,7 +535,7 @@ public class Die
 
     IEnumerator GetDefaultAnimSetColorCr(System.Action<Color> retColor)
     {
-        // Setup bulk receive handler
+        // Setup message handler
         MessageReceivedDelegate defaultAnimSetColorHandler = (msg) =>
         {
             var bulkMsg = (DieMessageDefaultAnimSetColor)msg;
