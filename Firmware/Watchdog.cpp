@@ -5,6 +5,7 @@
 #include "Watchdog.h"
 #include "Die.h"
 #include "Debug.h"
+#include "SimbleeBLE.h"
 
 using namespace Systems;
 
@@ -20,10 +21,13 @@ Watchdog::Watchdog()
 
 void Watchdog::sleepUntilInterrupt()
 {
+	// Turn off bluetooth
+	SimbleeBLE.end();
+
 	// Prepare to wakeup on matching interrupt pin
 	Simblee_pinWake(MAGNET_PIN, HIGH);
 
-	// Sleep until someboby poked us!
+	// Sleep until someboby pokes us!
 	Simblee_ULPDelay(INFINITE);
 
 	// If we get here, we either got an accelerometer interrupt, or bluetooth message
@@ -33,6 +37,8 @@ void Watchdog::sleepUntilInterrupt()
 		Simblee_resetPinWake(MAGNET_PIN);
 		debugPrintln("Watchdog: Magnet no longer present, waking up");
 	}
+
+	SimbleeBLE.begin();
 }
 
 void Watchdog::init()

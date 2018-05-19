@@ -155,7 +155,7 @@ bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 {
 	// We're going to program a few animations!
 	int totalAnimSize = 0;
-	Animation* faceAnims[6];
+	Animation* faceAnims[12];
 	for (int i = 0; i < 6; ++i)
 	{
 		Animation* anim = Animation::AllocateAnimation(i + 1); // face i has i+1 led
@@ -181,11 +181,33 @@ bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 		totalAnimSize += anim->ComputeByteSize();
 	}
 
+	for (int i = 0; i < 6; ++i)
+	{
+		Animation* anim = Animation::AllocateAnimation(i + 1); // face i has i+1 led
+															   //Animation* anim = Animation::AllocateAnimation(1);
+		int totalTime = 1500;
+		for (int j = 0; j <= i; ++j)
+		{
+			AnimationTrack updown;
+			updown.count = 0;
+			updown.startTime = 0;	// ms
+			updown.duration = totalTime;	// ms
+			updown.ledIndex = LEDs::ledIndex(i, j);
+			updown.AddKeyframe(0, Core::getRed(color), Core::getGreen(color), Core::getBlue(color));
+			updown.AddKeyframe(160, Core::getRed(color), Core::getGreen(color), Core::getBlue(color));
+			updown.AddKeyframe(255, 0, 0, 0);
+			anim->SetTrack(updown, j);
+		}
+
+		faceAnims[i+6] = anim;
+		totalAnimSize += anim->ComputeByteSize();
+	}
+
 	AnimationSet::ProgrammingToken token;
 	bool ret = EraseAnimations(totalAnimSize, token);
 	if (ret)
 	{
-		for (int i = 0; ret && i < 6; ++i)
+		for (int i = 0; ret && i < 12; ++i)
 		{
 			ret = TransferAnimation(faceAnims[i], token);
 		}
@@ -197,7 +219,7 @@ bool AnimationSet::ProgramDefaultAnimationSet(uint32_t color)
 	}
 
 	// Clean up memory
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 12; ++i)
 	{
 		free(faceAnims[i]);
 	}

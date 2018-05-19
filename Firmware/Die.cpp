@@ -24,6 +24,7 @@
 #include "Rainbow.h"
 
 #include "Watchdog.h"
+#include "SimpleThrowDetector.h"
 
 using namespace Core;
 using namespace Systems;
@@ -45,6 +46,11 @@ void Die::init()
 
 	// Setup Watchdog first
 	watchdog.init();
+
+	// Initialize random colors
+	randomSeed(analogRead(3));
+	random(0xFF);
+	random(0xFF);
 
 	// For info, print out the highest page number
 	debugPrint("Lowest page available: ");
@@ -90,7 +96,9 @@ void Die::init()
 	else
 	{
 		debugPrint("invalid, setting default anims...");
-		AnimationSet::ProgramDefaultAnimationSet(0x808000);
+		byte hue = random(0xFF);
+		uint32_t color = Rainbow::Wheel(hue);
+		AnimationSet::ProgramDefaultAnimationSet(color);
 		if (animationSet->CheckValid())
 			debugPrintln("ok");
 		else
@@ -130,6 +138,7 @@ void Die::init()
 	accelController.begin();
 	lazarus.init();
 	jerkMonitor.begin();
+	simpleThrowDetector.begin();
 	debugPrintln("ok");
 	leds.setLED(5, 4, 0x00FF00);
 
@@ -455,9 +464,6 @@ void Die::OnRenameDie(DieMessage* msg)
 		PauseModules();
 	}
 
-	// Stop everything
-	PauseModules();
-
 	auto animSetMsg = (DieMessageRename*)msg;
 	debugPrint("Renaming die to ");
 	debugPrint(animSetMsg->newName);
@@ -495,12 +501,22 @@ void Die::RenameDie(const char* newName)
 	// Acknowledge the anim
 	while (!SendMessage(DieMessage::MessageType_RenameFinished))
 		delay(10);
+
+	// Restart BLE with the new name
+	SimbleeBLE.end();
+	SimbleeBLE.advertisementData = settings->name;
+	SimbleeBLE.deviceName = settings->name;
+	SimbleeBLE.begin();
 }
 
 void Die::OnFlash(DieMessage* msg)
 {
-	// Stop everything
-	PauseModules();
+	bool sleep = lazarus.sleeping;
+	if (!sleep)
+	{
+		// Stop everything
+		PauseModules();
+	}
 
 	// Rainbow!
 	leds.init();
@@ -522,8 +538,11 @@ void Die::OnFlash(DieMessage* msg)
 	while (!SendMessage(DieMessage::MessageType_FlashFinished))
 		delay(10);
 
-	// Resume everything
-	ResumeModules();
+	if (!sleep)
+	{
+		// Resume everything
+		ResumeModules();
+	}
 }
 
 

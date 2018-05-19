@@ -49,7 +49,7 @@ public class TelemetryDemoDie : MonoBehaviour
 
         this.die = die;
         this.die.OnSettingsChanged += OnDieSettingsChanged;
-
+ 
         changeColorButton.onClick.RemoveAllListeners();
         changeColorButton.onClick.AddListener(ChangeColor);
 
@@ -59,12 +59,12 @@ public class TelemetryDemoDie : MonoBehaviour
         showOff2Button.onClick.RemoveAllListeners();
         showOff2Button.onClick.AddListener(() => ShowOff(0));
 
-        // Update the ui color
-        die.GetDefaultAnimSetColor((col) => UpdateUIColor(col));
-
         changeColorButton.interactable = true;
         showOffButton.interactable = true;
         showOff2Button.interactable = true;
+
+        // Update the ui color
+        die.GetDefaultAnimSetColor((col) => UpdateUIColor(col));
     }
 
     public void OnTelemetryReceived(Vector3 acc, int millis)
@@ -123,16 +123,18 @@ public class TelemetryDemoDie : MonoBehaviour
         changeColorButton.interactable = false;
         showOffButton.interactable = false;
         showOff2Button.interactable = false;
-
+        Debug.Log("Showing Off");
         try
         {
             die.Flash(index);
+            Debug.Log("Waiting");
             yield return new WaitForSeconds(2.0f);
         }
         finally
         {
         }
 
+        Debug.Log("Resetting Buttons");
         changeColorButton.interactable = true;
         showOffButton.interactable = true;
         showOff2Button.interactable = true;

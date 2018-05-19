@@ -207,7 +207,7 @@ public class Central
         System.Action<Die> dieConnectedCallback,
         System.Action<Die> dieDisconnectedCallback)
 	{
-        if (_state == CentralState.Idle)
+        if (!die.connected && _state == CentralState.Idle)
         {
             _state = CentralState.Connecting;
             connectingStartTime = Time.time;

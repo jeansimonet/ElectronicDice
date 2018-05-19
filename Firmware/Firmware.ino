@@ -3,6 +3,7 @@
 //----------------
 // Make sure to include ota_bootloader.h so it 
 // includes the bootloader hex in the image.
+#include "SimpleThrowDetector.h"
 #include "Watchdog.h"
 #include "Rainbow.h"
 #include <ota_bootloader.h>
@@ -45,7 +46,7 @@ Die die;
 //#define TEST TEST_LED
 //#define TEST TEST_SLEEP
 //#define TEST TEST_LED_SLOW
-#define TEST TEST_ALL_SYSTEMS
+//#define TEST TEST_ALL_SYSTEMS
 //#define TEST TEST_SLEEP_ACC
 //#define TEST TEST_MAGNET
 //#define TEST TEST_ACC_DICE
