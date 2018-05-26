@@ -7,7 +7,7 @@
 
 class Animation;
 
-#define MAX_ANIMS (5)
+#define MAX_ANIMS (6)
 
 /// <summary>
 /// Manages a set of running animations, talking to the LED controller

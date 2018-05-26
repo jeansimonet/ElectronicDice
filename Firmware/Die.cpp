@@ -259,8 +259,11 @@ void Die::updateFaceAnimation()
 
 			// Toggle leds
 			//animController.stopAll();
-			playAnimation(currentFace);
-
+			if (simpleThrowDetector.GetCurrentState() != SimpleThrowDetector::ThrowState_OnFace ||
+				currentFace != simpleThrowDetector.GetOnFaceFace())
+			{
+				playAnimation(currentFace);
+			}
 			// Send face message
 			DieMessageState faceMessage;
 			faceMessage.state = currentFace + 1;
@@ -438,6 +441,12 @@ void Die::OnProgramDefaultAnimSet(DieMessage* msg)
 	{
 		// Resume 
 		ResumeModules();
+	}
+
+	// Flash entire die once
+	for (int i = 0; i < 6; ++i)
+	{
+		animController.play(animationSet->GetAnimation(i + 6));
 	}
 }
 

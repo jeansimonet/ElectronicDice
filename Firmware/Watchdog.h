@@ -10,7 +10,7 @@ namespace Systems
 	class Watchdog
 	{
 	private:
-		void sleepUntilInterrupt();
+		void sleepUntilInterrupt(uint32_t pin);
 		static void MagnetInterrupt();
 
 	public:
