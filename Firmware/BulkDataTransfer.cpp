@@ -3,6 +3,10 @@
 #include "BluetoothMessage.h"
 #include "Die.h"
 
+#define RETRY_MS (100) // ms
+#define TIMEOUT_MS (3000) // ms
+#define BLOCK_SIZE (16)
+
 /// <summary>
 /// Constructor
 /// </summary>
@@ -11,6 +15,7 @@ SendBulkDataSM::SendBulkDataSM()
 	, size(0)
 	, currentState(State_Done)
 	, currentOffset(0)
+	, retryStart(0)
 {
 }
 
@@ -40,24 +45,46 @@ void SendBulkDataSM::Update()
 	switch (currentState)
 	{
 	case State_Setup:
+		// Register for SetupAck message
+		die.RegisterMessageHandler(DieMessage::MessageType_BulkSetupAck, this, [](void* token, DieMessage* msg)
+		{
+			((SendBulkDataSM*)token)->currentState = State_SetupAckReceived;
+		});
+
+		// Send setup message
+		currentState = State_SendingSetupMsg;
+		timeoutStart = millis();
+		// voluntary fall-through
+	case State_SendingSetupMsg:
 		{
 			// Send setup message over
 			DieMessageBulkSetup setupMsg;
 			setupMsg.size = size;
 
-			// Register for SetupAck message
-			die.RegisterMessageHandler(DieMessage::MessageType_BulkSetupAck, this, [](void* token, DieMessage* msg)
-			{
-				((SendBulkDataSM*)token)->currentState = State_SetupAckReceived;
-			});
-
-			// Send setup message
 			// (we register for a response first to be sure and not miss the ack)
 			if (die.SendMessage(&setupMsg, sizeof(setupMsg)))
 			{
 				currentState = State_WaitingForSetupAck;
+				// Start a timeout timer
+				retryStart = millis();
 			}
-			// Else we try again!
+			// Else we try again next update!
+		}
+		break;
+	case State_WaitingForSetupAck:
+		{
+			if (millis() > timeoutStart + TIMEOUT_MS)
+			{
+				// Tried a bunch, no response,
+				die.UnregisterMessageHandler(DieMessage::MessageType_BulkSetupAck);
+				currentState = State_Timeout;
+			}
+			else if (millis() > retryStart + RETRY_MS)
+			{
+				// Timed out, send the setup again
+				currentState = State_SendingSetupMsg;
+			}
+			// Else continue waiting for ack!
 		}
 		break;
 	case State_SetupAckReceived:
@@ -66,17 +93,28 @@ void SendBulkDataSM::Update()
 		// Register for data ack
 		die.RegisterMessageHandler(DieMessage::MessageType_BulkDataAck, this, [](void* token, DieMessage* msg)
 		{
-			((SendBulkDataSM*)token)->currentState = State_DataAckReceived;
+			auto sbd = (SendBulkDataSM*)token;
+			auto ack = (DieMessageBulkDataAck*)msg;
+			if (ack->offset == sbd->currentOffset)
+			{
+				// Good, move onto the next chunk
+				sbd->currentState = State_DataAckReceived;
+				sbd->currentOffset += BLOCK_SIZE;
+				sbd->timeoutStart = millis();
+			}
+			// Else ignore this ack, we've probably already gotten it!
 		});
+
+		timeoutStart = millis();
 		// Voluntary fall through
 	case State_DataAckReceived:
 		{
-			short remainingSize = min(size - currentOffset, 16);
+			short remainingSize = min(size - currentOffset, BLOCK_SIZE);
 			if (remainingSize > 0)
 			{
 				// Send next packet
 				DieMessageBulkData dataMsg;
-				dataMsg.size = min(size - currentOffset, 16);
+				dataMsg.size = min(size - currentOffset, BLOCK_SIZE);
 				dataMsg.offset = currentOffset;
 				memcpy(dataMsg.data, &data[currentOffset], dataMsg.size);
 
@@ -84,6 +122,8 @@ void SendBulkDataSM::Update()
 				if (die.SendMessage(&dataMsg, sizeof(dataMsg)))
 				{
 					currentState = State_WaitingForDataAck;
+					// Start a timeout timer
+					retryStart = millis();
 				}
 				// Else we try again next update
 			}
@@ -93,9 +133,21 @@ void SendBulkDataSM::Update()
 				die.UnregisterMessageHandler(DieMessage::MessageType_BulkDataAck);
 				currentState = State_TransferComplete;
 			}
-
 		}
 		break;
+	case State_WaitingForDataAck:
+		if (millis() > timeoutStart + TIMEOUT_MS)
+		{
+			// Tried a bunch, no response,
+			die.UnregisterMessageHandler(DieMessage::MessageType_BulkDataAck);
+			currentState = State_Timeout;
+		}
+		else if (millis() > retryStart + RETRY_MS)
+		{
+			// Timed out, send the data chunk again
+			currentState = State_DataAckReceived;
+		}
+		// Else continue waiting for ack!
 	default:
 		// Nothing
 		break;
@@ -105,9 +157,19 @@ void SendBulkDataSM::Update()
 /// <summary>
 /// Are we done?
 /// </summary>
-bool SendBulkDataSM::TransferComplete()
+BulkDataState SendBulkDataSM::GetState() const
 {
-	return currentState == State_TransferComplete;
+	switch (currentState)
+	{
+	case State_Done:
+		return BulkDataState_Idle;
+	case State_TransferComplete:
+		return BulkDataState_Complete;
+	case State_Timeout:
+		return BulkDataState_Failed;
+	default:
+		return BulkDataState_Transferring;
+	}
 }
 
 /// <summary>
@@ -130,7 +192,10 @@ ReceiveBulkDataSM::ReceiveBulkDataSM()
 	: mallocData(nullptr)
 	, mallocSize(0)
 	, currentState(State_Done)
-	, currentTotalSize(0)
+	, currentOffset(0)
+	, lastOffset(0)
+	, retryStart(0)
+	, timeoutStart(0)
 {
 }
 
@@ -146,7 +211,10 @@ void ReceiveBulkDataSM::Setup()
 	mallocData = nullptr;
 	mallocSize = 0;
 	currentState = State_WaitingForSetup;
-	currentTotalSize = 0;
+	currentOffset = 0;
+	lastOffset = 0;
+	retryStart = 0;
+	timeoutStart = 0;
 
 	// Register handler
 	die.RegisterMessageHandler(DieMessage::MessageType_BulkSetup, this, [](void* token, DieMessage* msg)
@@ -184,33 +252,59 @@ void ReceiveBulkDataSM::Update()
 	switch (currentState)
 	{
 	case State_SetupReceived:
-		{
-			// Unregister setup handler
-			die.UnregisterMessageHandler(DieMessage::MessageType_BulkSetup);
+		// Unregister setup handler
+		die.UnregisterMessageHandler(DieMessage::MessageType_BulkSetup);
 
-			// Register handler for data
-			die.RegisterMessageHandler(DieMessage::MessageType_BulkData, this, [](void* token, DieMessage* msg)
+		// Register handler for data
+		die.RegisterMessageHandler(DieMessage::MessageType_BulkData, this, [](void* token, DieMessage* msg)
+		{
+			auto bulkDataMsg = static_cast<DieMessageBulkData*>(msg);
+			auto me = ((ReceiveBulkDataSM*)token);
+			if (bulkDataMsg->offset == me->currentOffset)
 			{
-				auto bulkDataMsg = static_cast<DieMessageBulkData*>(msg);
-				auto me = ((ReceiveBulkDataSM*)token);
 				memcpy(&me->mallocData[bulkDataMsg->offset], bulkDataMsg->data, bulkDataMsg->size);
 				me->currentState = State_DataReceived;
-				me->currentTotalSize += bulkDataMsg->size;
-			});
-
+				me->currentOffset += bulkDataMsg->size;
+				me->timeoutStart = millis();
+			}
+		});
+		currentState = State_SendingSetupAck;
+		timeoutStart = millis();
+		// Voluntary fall-through
+	case State_SendingSetupAck:
+		{
 			// Acknowledge the setup
 			if (die.SendMessage(DieMessage::MessageType_BulkSetupAck))
 			{
-				currentState = State_WaitingForData;
+				currentState = State_WaitingForFirstData;
+
+				// Start a timeout
+				retryStart = millis();
 			}
 			// Else we try again next update
 		}
 		break;
+	case State_WaitingForFirstData:
+		if (millis() > timeoutStart + TIMEOUT_MS)
+		{
+			die.UnregisterMessageHandler(DieMessage::MessageType_BulkData);
+			currentState = State_Timeout;
+		}
+		else if (millis() > retryStart + RETRY_MS)
+		{
+			// Send ack again
+			currentState = State_SendingSetupAck;
+		}
+		// Else keep waiting for data
+		break;
 	case State_DataReceived:
 		{
-			if (die.SendMessage(DieMessage::MessageType_BulkDataAck))
+			DieMessageBulkDataAck ackMsg;
+			ackMsg.offset = lastOffset;
+			if (die.SendMessage(&ackMsg, sizeof(ackMsg)))
 			{
-				if (currentTotalSize == mallocSize)
+				lastOffset = currentOffset;
+				if (lastOffset == mallocSize)
 				{
 					// We're done
 					die.UnregisterMessageHandler(DieMessage::MessageType_BulkData);
@@ -219,10 +313,26 @@ void ReceiveBulkDataSM::Update()
 				else
 				{
 					currentState = State_WaitingForData;
+
+					// Start a timeout
+					retryStart = millis();
 				}
 			}
 			// Else we try again next update
 		}
+		break;
+	case State_WaitingForData:
+		if (millis() > timeoutStart + TIMEOUT_MS)
+		{
+			die.UnregisterMessageHandler(DieMessage::MessageType_BulkData);
+			currentState = State_Timeout;
+		}
+		else if (millis() > retryStart + RETRY_MS)
+		{
+			// Send ack again
+			currentState = State_DataReceived;
+		}
+		// Else keep waiting for data
 		break;
 	default:
 		break;
@@ -232,9 +342,19 @@ void ReceiveBulkDataSM::Update()
 /// <summary>
 /// Are we done?
 /// </summary>
-bool ReceiveBulkDataSM::TransferComplete()
+BulkDataState ReceiveBulkDataSM::GetState() const
 {
-	return currentState == State_TransferComplete;
+	switch (currentState)
+	{
+	case State_Done:
+		return BulkDataState_Idle;
+	case State_Timeout:
+		return BulkDataState_Failed;
+	case State_TransferComplete:
+		return BulkDataState_Complete;
+	default:
+		return BulkDataState_Transferring;
+	}
 }
 
 /// <summary>

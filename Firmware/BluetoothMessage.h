@@ -101,6 +101,13 @@ struct DieMessageBulkData
 	inline DieMessageBulkData() : DieMessage(DieMessage::MessageType_BulkData) {}
 };
 
+struct DieMessageBulkDataAck
+	: DieMessage
+{
+	short offset;
+	inline DieMessageBulkDataAck() : DieMessage(DieMessage::MessageType_BulkDataAck) {}
+};
+
 struct DieMessageTransferAnimSet
 	: DieMessage
 {

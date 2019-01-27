@@ -3,18 +3,12 @@
 #include "Debug.h"
 #include "Die.h"
 #include "AnimController.h"
+#include "Settings.h"
 
 using namespace Systems;
 using namespace Devices;
 
 SimpleThrowDetector Systems::simpleThrowDetector;
-
-#define SIGMA_DECAY_START (0.95f)
-#define SIGMA_DECAY_STOP (0.05f)
-#define SIGMA_THRESHOLD_START (100)
-#define SIGMA_THRESHOLD_END (0.5)
-#define ROLL_MIN_TIME (300) //ms
-#define FACE_THRESHOLD (0.85f)
 
 void SimpleThrowDetector::begin()
 {
@@ -42,15 +36,15 @@ void SimpleThrowDetector::onAccelFrame(const AccelFrame& frame)
 	switch (currentState)
 	{
 	case ThrowState_StartedRolling:
-		sigma = sigma * SIGMA_DECAY_START + jerk2 * (1.0f - SIGMA_DECAY_START);
-		if (sigma < SIGMA_THRESHOLD_END)
+		sigma = sigma * settings->sigmaDecayStart + jerk2 * (1.0f - settings->sigmaDecayStart);
+		if (sigma < settings->sigmaThresholdStart)
 		{
 			// Stopped rolling, so this is like a small bump, not enough
 			currentState = ThrowState_OnFace;
 		}
 		else
 		{
-			if (millis() > rollStartTime + ROLL_MIN_TIME)
+			if (millis() > rollStartTime + settings->minRollTime)
 			{
 				// Ok, it's been long enough
 				currentState = ThrowState_RolledLongEnough;
@@ -59,14 +53,14 @@ void SimpleThrowDetector::onAccelFrame(const AccelFrame& frame)
 		}
 		break;
 	case ThrowState_RolledLongEnough:
-		sigma = sigma * SIGMA_DECAY_STOP + jerk2 * (1.0f - SIGMA_DECAY_STOP);
-		if (sigma < SIGMA_THRESHOLD_END)
+		sigma = sigma * settings->sigmaDecayStop + jerk2 * (1.0f - settings->sigmaDecayStop);
+		if (sigma < settings->sigmaThresholdEnd)
 		{
 			currentState = ThrowState_OnFace;
 			onFaceFace = accelController.currentFace();
-			if (abs(accelerometer.convert(frame.X)) > FACE_THRESHOLD ||
-				abs(accelerometer.convert(frame.Y)) > FACE_THRESHOLD ||
-				abs(accelerometer.convert(frame.Z)) > FACE_THRESHOLD)
+			if (abs(accelerometer.convert(frame.X)) > settings->faceThreshold ||
+				abs(accelerometer.convert(frame.Y)) > settings->faceThreshold ||
+				abs(accelerometer.convert(frame.Z)) > settings->faceThreshold)
 			{
 				// We stopped moving
 				// Play an anim, and switch state
@@ -77,8 +71,8 @@ void SimpleThrowDetector::onAccelFrame(const AccelFrame& frame)
 		}
 		break;
 	case ThrowState_OnFace:
-		sigma = sigma * SIGMA_DECAY_START + jerk2 * (1.0f - SIGMA_DECAY_START);
-		if (sigma >= SIGMA_THRESHOLD_START)
+		sigma = sigma * settings->sigmaDecayStart + jerk2 * (1.0f - settings->sigmaDecayStart);
+		if (sigma >= settings->sigmaThresholdStart)
 		{
 			// We started moving, count time
 			rollStartTime = millis();

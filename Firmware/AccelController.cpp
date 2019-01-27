@@ -8,7 +8,7 @@ using namespace Devices;
 using namespace Core;
 
 // This defines how frequently we try to read the accelerometer
-#define TIMER2_RESOLUTION (20000)	// 10ms
+#define TIMER2_RESOLUTION (10000)	// 10ms
 #define JERK_SCALE (1000)			// To make the jerk in the same range as the acceleration
 
 AccelerationController accelController;

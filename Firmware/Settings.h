@@ -23,6 +23,15 @@ public:
 	// Indicates whether there is valid data
 	uint32_t headMarker;
 	char name[16];
+
+	// Face detector
+	float sigmaDecayStart;
+	float sigmaDecayStop;
+	float sigmaThresholdStart;
+	float sigmaThresholdEnd;
+	float faceThreshold;
+	int minRollTime;
+
 	uint32_t tailMarker;
 
 	bool CheckValid() const;
@@ -30,6 +39,8 @@ public:
 	static bool EraseSettings();
 	static bool TransferSettings(Settings* sourceSettings);
 	static bool TransferSettingsRaw(void* rawData, size_t rawDataSize);
+	static void SetDefaults(Settings& outSettings);
+	static bool ProgramDefaults();
 };
 
 extern const Settings* settings;
@@ -46,6 +57,7 @@ private:
 		State_ErasingFlash = 0,
 		State_SendingAck,
 		State_TransferSettings,
+		State_Failed,
 		State_Done
 	};
 
@@ -78,6 +90,7 @@ private:
 		State_WaitingForSetupAck,
 		State_SetupAckReceived,
 		State_SendingSettings,
+		State_Failed,
 		State_Done
 	};
 

@@ -87,8 +87,8 @@ void Die::init()
 		debugPrintln("ok");
 	else
 	{
-		debugPrintln("invalid");
-		//RenameDie("Die 2");
+		debugPrint("invalid, setting defaults");
+		Settings::ProgramDefaults();
 	}
 	debugPrint("Checking AnimationSet...");
 	if (animationSet->CheckValid())

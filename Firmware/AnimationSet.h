@@ -77,6 +77,7 @@ private:
 		State_SendingAck,
 		State_TransferAnim,
 		State_SendingReadyForNextAnim,
+		State_Failed,
 		State_Done
 	};
 
@@ -114,6 +115,7 @@ private:
 		State_SendingAnim,
 		State_WaitingForReadyForNextAnim,
 		State_ReceivedReadyForNextAnim,
+		State_Failed,
 		State_Done
 	};
 

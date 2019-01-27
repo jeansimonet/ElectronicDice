@@ -14,14 +14,6 @@ const AnimationSet* animationSet = (const AnimationSet*)ANIMATION_SET_ADDRESS;
 /// </summary>
 bool AnimationSet::CheckValid() const
 {
-	//Serial.print("Head key = ");
-	//Serial.print(headMarker, HEX);
-	//Serial.println(" (should be 0x600DF00D)");
-
-	//Serial.print("Tail key = ");
-	//Serial.print(tailMarker, HEX);
-	//Serial.println(" (should be 0x600DF00D)");
-
 	return headMarker == ANIMATION_SET_VALID_KEY && tailMarker == ANIMATION_SET_VALID_KEY;
 }
 
@@ -380,36 +372,46 @@ void ReceiveAnimSetSM::Update()
 		{
 			debugPrint("Is bulk transfer done?");
 			// Is it done?
-			if (receiveBulkDataSM.TransferComplete())
+			switch (receiveBulkDataSM.GetState())
 			{
-				debugPrint("yes, copy to flash");
-				// The anim data is ready, copy it to flash!
-				if (!AnimationSet::TransferAnimationRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize, progToken))
+			case BulkDataState_Complete:
 				{
-					receiveBulkDataSM.Finish();
-					Finish();
-				}
-				else
-				{
-					// Clean up memory allocated by the bulk transfer
-					receiveBulkDataSM.Finish();
-
-					if (progToken.currentCount == count)
+					debugPrint("yes, copy to flash");
+					// The anim data is ready, copy it to flash!
+					if (!AnimationSet::TransferAnimationRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize, progToken))
 					{
-						debugPrint("no more anims, programming animation set");
-						// No more anims to receive, program AnimationSet in flash
-						AnimationSet::TransferAnimationSet(progToken.animationPtrInFlash, count);
-
-						// Clean up animation table too
+						receiveBulkDataSM.Finish();
 						Finish();
 					}
 					else
 					{
-						currentState = State_SendingReadyForNextAnim;
+						// Clean up memory allocated by the bulk transfer
+						receiveBulkDataSM.Finish();
+
+						if (progToken.currentCount == count)
+						{
+							debugPrint("no more anims, programming animation set");
+							// No more anims to receive, program AnimationSet in flash
+							AnimationSet::TransferAnimationSet(progToken.animationPtrInFlash, count);
+
+							// Clean up animation table too
+							Finish();
+						}
+						else
+						{
+							currentState = State_SendingReadyForNextAnim;
+						}
 					}
 				}
+				break;
+			case BulkDataState_Failed:
+				debugPrint("Timeout transfering animation data");
+				currentState = State_Failed;
+				break;
+			default:
+				// Else keep waiting
+				break;
 			}
-			// Else keep waiting
 		}
 		break;
 	case State_SendingReadyForNextAnim:
@@ -521,27 +523,36 @@ void SendAnimSetSM::Update()
 	case State_SendingAnim:
 		{
 			// Is the transfer complete?
-			if (sendBulkDataSM.TransferComplete())
+			switch (sendBulkDataSM.GetState())
 			{
-				// Next anim!
-				currentAnim++;
-				if (currentAnim == animationSet->Count())
+			case BulkDataState_Complete:
 				{
-					// We're done!
-					Finish();
-				}
-				else
-				{
-					// Wait for a message indicating that the other side is ready for the next anim
-					die.RegisterMessageHandler(DieMessage::MessageType_TransferAnimReadyForNextAnim, this, [](void* token, DieMessage* msg)
+					// Next anim!
+					currentAnim++;
+					if (currentAnim == animationSet->Count())
 					{
-						((SendAnimSetSM*)token)->currentState = State_ReceivedReadyForNextAnim;
-					});
+						// We're done!
+						Finish();
+					}
+					else
+					{
+						// Wait for a message indicating that the other side is ready for the next anim
+						die.RegisterMessageHandler(DieMessage::MessageType_TransferAnimReadyForNextAnim, this, [](void* token, DieMessage* msg)
+						{
+							((SendAnimSetSM*)token)->currentState = State_ReceivedReadyForNextAnim;
+						});
 
-					currentState = State_WaitingForReadyForNextAnim;
+						currentState = State_WaitingForReadyForNextAnim;
+					}
 				}
+				break;
+			case BulkDataState_Failed:
+				currentState = State_Failed;
+				break;
+			default:
+				// Else wait some more
+				break;
 			}
-			// Else wait some more
 		}
 		break;
 	case SendAnimSetSM::State_ReceivedReadyForNextAnim:

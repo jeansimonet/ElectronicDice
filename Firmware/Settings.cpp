@@ -65,6 +65,24 @@ bool Settings::TransferSettingsRaw(void* rawData, size_t rawDataSize)
 	return res == 0;
 }
 
+void Settings::SetDefaults(Settings& outSettings)
+{
+	outSettings.sigmaDecayStart = 0.95f;
+	outSettings.sigmaDecayStop = 0.05f;
+	outSettings.sigmaThresholdStart = 100;
+	outSettings.sigmaThresholdEnd = 0.5;
+	outSettings.faceThreshold = 0.85f;
+	outSettings.minRollTime = 300;
+}
+
+bool Settings::ProgramDefaults()
+{
+	Settings defaults;
+	SetDefaults(defaults);
+	return TransferSettings(&defaults);
+}
+
+
 ReceiveSettingsSM::ReceiveSettingsSM()
 	: currentState(State_Done)
 	, FinishedCallbackHandler(nullptr)
@@ -106,20 +124,28 @@ void ReceiveSettingsSM::Update()
 		// Else try again next frame
 		break;
 	case State_TransferSettings:
-		if (receiveBulkDataSM.TransferComplete())
+		switch (receiveBulkDataSM.GetState())
 		{
-			// Write the data to flash!
-			if (!Settings::TransferSettingsRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize))
+		case BulkDataState_Complete:
 			{
-				debugPrint("Error writting settings");
-			}
+				// Write the data to flash!
+				if (!Settings::TransferSettingsRaw(receiveBulkDataSM.mallocData, receiveBulkDataSM.mallocSize))
+				{
+					debugPrint("Error writting settings");
+				}
 
-			// And we're done!
-			receiveBulkDataSM.Finish();
-			Finish();
+				// And we're done!
+				receiveBulkDataSM.Finish();
+				Finish();
+			}
+			break;
+		case BulkDataState_Failed:
+			currentState = State_Failed;
+			break;
+		default:
+			// Else keep waiting
+			break;
 		}
-		// Else keep waiting
-		break;
 	default:
 		break;
 	}
@@ -189,13 +215,20 @@ void SendSettingsSM::Update()
 		currentState = State_SendingSettings;
 		break;
 	case SendSettingsSM::State_SendingSettings:
-		if (sendBulkDataSM.TransferComplete())
+		switch (sendBulkDataSM.GetState())
 		{
+		case BulkDataState_Complete:
 			// We're done!
 			sendBulkDataSM.Finish();
 			Finish();
+			break;
+		case BulkDataState_Failed:
+			currentState = State_Failed;
+			break;
+		default:
+			// Else keep waiting
+			break;
 		}
-		// Else keep waiting
 		break;
 	default:
 		break;
